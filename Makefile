@@ -1,21 +1,25 @@
-.PHONY: all clean
-all: data/pdb_chain_uniprot.tsv.gz\
-	 data/ss.txt.gz\
-	 data/TOPCONS.zip\
-	 data/topcons/TMs.3line\
-	 data/topcons/Globular.3line
+DATADIR := data
+TOPCONSDIR := $(DATADIR)/topcons
+3LINES := $(addprefix ${TOPCONSDIR}/,Globular.3line TMs.3line)
+FASTAS := $(addprefix ${TOPCONSDIR}/,Globular.fa TMs.fa)
 
-data/ss.txt.gz:
+all: $(DATADIR)/pdb_chain_uniprot.tsv.gz\
+	 $(DATADIR)/ss.txt.gz\
+	 $(DATADIR)/TOPCONS.zip\
+	 $(3LINES)\
+	 $(FASTAS)
+
+$(DATADIR)/ss.txt.gz:
 	wget -P data/ https://cdn.rcsb.org/etl/kabschSander/ss.txt.gz
 
-data/pdb_chain_uniprot.tsv.gz: 
+$(DATADIR)/pdb_chain_uniprot.tsv.gz: 
 	wget -P data/ ftp://ftp.ebi.ac.uk/pub/databases/msd/sifts/flatfiles/tsv/pdb_chain_uniprot.tsv.gz
 
-data/TOPCONS.zip:
+$(DATADIR)/TOPCONS.zip:
 	wget -O data/TOPCONS.zip http://topcons.net/static/download/TOPCONS2.0_datasets.zip
 
-data/topcons/TMs.3line data/topcons/Globular.3line:
-	mkdir -p data/topcons
+$(3LINES): $(DATADIR)/pdb_chain_uniprot.tsv.gz $(DATADIR)/ss.txt.gz $(DATADIR)/TOPCONS.zip
+	mkdir -p $(TOPCONSDIR)
 	unzip -o data/TOPCONS.zip -d data/
 	# Generate up lists of uniprot IDs to map against PDB and ss from RCSB
 	./bin/gen_uniprot_list.sh data/TOPCONS2_datasets/Globular.3line > data/topcons/g1.txt
@@ -29,14 +33,19 @@ data/topcons/TMs.3line data/topcons/Globular.3line:
 	grep -h "" data/TOPCONS2_datasets/TM.3line data/topcons/SPTM.3line > data/topcons/TMs.3line
 	# Clean up
 	rm -rf data/TOPCONS2_datasets
-	rm -f data/topcons/globularlist.txt
 	rm -f data/topcons/memtemp
 	rm -f data/topcons/g1.txt
 	rm -f data/topcons/g2.txt
 	rm -f data/topcons/SPTM.3line
 
+$(FASTAS) : %.fa: %.3line
+	sed '3~3d' $< > $@
+
+.PHONY: clean deepclean
 clean:
-	rm -rf data/pdb_chain_uniprot.tsv.gz
-	rm -rf ss.txt.gz
-	rm -rf data/TOPCONS.zip
-	rm -rf data/topcons
+	rm -rf $(TOPCONSDIR)
+deepclean:
+	rm -rf $(DATADIR)/pdb_chain_uniprot.tsv.gz
+	rm -rf $(DATADIR)/ss.txt.gz
+	rm -rf $(DATADIR)/TOPCONS.zip
+	rm -rf $(TOPCONSDIR)
