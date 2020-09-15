@@ -2,12 +2,14 @@ DATADIR := data
 TOPCONSDIR := $(DATADIR)/topcons
 3LINES := $(addprefix ${TOPCONSDIR}/,Globular.3line TMs.3line)
 FASTAS := $(addprefix ${TOPCONSDIR}/,Globular.fa TMs.fa)
+CLUST := $(addprefix ${TOPCONSDIR}/,Globular.clust.fa TMs.clust.fa)
 
 all: $(DATADIR)/pdb_chain_uniprot.tsv.gz\
 	 $(DATADIR)/ss.txt.gz\
 	 $(DATADIR)/TOPCONS.zip\
 	 $(3LINES)\
-	 $(FASTAS)
+	 $(FASTAS)\
+	 $(CLUST)
 
 $(DATADIR)/ss.txt.gz:
 	wget -P data/ https://cdn.rcsb.org/etl/kabschSander/ss.txt.gz
@@ -40,6 +42,9 @@ $(3LINES): $(DATADIR)/pdb_chain_uniprot.tsv.gz $(DATADIR)/ss.txt.gz $(DATADIR)/T
 
 $(FASTAS) : %.fa: %.3line
 	sed '3~3d' $< > $@
+
+$(CLUST) : %.clust.fa: %.fa
+	cd-hit -i $< -o $@ -c 0.5 -n 3 -T 0 -M 0 -d 0
 
 .PHONY: clean deepclean
 clean:
