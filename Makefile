@@ -1,6 +1,7 @@
 DATADIR := data
 TOPCONSDIR := $(DATADIR)/topcons
 3LINES := $(addprefix ${TOPCONSDIR}/,Globular.3line TMs.3line)
+3LINESCLUST := $(addprefix ${TOPCONSDIR}/,Globular.clust.3line TMs.clust.3line)
 FASTAS := $(addprefix ${TOPCONSDIR}/,Globular.fa TMs.fa)
 CLUST := $(addprefix ${TOPCONSDIR}/,Globular.clust.fa TMs.clust.fa)
 
@@ -8,6 +9,7 @@ all: $(DATADIR)/pdb_chain_uniprot.tsv.gz\
 	 $(DATADIR)/ss.txt.gz\
 	 $(DATADIR)/TOPCONS.zip\
 	 $(3LINES)\
+	 $(3LINESCLUST)\
 	 $(FASTAS)\
 	 $(CLUST)
 
@@ -45,6 +47,9 @@ $(FASTAS) : %.fa: %.3line
 
 $(CLUST) : %.clust.fa: %.fa
 	cd-hit -i $< -o $@ -c 0.5 -n 3 -T 0 -M 0 -d 0
+
+$(3LINESCLUST) : %.clust.3line: %.clust.fa
+	./bin/add_topo_from_3line.py $< $(subst .clust,,$@) > $@
 
 .PHONY: clean deepclean
 clean:
