@@ -4,6 +4,8 @@ TOPCONSDIR := $(DATADIR)/topcons
 3LINESCLUST := $(addprefix ${TOPCONSDIR}/,Globular.clust.3line TMs.clust.3line)
 FASTAS := $(addprefix ${TOPCONSDIR}/,Globular.fa TMs.fa)
 CLUST := $(addprefix ${TOPCONSDIR}/,Globular.clust.fa TMs.clust.fa)
+MEMS := $(addprefix ${TOPCONSDIR}/,Globular.clust.mems.pickle TMs.clust.mems.pickle)
+STATS := $(addprefix ${TOPCONSDIR}/,Globular_stats.txt TMs_stats.txt)
 
 all: $(DATADIR)/pdb_chain_uniprot.tsv.gz\
 	 $(DATADIR)/ss.txt.gz\
@@ -11,7 +13,9 @@ all: $(DATADIR)/pdb_chain_uniprot.tsv.gz\
 	 $(3LINES)\
 	 $(3LINESCLUST)\
 	 $(FASTAS)\
-	 $(CLUST)
+	 $(CLUST)\
+	 $(MEMS)\
+	 $(STATS)
 
 $(DATADIR)/ss.txt.gz:
 	wget -P data/ https://cdn.rcsb.org/etl/kabschSander/ss.txt.gz
@@ -30,7 +34,7 @@ $(3LINES): $(DATADIR)/pdb_chain_uniprot.tsv.gz $(DATADIR)/ss.txt.gz $(DATADIR)/T
 	./bin/gen_uniprot_list.sh data/TOPCONS2_datasets/Globular+SP.3line > data/topcons/g2.txt
 	grep -h "" data/topcons/g1.txt data/topcons/g2.txt > data/topcons/globularlist.txt
 	# Actually generate the 3line from the list
-	./bin/make_3line_from_uniprot_list.py data/topcons/globularlist.txt data/pdb_chain_uniprot.tsv.gz data/ss.txt.gz data/topcons/Globular.3line
+	./bin/make_3line_from_uniprot_list.py data/topcons/globularlist.txt data/pdb_chain_uniprot.tsv.gz data/ss.txt.gz data/topcons/Globular.3line -t H
 	# Add in PDB ids for the SP+TM.3line, keep the original topology annotation
 	# Merge TM and SPTM together
 	./bin/add_pdbid_to_3line.py data/TOPCONS2_datasets/SP+TM.3line data/pdb_chain_uniprot.tsv.gz data/topcons/SPTM.3line
@@ -50,6 +54,12 @@ $(CLUST) : %.clust.fa: %.fa
 
 $(3LINESCLUST) : %.clust.3line: %.clust.fa
 	./bin/add_topo_from_3line.py $< $(subst .clust,,$@) > $@
+
+$(MEMS) : %.clust.mems.pickle: %.clust.3line
+	./bin/make_mems_from_3line.py $< $@
+
+$(STATS) : %_stats.txt: %.clust.mems.pickle
+	./bin/statsCharges.py $< > $@
 
 .PHONY: clean deepclean
 clean:
