@@ -205,10 +205,14 @@ for key, membranes in helices.items():
                 if seg_full_len <= place + i:
                     break
 
+                if first_aa not in AAS:
+                    continue
                 first_aa_index = AAS.index(first_aa)
                 second_aa = seg_full[place + i]
-                second_aa_index = AAS.index(second_aa)
 
+                if second_aa not in AAS:
+                    continue
+                second_aa_index = AAS.index(second_aa)
                 aa_pairs_full[first_aa_index][second_aa_index] += 1
 
         # Use the trimmed segments for the rest
@@ -218,8 +222,12 @@ for key, membranes in helices.items():
                 if seg_trimmed_len <= place + i:
                     break
 
+                if first_aa not in AAS:
+                    continue
                 first_aa_index = AAS.index(first_aa)
                 second_aa = seg_trimmed[place + i]
+                if second_aa not in AAS:
+                    continue
                 second_aa_index = AAS.index(second_aa)
 
                 aa_pairs_trimmed[first_aa_index][second_aa_index] += 1
