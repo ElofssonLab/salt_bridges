@@ -10,7 +10,7 @@ import os.path
 # import urllib.request
 import re
 import pandas as pd
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 # from matplotlib.sankey import Sankey
 
 parser = argparse.ArgumentParser()
@@ -276,84 +276,84 @@ for key, membranes in helices.items():
                                 prot_same_gaps_trimmed_sanH[i-1].add(key)
 
 num_prots = len(protein_set)
-# ##########
-# # Graphs #
-# ##########
-# 
-# charge_hist_data = list(np.concatenate(
-#                         [[i+1]*len(pos)
-#                             for i, pos in enumerate(charged_gaps_trimmed)]))
-# charge_hist_data_sanH = list(np.concatenate(
-#                         [[i+1]*len(pos)
-#                             for i, pos in
-#                             enumerate(charged_gaps_trimmed_sanH)]))
-# opp_hist_data = list(np.concatenate(
-#                         [[i+1]*len(pos)
-#                             for i, pos in enumerate(opp_gaps_trimmed)]))
-# opp_hist_data_sanH = list(np.concatenate(
-#                         [[i+1]*len(pos)
-#                             for i, pos in enumerate(opp_gaps_trimmed_sanH)]))
-# same_hist_data = list(np.concatenate(
-#                         [[i+1]*len(pos)
-#                             for i, pos in enumerate(same_gaps_trimmed)]))
-# same_hist_data_sanH = list(np.concatenate(
-#                         [[i+1]*len(pos)
-#                             for i, pos in enumerate(same_gaps_trimmed_sanH)]))
-# 
-# # Charged pairs
-# plt.hist(charge_hist_data, bins=np.arange(12)-0.5)
-# plt.xticks(range(1, 11))
-# plt.yticks(range(0, 27, 5))
-# plt.xlim([0, 11])
-# plt.ylim([0, 27])
-# plt.title("Distance between charged AA's")
-# plt.savefig('charged_pairs.svg')
-# plt.clf()
-# # Charged pairs sanH
-# plt.hist(charge_hist_data_sanH, bins=np.arange(12)-0.5)
-# plt.xticks(range(1, 11))
-# plt.yticks(range(0, 27, 5))
-# plt.xlim([0, 11])
-# plt.ylim([0, 27])
-# plt.title("Distance between charged AA's san H")
-# plt.savefig('charged_pairs_sanH.svg')
-# plt.clf()
-# # Opposite pairs
-# plt.hist(opp_hist_data, bins=np.arange(12)-0.5)
-# plt.xticks(range(1, 11))
-# plt.yticks(range(0, 27, 5))
-# plt.xlim([0, 11])
-# plt.ylim([0, 27])
-# plt.title("Distance between opposite charged AA's")
-# plt.savefig('opp_pairs.svg')
-# plt.clf()
-# # Opposite pairs sanH
-# plt.hist(opp_hist_data_sanH, bins=np.arange(12)-0.5)
-# plt.xticks(range(1, 11))
-# plt.yticks(range(0, 27, 5))
-# plt.xlim([0, 11])
-# plt.ylim([0, 27])
-# plt.title("Distance between opposite charged AA's san H")
-# plt.savefig('opp_pairs_sanH.svg')
-# plt.clf()
-# # Same charged pairs
-# plt.hist(same_hist_data, bins=np.arange(12)-0.5)
-# plt.xticks(range(1, 11))
-# plt.yticks(range(0, 27, 5))
-# plt.xlim([0, 11])
-# plt.ylim([0, 27])
-# plt.title("Distance between same charged AA's")
-# plt.savefig('same_pairs.svg')
-# plt.clf()
-# # Same charged pairs sanH
-# plt.hist(same_hist_data_sanH, bins=np.arange(12)-0.5)
-# plt.xticks(range(1, 11))
-# plt.yticks(range(0, 27, 5))
-# plt.xlim([0, 11])
-# plt.ylim([0, 27])
-# plt.title("Distance between same charged AA's san H")
-# plt.savefig('same_pairs_sanH.svg')
-# plt.clf()
+##########
+# Graphs #
+##########
+
+charge_hist_data = list(np.concatenate(
+                        [[i+1]*len(pos)
+                            for i, pos in enumerate(charged_gaps_trimmed)]))
+charge_hist_data_sanH = list(np.concatenate(
+                        [[i+1]*len(pos)
+                            for i, pos in
+                            enumerate(charged_gaps_trimmed_sanH)]))
+opp_hist_data = list(np.concatenate(
+                        [[i+1]*len(pos)
+                            for i, pos in enumerate(opp_gaps_trimmed)]))
+opp_hist_data_sanH = list(np.concatenate(
+                        [[i+1]*len(pos)
+                            for i, pos in enumerate(opp_gaps_trimmed_sanH)]))
+same_hist_data = list(np.concatenate(
+                        [[i+1]*len(pos)
+                            for i, pos in enumerate(same_gaps_trimmed)]))
+same_hist_data_sanH = list(np.concatenate(
+                        [[i+1]*len(pos)
+                            for i, pos in enumerate(same_gaps_trimmed_sanH)]))
+
+# Charged pairs
+plt.hist(charge_hist_data, bins=np.arange(12)-0.5)
+plt.xticks(range(1, 11))
+plt.yticks(range(0, 27, 5))
+plt.xlim([0, 11])
+plt.ylim([0, 27])
+plt.title("Distance between charged AA's")
+plt.savefig('images/charged_pairs.svg')
+plt.clf()
+# Charged pairs sanH
+plt.hist(charge_hist_data_sanH, bins=np.arange(12)-0.5)
+plt.xticks(range(1, 11))
+plt.yticks(range(0, 27, 5))
+plt.xlim([0, 11])
+plt.ylim([0, 27])
+plt.title("Distance between charged AA's san H")
+plt.savefig('images/charged_pairs_sanH.svg')
+plt.clf()
+# Opposite pairs
+plt.hist(opp_hist_data, bins=np.arange(12)-0.5)
+plt.xticks(range(1, 11))
+plt.yticks(range(0, 27, 5))
+plt.xlim([0, 11])
+plt.ylim([0, 27])
+plt.title("Distance between opposite charged AA's")
+plt.savefig('images/opp_pairs.svg')
+plt.clf()
+# Opposite pairs sanH
+plt.hist(opp_hist_data_sanH, bins=np.arange(12)-0.5)
+plt.xticks(range(1, 11))
+plt.yticks(range(0, 27, 5))
+plt.xlim([0, 11])
+plt.ylim([0, 27])
+plt.title("Distance between opposite charged AA's san H")
+plt.savefig('images/opp_pairs_sanH.svg')
+plt.clf()
+# Same charged pairs
+plt.hist(same_hist_data, bins=np.arange(12)-0.5)
+plt.xticks(range(1, 11))
+plt.yticks(range(0, 27, 5))
+plt.xlim([0, 11])
+plt.ylim([0, 27])
+plt.title("Distance between same charged AA's")
+plt.savefig('images/same_pairs.svg')
+plt.clf()
+# Same charged pairs sanH
+plt.hist(same_hist_data_sanH, bins=np.arange(12)-0.5)
+plt.xticks(range(1, 11))
+plt.yticks(range(0, 27, 5))
+plt.xlim([0, 11])
+plt.ylim([0, 27])
+plt.title("Distance between same charged AA's san H")
+plt.savefig('images/same_pairs_sanH.svg')
+plt.clf()
 # 
 # sys.exit()
 #
