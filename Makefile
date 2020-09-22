@@ -9,7 +9,7 @@ PROCDIR := $(DATADIR)/processed
 FASTAS := $(addprefix ${PROCDIR}/,Globular.fa TMs.fa)
 CLUST := $(addprefix ${PROCDIR}/,Globular.clust.fa TMs.clust.fa)
 MEMS := $(addprefix ${PROCDIR}/,Globular.clust.mems.pickle TMs.clust.mems.pickle)
-STATS := $(addprefix ${PROCDIR}/,Globular_stats.txt TMs_stats.txt)
+STATS := Globular_stats.txt TMs_stats.txt
 
 all: $(STATS)
 
@@ -78,7 +78,7 @@ $(3LINESCLUST) : %.clust.3line: %.clust.fa | $(CLUST)
 $(MEMS) : %.clust.mems.pickle: %.clust.3line | $(3LINESCLUST)
 	./bin/make_mems_from_3line.py $< $@
 
-$(STATS) : %_stats.txt: %.clust.mems.pickle | $(MEMS)
+$(STATS) : %_stats.txt: $(PROCDIR)/%.clust.mems.pickle | $(MEMS)
 	./bin/statsCharges.py $< > $@
 
 .PHONY: clean deepclean
@@ -86,9 +86,11 @@ clean:
 	rm -rf $(TOPCONSDIR)
 	rm -rf $(SCAMPIDIR)
 	rm -rf $(PROCDIR)
+	rm -r $(STATS)
 deepclean:
 	rm -rf $(DATADIR)/pdb_chain_uniprot.tsv.gz
 	rm -rf $(DATADIR)/ss.txt.gz
 	rm -rf $(DATADIR)/TOPCONS.zip
 	rm -rf $(TOPCONSDIR)
 	rm -rf $(SCAMPIDIR)
+	rm -r $(STATS)
