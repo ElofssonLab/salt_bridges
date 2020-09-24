@@ -2,9 +2,11 @@ DATADIR := data
 RAWDIR := $(DATADIR)/raw
 TOPCONSDIR := $(DATADIR)/topcons
 SCAMPIDIR := $(DATADIR)/scampi
+OPMDIR := $(DATADIR)/OPM
 PDBTMDIR := $(DATADIR)/pdbtm
 PROCDIR := $(DATADIR)/processed
-3LINES := $(addprefix ${PROCDIR}/,Globular.3line TMs.3line, pdbtm.3line)
+3LINES := $(addprefix ${PROCDIR}/,Globular.3line TMs.3line pdbtm.3line)
+3LINESOPM := $(addprefix ${OPMDIR}/, TMs.3line)
 3LINESSCAMPI := $(addprefix ${SCAMPIDIR}/,Globular.3line TMs.3line)
 3LINESTOPCONS := $(addprefix ${TOPCONSDIR}/,Globular.3line TMs.3line)
 3LINESPDBTM := $(PDBTMDIR)/pdbtm.3line
@@ -14,7 +16,15 @@ CLUST := $(addprefix ${PROCDIR}/,Globular.clust.fa TMs.clust.fa pdbtm.clust.fa)
 MEMS := $(addprefix ${PROCDIR}/,Globular.clust.mems.pickle TMs.clust.mems.pickle pdbtm.clust.mems.pickle)
 STATS := Globular_stats.txt TMs_stats.txt pdbtm_stats.txt
 
-all: $(STATS)
+
+
+all: $(STATS) $(3LINESOPM)
+
+$(RAWDIR)/opm_poly.json:
+	wget -O $@ https://lomize-group-opm.herokuapp.com/classtypes/1/primary_structures?pageSize=3000
+
+$(RAWDIR)/opm_bi.json:
+	wget -O $@ https://lomize-group-opm.herokuapp.com/classtypes/11/primary_structures?pageSize=3000
 
 $(RAWDIR)/pdbtm_alpha_entries.xml:
 	wget -O $@ http://pdbtm.enzim.hu/data/pdbtmalpha
@@ -34,6 +44,12 @@ $(RAWDIR)/pdb_chain_uniprot.tsv.gz:
 
 $(RAWDIR)/TOPCONS.zip:
 	wget -O $(RAWDIR)/TOPCONS.zip http://topcons.net/static/download/TOPCONS2.0_datasets.zip
+
+$(3LINESOPM): $(RAWDIR)/pdb_chain_uniprot.tsv.gz $(RAWDIR)/opm_bi.json $(RAWDIR)/opm_poly.json
+	mkdir -p $(OPMDIR)
+	./bin/opm_uniprot_api.py $(RAWDIR)/opm_bi.json $< $(OPMDIR)/opm_bi.3line
+	./bin/opm_uniprot_api.py $(RAWDIR)/opm_poly.json $< $(OPMDIR)/opm_poly.3line
+	grep -h "" $(OPMDIR)/opm_bi.3line $(OPMDIR)/opm_poly.3line > $@
 
 $(3LINESSCAMPI): $(RAWDIR)/pdb_chain_uniprot.tsv.gz $(RAWDIR)/ss.txt.gz $(RAWDIR)/SCAMPI.zip
 	mkdir -p $(SCAMPIDIR)
@@ -92,7 +108,7 @@ $(3LINESCLUST) : %.clust.3line: %.clust.fa | $(CLUST)
 $(MEMS) : %.clust.mems.pickle: %.clust.3line | $(3LINESCLUST)
 	./bin/make_mems_from_3line.py $< $@
 
-$(STATS) : %_stats.txt: $(PROCDIR)/%.clust.mems.pickle | $(MEMS)
+$(STATS) : %_stats.txt : $(PROCDIR)/%.clust.mems.pickle | $(MEMS)
 	./bin/statsCharges.py $< > $@
 
 .PHONY: clean deepclean
