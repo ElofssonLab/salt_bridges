@@ -1,24 +1,26 @@
 DATADIR := data
+STATDIR := stats
+IMAGEDIR := images
 RAWDIR := $(DATADIR)/raw
 TOPCONSDIR := $(DATADIR)/topcons
 SCAMPIDIR := $(DATADIR)/scampi
 OPMDIR := $(DATADIR)/OPM
 PDBTMDIR := $(DATADIR)/pdbtm
 PROCDIR := $(DATADIR)/processed
-3LINES := $(addprefix ${PROCDIR}/,Globular.3line TMs.3line pdbtm.3line)
-3LINESOPM := $(addprefix ${OPMDIR}/, TMs.3line)
+3LINES := $(addprefix ${PROCDIR}/,Topcons_Globular.3line Topcon_TMs.3line Scampi_Globuler.3line Scampi_TMs.3line pdbtm.3line opm.3line)
 3LINESSCAMPI := $(addprefix ${SCAMPIDIR}/,Globular.3line TMs.3line)
 3LINESTOPCONS := $(addprefix ${TOPCONSDIR}/,Globular.3line TMs.3line)
 3LINESPDBTM := $(PDBTMDIR)/pdbtm.3line
-3LINESCLUST := $(addprefix ${PROCDIR}/,Globular.clust.3line TMs.clust.3line pdbtm.clust.3line)
-FASTAS := $(addprefix ${PROCDIR}/,Globular.fa TMs.fa pdbtm.fa)
-CLUST := $(addprefix ${PROCDIR}/,Globular.clust.fa TMs.clust.fa pdbtm.clust.fa)
-MEMS := $(addprefix ${PROCDIR}/,Globular.clust.mems.pickle TMs.clust.mems.pickle pdbtm.clust.mems.pickle)
-STATS := Globular_stats.txt TMs_stats.txt pdbtm_stats.txt
+3LINESOPM := $(OPMDIR)/opm.3line
+3LINESCLUST := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.3line Topcons_TMs.clust.3line Scampi_Globular.clust.3line Scampi_TMs.clust.3line pdbtm.clust.3line opm.clust.3line)
+FASTAS := $(addprefix ${PROCDIR}/,Topcons_Globular.fa Topcons_TMs.fa Scampi_Globular.fa Scampi_TMs.fa pdbtm.fa opm.fa)
+CLUST := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.fa Topcons_TMs.clust.fa Scampi_Globular.clust.fa Scampi_TMs.clust.fa pdbtm.clust.fa opm.clust.fa)
+MEMS := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.mems.pickle Topcons_TMs.clust.mems.pickle Scampi_Globular.clust.mems.pickle Scampi_TMs.clust.mems.pickle pdbtm.clust.mems.pickle opm.clust.mems.pickle)
+STATS := $(addprefix ${STATDIR}/,Topcons_Globular_stats.txt Topcons_TMs_stats.txt Scampi_Globular_stats.txt Scampi_TMs_stats.txt pdbtm_stats.txt opm_stats.txt)
 
 
 
-all: $(STATS) $(3LINESOPM)
+all: $(STATS)
 
 $(RAWDIR)/opm_poly.json:
 	wget -O $@ https://lomize-group-opm.herokuapp.com/classtypes/1/primary_structures?pageSize=3000
@@ -90,11 +92,14 @@ $(3LINESTOPCONS): $(RAWDIR)/pdb_chain_uniprot.tsv.gz $(RAWDIR)/ss.txt.gz $(RAWDI
 	rm -f $(TOPCONSDIR)/g2.txt
 	rm -f $(TOPCONSDIR)/SPTM.3line
 
-$(3LINES): $(3LINESSCAMPI) $(3LINESTOPCONS) $(3LINESPDBTM)
+$(3LINES): $(3LINESSCAMPI) $(3LINESTOPCONS) $(3LINESPDBTM) $(3LINESOPM)
 	mkdir -p $(PROCDIR)
-	grep -h "" $(SCAMPIDIR)/TMs.3line $(TOPCONSDIR)/TMs.3line > $(PROCDIR)/TMs.3line
-	grep -h "" $(SCAMPIDIR)/Globular.3line $(TOPCONSDIR)/Globular.3line > $(PROCDIR)/Globular.3line
+	cp $(SCAMPIDIR)/TMs.3line $(PROCDIR)/Scampi_TMs.3line
+	cp $(SCAMPIDIR)/Globular.3line $(PROCDIR)/Scampi_Globular.3line
+	cp $(TOPCONSDIR)/TMs.3line $(PROCDIR)/Topcons_TMs.3line
+	cp $(TOPCONSDIR)/Globular.3line $(PROCDIR)/Topcons_Globular.3line
 	cp $(3LINESPDBTM) $(PROCDIR)/pdbtm.3line
+	cp $(3LINESOPM) $(PROCDIR)/opm.3line
 
 $(FASTAS) : %.fa: %.3line | $(3LINES)
 	sed '3~3d' $< > $@
@@ -108,7 +113,7 @@ $(3LINESCLUST) : %.clust.3line: %.clust.fa | $(CLUST)
 $(MEMS) : %.clust.mems.pickle: %.clust.3line | $(3LINESCLUST)
 	./bin/make_mems_from_3line.py $< $@
 
-$(STATS) : %_stats.txt : $(PROCDIR)/%.clust.mems.pickle | $(MEMS)
+$(STATS) : $(STATDIR)/%_stats.txt : $(PROCDIR)/%.clust.mems.pickle | $(MEMS)
 	./bin/statsCharges.py $< > $@
 
 .PHONY: clean deepclean
@@ -117,8 +122,10 @@ clean:
 	rm -rf $(SCAMPIDIR)
 	rm -rf $(PDBTMDIR)
 	rm -rf $(PROCDIR)
+	rm -r $(IMAGEDIR)/*
 	rm -r $(STATS)
 deepclean: clean
+	rm -rf $(OPMDIR)
 	rm -rf $(RAWDIR)/pdb_chain_uniprot.tsv.gz
 	rm -rf $(RAWDIR)/ss.txt.gz
 	rm -rf $(RAWDIR)/TOPCONS.zip

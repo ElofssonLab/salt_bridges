@@ -10,6 +10,7 @@ import os.path
 # import urllib.request
 import re
 import pandas as pd
+import seaborn as sns
 import matplotlib.pyplot as plt
 # from matplotlib.sankey import Sankey
 
@@ -299,61 +300,95 @@ same_hist_data = list(np.concatenate(
 same_hist_data_sanH = list(np.concatenate(
                         [[i+1]*len(pos)
                             for i, pos in enumerate(same_gaps_trimmed_sanH)]))
+df_charge = pd.DataFrame(charge_hist_data_sanH, columns=["Gap"])
+df_charge["Type"] = "Charged"
+df_same = pd.DataFrame(same_hist_data_sanH, columns=["Gap"])
+df_same["Type"] = "Same"
+df_opp = pd.DataFrame(opp_hist_data_sanH, columns=["Gap"])
+df_opp["Type"] = "Opp"
+df = pd.concat([df_charge, df_same, df_opp], ignore_index=True)
+df = df[df["Gap"] < 8]
 
-# # Charged pairs
-# plt.hist(charge_hist_data, bins=np.arange(12)-0.5)
+name = args.pickle_file.split('/')[-1].split('.')[0]
+sns.set_theme(style="white", context="talk")
+f, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 10), sharex=True)
+f.suptitle(name + ", distance between charges")
+sns.histplot(df[df["Type"]=="Charged"], x="Gap", color="grey", discrete=True, ax=ax1)
+ax1.axhline(0, color="k", clip_on=False)
+ax1.set_ylabel("Charged")
+sns.histplot(df[df["Type"]=="Opp"], x="Gap", color="grey", discrete=True, ax=ax2)
+ax2.axhline(0, color="k", clip_on=False)
+ax2.set_ylabel("Opp")
+sns.histplot(df[df["Type"]=="Same"], x="Gap", color="grey", discrete=True, ax=ax3)
+ax3.axhline(0, color="k", clip_on=False)
+ax3.set_ylabel("Same")
+for ax in [ax1, ax2, ax3]:
+    ax.patches[0].set_facecolor("crimson")
+    ax.patches[2].set_facecolor("orange")
+    ax.patches[3].set_facecolor("yellow")
+sns.despine(bottom=True)
+plt.tight_layout(h_pad=2)
+plt.savefig('images/' + name + '.png')
+# sns_plot = sns.displot(df, x="Gap", binwidth=1, discrete=True, hue="Type")
+# sns_plot.fig.set_figwidth(15)
+# sns_plot.fig.set_figheight(10)
+# sns_plot.savefig("images/test.png")
+
+# f, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(7,5), sharex=True)
+# # # Charged pairs
+# # plt.hist(charge_hist_data, bins=np.arange(12)-0.5)
+# # plt.xticks(range(1, 11))
+# # plt.yticks(range(0, 200, 5))
+# # plt.xlim([0, 11])
+# # plt.ylim([0, 200])
+# # plt.title("Distance between charged AA's")
+# # plt.savefig('images/charged_pairs.svg')
+# # plt.clf()
+# # Charged pairs sanH
+# plt.hist(charge_hist_data_sanH, bins=np.arange(12)-0.5)
 # plt.xticks(range(1, 11))
-# plt.yticks(range(0, 200, 5))
+# plt.yticks(range(0, 400, 5))
 # plt.xlim([0, 11])
-# plt.ylim([0, 200])
-# plt.title("Distance between charged AA's")
-# plt.savefig('images/charged_pairs.svg')
+# plt.ylim([0, 400])
+# plt.title("Distance between charged AA's san H")
+# plt.savefig('images/charged_pairs_sanH.svg')
 # plt.clf()
-# Charged pairs sanH
-plt.hist(charge_hist_data_sanH, bins=np.arange(12)-0.5)
-plt.xticks(range(1, 11))
-plt.yticks(range(0, 400, 5))
-plt.xlim([0, 11])
-plt.ylim([0, 400])
-plt.title("Distance between charged AA's san H")
-plt.savefig('images/charged_pairs_sanH.svg')
-plt.clf()
-# # Opposite pairs
-# plt.hist(opp_hist_data, bins=np.arange(12)-0.5)
+# # # Opposite pairs
+# # plt.hist(opp_hist_data, bins=np.arange(12)-0.5)
+# # plt.xticks(range(1, 11))
+# # plt.yticks(range(0, 200, 5))
+# # plt.xlim([0, 11])
+# # plt.ylim([0, 200])
+# # plt.title("Distance between opposite charged AA's")
+# # plt.savefig('images/opp_pairs.svg')
+# # plt.clf()
+# # Opposite pairs sanH
+# plt.hist(opp_hist_data_sanH, bins=np.arange(12)-0.5)
 # plt.xticks(range(1, 11))
-# plt.yticks(range(0, 200, 5))
+# plt.yticks(range(0, 400, 5))
 # plt.xlim([0, 11])
-# plt.ylim([0, 200])
-# plt.title("Distance between opposite charged AA's")
-# plt.savefig('images/opp_pairs.svg')
+# plt.ylim([0, 400])
+# plt.title("Distance between opposite charged AA's san H")
+# plt.savefig('images/opp_pairs_sanH.svg')
 # plt.clf()
-# Opposite pairs sanH
-plt.hist(opp_hist_data_sanH, bins=np.arange(12)-0.5)
-plt.xticks(range(1, 11))
-plt.yticks(range(0, 400, 5))
-plt.xlim([0, 11])
-plt.ylim([0, 400])
-plt.title("Distance between opposite charged AA's san H")
-plt.savefig('images/opp_pairs_sanH.svg')
-plt.clf()
-# # Same charged pairs
-# plt.hist(same_hist_data, bins=np.arange(12)-0.5)
+# # # Same charged pairs
+# # plt.hist(same_hist_data, bins=np.arange(12)-0.5)
+# # plt.xticks(range(1, 11))
+# # plt.yticks(range(0, 200, 5))
+# # plt.xlim([0, 11])
+# # plt.ylim([0, 200])
+# # plt.title("Distance between same charged AA's")
+# # plt.savefig('images/same_pairs.svg')
+# # plt.clf()
+# # Same charged pairs sanH
+# plt.hist(same_hist_data_sanH, bins=np.arange(12)-0.5)
 # plt.xticks(range(1, 11))
-# plt.yticks(range(0, 200, 5))
+# plt.yticks(range(0, 400, 5))
 # plt.xlim([0, 11])
-# plt.ylim([0, 200])
-# plt.title("Distance between same charged AA's")
-# plt.savefig('images/same_pairs.svg')
+# plt.ylim([0, 400])
+# plt.title("Distance between same charged AA's san H")
+# plt.savefig('images/same_pairs_sanH.svg')
 # plt.clf()
-# Same charged pairs sanH
-plt.hist(same_hist_data_sanH, bins=np.arange(12)-0.5)
-plt.xticks(range(1, 11))
-plt.yticks(range(0, 400, 5))
-plt.xlim([0, 11])
-plt.ylim([0, 400])
-plt.title("Distance between same charged AA's san H")
-plt.savefig('images/same_pairs_sanH.svg')
-plt.clf()
 # 
 # sys.exit()
 #
