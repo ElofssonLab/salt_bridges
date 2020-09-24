@@ -126,6 +126,8 @@ clean:
 	rm -r $(STATS)
 deepclean: clean
 	rm -rf $(OPMDIR)
+	rm -r $(IMAGEDIR)/*
+	rm -r $(STATS)
 	rm -rf $(RAWDIR)/pdb_chain_uniprot.tsv.gz
 	rm -rf $(RAWDIR)/ss.txt.gz
 	rm -rf $(RAWDIR)/TOPCONS.zip
