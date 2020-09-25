@@ -17,10 +17,9 @@ FASTAS := $(addprefix ${PROCDIR}/,Topcons_Globular.fa Topcons_TMs.fa Scampi_Glob
 CLUST := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.fa Topcons_TMs.clust.fa Scampi_Globular.clust.fa Scampi_TMs.clust.fa pdbtm.clust.fa opm.clust.fa)
 MEMS := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.mems.pickle Topcons_TMs.clust.mems.pickle Scampi_Globular.clust.mems.pickle Scampi_TMs.clust.mems.pickle pdbtm.clust.mems.pickle opm.clust.mems.pickle)
 STATS := $(addprefix ${STATDIR}/,Topcons_Globular_stats.txt Topcons_TMs_stats.txt Scampi_Globular_stats.txt Scampi_TMs_stats.txt pdbtm_stats.txt opm_stats.txt)
+LISTS := $(addprefix ${STATDIR}/,pdbtm_1_list.txt pdbtm_2_list.txt opm_1_list.txt opm_2_list.txt)
 
-
-
-all: $(STATS)
+all: $(STATS) $(LISTS)
 
 $(RAWDIR)/opm_poly.json:
 	wget -O $@ https://lomize-group-opm.herokuapp.com/classtypes/1/primary_structures?pageSize=3000
@@ -116,6 +115,12 @@ $(MEMS) : %.clust.mems.pickle: %.clust.3line | $(3LINESCLUST)
 $(STATS) : $(STATDIR)/%_stats.txt : $(PROCDIR)/%.clust.mems.pickle | $(MEMS)
 	./bin/statsCharges.py $< > $@
 
+$(LISTS) : $(MEMS) $(3LINES)
+	./bin/gen_potential_list.py $(PROCDIR)/pdbtm.clust.mems.pickle $(PROCDIR)/pdbtm.clust.3line -b 1 > $(STATDIR)/pdbtm_1_list.txt
+	./bin/gen_potential_list.py $(PROCDIR)/pdbtm.clust.mems.pickle $(PROCDIR)/pdbtm.clust.3line -b 2 > $(STATDIR)/pdbtm_2_list.txt
+	./bin/gen_potential_list.py $(PROCDIR)/opm.clust.mems.pickle $(PROCDIR)/opm.clust.3line -b 1 > $(STATDIR)/opm_1_list.txt
+	./bin/gen_potential_list.py $(PROCDIR)/opm.clust.mems.pickle $(PROCDIR)/opm.clust.3line -b 2 > $(STATDIR)/opm_2_list.txt
+
 .PHONY: clean deepclean
 clean:
 	rm -rf $(TOPCONSDIR)
@@ -124,10 +129,12 @@ clean:
 	rm -rf $(PROCDIR)
 	rm -r $(IMAGEDIR)/*
 	rm -r $(STATS)
+	rm -r $(LISTS)
 deepclean: clean
 	rm -rf $(OPMDIR)
 	rm -r $(IMAGEDIR)/*
 	rm -r $(STATS)
+	rm -r $(LISTS)
 	rm -rf $(RAWDIR)/pdb_chain_uniprot.tsv.gz
 	rm -rf $(RAWDIR)/ss.txt.gz
 	rm -rf $(RAWDIR)/TOPCONS.zip
