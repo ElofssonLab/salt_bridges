@@ -71,7 +71,7 @@ for i, entry in enumerate(class_list["objects"]):
         mem_segments = []
         opm_mem_segments = subunit["segment"]
         sp_stop = 0
-        chain = subunit["protein_letter"]
+        chain = subunit["protein_letter"].upper()
         patt = r"(?P<start>[0-9]{1,4})\s*-\s*(?P<end>[0-9]{1,4})"
         segs = re.findall(patt, subunit["segment"])
 
