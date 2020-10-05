@@ -1,22 +1,14 @@
 #!/usr/bin/env python3
 """Membrane charge caluclations."""
 import matplotlib
-# matplotlib.use('Agg')
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import math
 import pickle
 import random
-import collections
-import sys
 import argparse
-
-parser = argparse.ArgumentParser()
-
-parser.add_argument("input_file", type=str, help="Input membrane pickle")
-
-args = parser.parse_args()
-
+import collections
 data = {}
 positive = 'KR'
 negative = 'DE'
@@ -52,9 +44,13 @@ positiveplus = 'RHK'
 #             start_pos = i
 #             curr_letter = c
 # pickle.dump(helicies,open("helicies.pickle","wb"))
+parser = argparse.ArgumentParser()
+
+parser.add_argument("input_file", type=str, help="Input membrane file")
+
+args = parser.parse_args()
 helicies = pickle.load(open(args.input_file, 'rb'))
 # helicies = pickle.load(open('helicies.pickle','rb'))
-mem_length = 17
 totalmemstring = ''
 totalmembranes = 0
 samehitcounter = [0, 0, 0, 0, 0, 0, 0]
@@ -62,160 +58,66 @@ hitcounter = [0, 0, 0, 0, 0, 0, 0]
 misscounter = [0, 0, 0, 0, 0, 0, 0]
 totalcharges = []
 pairs = [[], [], [], [], [], [], []]
-aas = 'ACDEFGHIKLMNPQRSTVWY'
-aaHits = np.zeros([7, 20, 20])
-aaPairs = np.zeros(7)
-# Dim 1, first and second in pair
-aaCount = np.zeros([2, 7, 20])
-memLens = []
-prolinMems = []                                                                                                                                                                                                                                                                         
-pPositions = []
+chargeCount =[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]]
+poschargeCount =[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]]
+negchargeCount =[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]]
+aaCount =[0,0,0,0,0,0,0]
 for key, membranes in helicies.items():
-    for startid, mem in membranes:
-
+    # print(key)
+    for place, mem in membranes:
         # print(mem)
-        # mem = mems[1]
-        # Uncomment next line for only mid mem
-        if len(mem) < mem_length:
+        if len(mem) < 17:
             continue
-        midMem = mem[5:-5]
-        # midMem = mem
-        memLen = len(midMem)
-        # The follow two lines for Globular with mem length > 15
-        # if memLen < 15:
-        #     continue
-
-#         # middle = memLen//2
-#         # for pos, aa in enumerate(midMem):
-#         #     if aa == 'P':
-#         #         pPositions.append(pos-middle)
-#         memLens.append(memLen)
-#         if 'P' in midMem:
-#             prolinMems.append(memLen)
-#         # print(memLen)
-# f, axarr = plt.subplots(1, 1, figsize=(12, 8))
-# plt.hist(memLens, alpha=0.5, bins=40, label='Membrane lengths')
-# plt.hist(prolinMems, alpha=0.5, bins=40, label='Contains Prolin')
-# plt.legend(loc='upper right')
-# # ax.title.set_text("Amino Acid Count MidMem")
-# # ax = sns.heatmap(normdf, ax=axarr[1], annot=True, fmt='.1%')
-# # ax.title.set_text("Amino Acid Count MidMem Norm")
-# plt.tight_layout()
-# f.savefig('images/histogramOfProlinMemLensTM.png')
-        for place, aa in enumerate(midMem):
-            # print(aa)
-            # aaCount[aas.index(aa)] += 1 # Old way of counting AA
-            # Now count the for each gap
+        mem = mem[5:-5]
+        totalmembranes += 1
+        totalmemstring += mem
+        memLen = len(mem)
+        chargesinmem = 0
+        for place, aa in enumerate(mem):
+            if aa in charged:
+                chargesinmem += 1
             for i in range(1, 8):
                 if memLen <= place + i:
                     break
-                if aa in aas:
-                    first = aas.index(aa)
-                    # print(midMem[place+i])
-                    second_aa = midMem[place + i]
-                    if second_aa in aas:
-                        aaPairs[i - 1] += 1
-                        second = aas.index(midMem[place + i])
-                        aaHits[i - 1][first][second] += 1
-                        # Count both first and second AA for each gap sized i
-                        aaCount[0][i - 1][first] += 1
-                        aaCount[1][i - 1][second] += 1
+                pairs[i-1].append(aa+mem[place+i])
+                nextAA = mem[place + i]
+                aaCount[i-1] += 1
+                if aa in charged:
+                    chargeCount[i-1][0] += 1
+                    if aa in positive:
+                        poschargeCount[i-1][0] += 1
+                        if nextAA in negative:
+                            negchargeCount[i-1][1] += 1
+                            hitcounter[i-1] = hitcounter[i-1] + 1
+                            chargeCount[i-1][1] += 1
+                        elif nextAA in positive:
+                            poschargeCount[i-1][1] += 1
+                            samehitcounter[i-1] = samehitcounter[i-1] + 1
+                            chargeCount[i-1][1] += 1
+                        else:
+                            misscounter[i-1] = misscounter[i-1] + 1
+                    if aa in negative:
+                        negchargeCount[i-1][0] += 1
+                        if nextAA in positive:
+                            poschargeCount[i-1][1] += 1
+                            hitcounter[i-1] = hitcounter[i-1] + 1
+                            chargeCount[i-1][1] += 1
+                        elif nextAA in negative:
+                            negchargeCount[i-1][1] += 1
+                            samehitcounter[i-1] = samehitcounter[i-1] + 1
+                            chargeCount[i-1][1] += 1
+                        else:
+                            misscounter[i-1] = misscounter[i-1] + 1
+                else:
+                    if nextAA in charged:
+                        chargeCount[i-1][1] += 1
+                        if nextAA in positive:
+                            poschargeCount[i-1][1] += 1
+                        elif nextAA in negative:
+                            negchargeCount[i-1][1] += 1
 
-logOdds = np.zeros([7])
-ci = []
-logOdds_opp = np.zeros([7])
-ci_opp = []
-logOdds_same = np.zeros([7])
-ci_same = []
-# print([aas.index(c) for c in chargedplus])
-aaIndex = [aas.index(c) for c in positiveplus]
-# print(sum(aaHits[0][chargesPlusIndex][chargesPlusIndex]))
-# for ind, aa in enumerate(aasOri):
-#    print(aa, aaCount[ind])
-for i in range(7):
-    # for first in range(20):
-    #     for second in range(20):
-    a = 0
-    b_temp = aaPairs[i]
-    c_first = 0
-    c_second = 0
-    c = 0
-    d_temp = aaPairs[i]**2
+        totalcharges.append(chargesinmem)
 
-    a_opp = 0
-    b_temp_opp = 0
-    c_first_opp = 0
-    c_second_opp = 0
-    d_temp_opp = 0
-
-    a_same = 0
-    b_temp_same = 0
-    c_first_same = 0
-    c_second_same = 0
-    d_temp_same = 0
-    
-    for first in [aas.index(c) for c in charged]:
-        for second in [aas.index(c) for c in charged]:
-            a += aaHits[i][first][second]                                                                                                                                                                                                                                               
-            # b_temp += aaPairs[i]
-            # b = aaPairs[i] - a
-            # print(a, b, a/b)
-            c_first += aaCount[0][i][first]
-            c_second += aaCount[1][i][second]
-            c += aaCount[0][i][first] * aaCount[1][i][second]
-            # Need square to handle pairs, first and second
-            # d = sum(aaCount)**2 # Old version
-            # d is aaPairs for this gap times 2 for each of the two
-            # amino acids as each pair contains two AAs.
-            # d_temp += aaPairs[i]
-            # d = aaPairs[i]**2 - c
-            # print(a, b, c, d)
-            # if (first in positive and second in negative) or (first in negative and second in positive):
-            #     a_opp += aaHits[i][first][second]                                                                                                                                                                                                                                  
-            #     b_temp_opp += aaPairs[i]
-            #     c_first_opp += aaCount[0][i][first]
-            #     c_second_opp += aaCount[1][i][second]
-            #     d_temp_opp += aaPairs[i]
-            # if (first in positive and second in positive) or (first in negative and second in negative):
-            #     a_same += aaHits[i][first][second]                                                                                                                                                                                                                                  
-            #     b_temp_same += aaPairs[i]
-            #     c_first_same += aaCount[0][i][first]
-            #     c_second_same += aaCount[1][i][second]
-            #     d_temp_same += aaPairs[i]
-
-    b = (b_temp - a)
-    # c = c_first * c_second
-    d = (d_temp-c)
-    odds = (a / b) / (c / d)
-
-    # b_opp = b_temp_opp - a_opp
-    # c_opp = c_first_opp*c_second_opp
-    # d_opp = d_temp_opp**2-c_opp
-    # odds_opp = (a_opp / b_opp) / (c_opp / d_opp)
-
-    # b_same = b_temp_same - a_same
-    # c_same = c_first_same*c_second_same
-    # d_same = d_temp_same**2-c_same
-    # odds_same = (a_same / b_same) / (c_same / d_same)
-#     # print("Odds ratio for gap {}: {:.2f}".format(i+1, (odds)))
-# print("Log odds ratio for gap {}: {:.2f}".format(i+1, math.log(odds)))
-# logOdds.append(math.log(odds))
-    if odds == 0.0:
-        logOddsValue = -math.inf
-        print("Odds 0 at gap: ", i + 1)
-        print("A-D: ", a, b, c, d)
-        print("First and second AA: ", aasOri[first], aasOri[second])
-        # print(aasOri[first], aasOri[second], a, b, c, d, odds)
-    else:
-        logOddsValue = math.log(odds)
-    logOdds[i] = logOddsValue
-    ci.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d), math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d)))
-print(logOdds)
-print(ci)
-# print(aaCount)
-# print(aaPairs)
-# print(aaHits)
-# sys.exit()
 # seqs = random.sample(totalmemstring,int(len(totalmemstring)/20))
 # loops = 1000
 # examples = []
@@ -256,33 +158,62 @@ print(ci)
 # Baseline using 1000 loops of shuffling and measuring how many pairs we find
 # baselinehits = [48,46,43,41,38,36,33] # For original
 # baselinehits = [3123, 2961, 2796, 2629, 2468, 2301, 2137]  # For uniref aligned
-# totalhits = np.array(hitcounter) + np.array(samehitcounter)
-# print("Samehitcounter: {}".format(samehitcounter))
-# print("Hit counter:    {}".format(hitcounter))
-# print("Total hits:     {}".format(totalhits))
-# print("Misscounter:    {}".format(misscounter))
+totalhits = np.array(hitcounter) + np.array(samehitcounter)
+print("Samehitcounter: {}".format(samehitcounter))
+print("Hit counter:    {}".format(hitcounter))
+print("Total hits:     {}".format(totalhits))
+print("Misscounter:    {}".format(misscounter))
 # print("Baseline:       {}".format(baselinehits))
-# print("Total charges:  {}".format(sum(totalcharges)))
-# freq = collections.Counter(totalcharges)
-# print(freq)
-# print("Total membranes: {}".format(totalmembranes))
-# logOdds = []
-# ci = []
-# for i in range(7):
-#     a = totalhits[i]                # Number of pairs, there is a charge
-#     b = sum(totalcharges) - a       # Number of charges that are not pair for this distance
-#     c = baselinehits[i]             # How many baseline pairs for this distance?
-#     d = sum(totalcharges) - c       # Number of non-hits for baseline
-#     odds = (a/b)/(c/d)
-#     # print("Odds ratio for gap {}: {:.2f}".format(i+1, (odds)))
-#     print("Log odds ratio for gap {}: {:.2f}".format(i+1, math.log(odds)))
-#     logOdds.append(math.log(odds))
-#     print("Upper 95% CI: {:.2f}".format((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d))))
-#     print("Lower 95% CI: {:.2f}".format((math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d))))
-#     ci.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d), math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d)))
+print("Total charges:  {}".format(sum(totalcharges)))
+freq = collections.Counter(totalcharges)
+print(freq)
+print("Total membranes: {}".format(totalmembranes))
+logOdds = []
+logOddsOpp = []
+logOddsSame = []
+ci = []
+ciOpp = []
+ciSame = []
+for i in range(7):
+    ###### For All charges ######
+    a = totalhits[i]                # Number of pairs, there is a charge
+    b = len(pairs[i])       # Number of total observed pairs
+    c = chargeCount[i][0]*chargeCount[i][1]             # How many baseline pairs for this distance?
+    d = aaCount[i]**2       # Number of non-hits for baseline
+    odds = (a/b)/(c/d)
+    print("Odds ratio for gap {}: {:.2f}".format(i+1, (odds)))
+    print("Log odds ratio for gap {}: {:.2f}".format(i+1, math.log(odds)))
+    logOdds.append(math.log(odds))
+    print("Upper 95% CI: {:.2f}".format((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d))))
+    print("Lower 95% CI: {:.2f}".format((math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d))))
+    ci.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d), math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d)))
+
+    ###### For Opp charges ######
+    a = hitcounter[i]                 # Number of opposite pairs, only opposite
+    b = len(pairs[i])       # Number of total observed pairs
+    c = poschargeCount[i][0]*negchargeCount[i][1] + negchargeCount[i][0]*poschargeCount[i][1]  # Only calculate opposite pairs
+    d = aaCount[i]**2       # Number of non-hits for baseline
+    odds = (a/b)/(c/d)
+    logOddsOpp.append(math.log(odds))
+    ciOpp.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d), math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d)))
+
+    ###### For same charges ######
+    a = samehitcounter[i]                 # Number of same pairs, only same
+    b = len(pairs[i])       # Number of total observed pairs
+    c = poschargeCount[i][0]*poschargeCount[i][1] + negchargeCount[i][0]*negchargeCount[i][1]  # Only calculate opposite pairs
+    d = aaCount[i]**2       # Number of non-hits for baseline
+    odds = (a/b)/(c/d)
+    logOddsSame.append(math.log(odds))
+    ciSame.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d), math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d)))
 # print(logOdds)
 # print(ci)
+# print(logOddsSame)
+# print(ciSame)
+# print(logOddsOpp)
+# print(ciOpp)
 
+f, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 10), sharex=True)
+###### Totalt ######
 y_r = [logOdds[i] - ci[i][0] for i in range(len(ci))]
 threshold = 0
 values = np.array(logOdds)
@@ -293,15 +224,51 @@ above_threshold = np.maximum(values - threshold, 0)
 below_threshold = np.minimum(values, threshold)
 # plt.bar(x, below_threshold, 0.35, color="g", yerr=y_r)
 # plt.bar(x, above_threshold, 0.35, color="r", yerr=y_r, bottom=below_threshold)
-plt.bar(x, logOdds, yerr=y_r, color=['g', 'r', 'g', 'g', 'r', 'r', 'r'], alpha=0.8, align='center')
+ax1.bar(x, logOdds, yerr=y_r, color=['g', 'r', 'g', 'g', 'r', 'r', 'g'], alpha=0.8, align='center')
 # plt.xticks(range(len(logOdds)), [str(i) for i in range(1,len(logOdds)+1)])
-plt.ylabel('Log odds ratio')
-plt.xlabel('Gap distance from first charged residue')
-plt.title('Log odds ratio from a charged residue')
-plt.axhline(xmax=8, color='black')
-plt.grid(True)
-plt.show()
-# plt.savefig("logoddsthreshold2.png")
+ax1.set_ylabel('Log odds ratio')
+# ax1.set_xlabel('Gap distance from first charged residue')
+ax1.set_title('Log odds ratio for all charged pairs')
+ax1.axhline(xmax=8, color='black')
+ax1.grid(True)
+###### Opp ######
+y_r = [logOddsOpp[i] - ciOpp[i][0] for i in range(len(ciOpp))]
+threshold = 0
+values = np.array(logOddsOpp)
+x = range(1, len(values)+1)
+# plt.bar(range(len(logOdds)), logOdds, yerr=y_r, alpha=0.2, align='center')
+# x = range(1, len(values)+1)
+above_threshold = np.maximum(values - threshold, 0)
+below_threshold = np.minimum(values, threshold)
+# plt.bar(x, below_threshold, 0.35, color="g", yerr=y_r)
+# plt.bar(x, above_threshold, 0.35, color="r", yerr=y_r, bottom=below_threshold)
+ax2.bar(x, logOddsOpp, yerr=y_r, color=['g', 'r', 'g', 'g', 'r', 'r', 'g'], alpha=0.8, align='center')
+# plt.xticks(range(len(logOdds)), [str(i) for i in range(1,len(logOdds)+1)])
+ax2.set_ylabel('Log odds ratio')
+# ax2.set_xlabel('Gap distance from first charged residue')
+ax2.set_title('Log odds ratio for opposite pairs')
+ax2.axhline(xmax=8, color='black')
+ax2.grid(True)
+###### Totalt ######
+y_r = [logOddsSame[i] - ciSame[i][0] for i in range(len(ciSame))]
+threshold = 0
+values = np.array(logOddsSame)
+x = range(1, len(values)+1)
+# plt.bar(range(len(logOdds)), logOdds, yerr=y_r, alpha=0.2, align='center')
+# x = range(1, len(values)+1)
+above_threshold = np.maximum(values - threshold, 0)
+below_threshold = np.minimum(values, threshold)
+# plt.bar(x, below_threshold, 0.35, color="g", yerr=y_r)
+# plt.bar(x, above_threshold, 0.35, color="r", yerr=y_r, bottom=below_threshold)
+ax3.bar(x, logOddsSame, yerr=y_r, color=['g', 'r', 'g', 'g', 'r', 'r', 'g'], alpha=0.8, align='center')
+# plt.xticks(range(len(logOdds)), [str(i) for i in range(1,len(logOdds)+1)])
+ax3.set_ylabel('Log odds ratio')
+ax3.set_xlabel('Gap distance from first charged residue')
+ax3.set_title('Log odds ratio for same pairs')
+ax3.axhline(xmax=8, color='black')
+ax3.grid(True)
+name = args.input_file.split('/')[-1].split('.')[0]
+plt.savefig('images/' + name + '_logodds.png')
 
 # ###### Build above and below graph
 # allthreshold = chargedbaseline**2

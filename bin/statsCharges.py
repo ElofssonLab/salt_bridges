@@ -134,6 +134,8 @@ prot_same_gaps_trimmed_sanH = [set() for i in range(10)]
 protein_set = set()
 total_num_proteins = len(helices.items())
 total_segments = 0
+same_pair_ids = [[],[],[],[],[],[],[],[],[],[]]
+opp_pair_ids = [[],[],[],[],[],[],[],[],[],[]]
 for key, membranes in helices.items():
     # Total number of membrane segments
     # print(key, membranes)
@@ -253,6 +255,10 @@ for key, membranes in helices.items():
                             segs_opp_gaps_trimmed[i-1].add(key + str(mem_num))
                             prot_opp_gaps_trimmed[i-1].add(key)
                             if first_aa != 'H' and second_aa != 'H':
+                                if first_aa in negative and second_aa in positive:
+                                    opp_pair_ids[i-1].append(key + '\tnegpos')
+                                else:
+                                    opp_pair_ids[i-1].append(key + '\tposneg')
                                 opp_gaps_trimmed_sanH[i-1].append(
                                                        first_aa + second_aa)
                                 segs_opp_gaps_trimmed_sanH[i-1].\
@@ -270,6 +276,10 @@ for key, membranes in helices.items():
                                                             str(mem_num))
                             prot_same_gaps_trimmed[i-1].add(key)
                             if first_aa != 'H' and second_aa != 'H':
+                                if first_aa in negative:
+                                    same_pair_ids[i-1].append(key + '\tneg')
+                                else:
+                                    same_pair_ids[i-1].append(key + '\tpos')
                                 same_gaps_trimmed_sanH[i-1].append(
                                                        first_aa + second_aa)
                                 segs_same_gaps_trimmed_sanH[i-1].\
@@ -277,6 +287,14 @@ for key, membranes in helices.items():
                                 prot_same_gaps_trimmed_sanH[i-1].add(key)
 
 num_prots = len(protein_set)
+# with open("same_pairs.txt",'w') as out_handle:
+#     for i in range(0,7):
+#         for pid in same_pair_ids[i]:
+#             out_handle.write(str(i+1) +' \t' + pid + '\n')
+# with open("opp_pairs.txt",'w') as out_handle:
+#     for i in range(0,7):
+#         for pid in opp_pair_ids[i]:
+#             out_handle.write(str(i+1) +' \t' + pid + '\n')
 ##########
 # Graphs #
 ##########

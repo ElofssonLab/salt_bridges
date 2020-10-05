@@ -3,37 +3,40 @@ STATDIR := stats
 IMAGEDIR := images
 RAWDIR := $(DATADIR)/raw
 TOPCONSDIR := $(DATADIR)/topcons
-SCAMPIDIR := $(DATADIR)/scampi
-OPMDIR := $(DATADIR)/OPM
+# SCAMPIDIR := $(DATADIR)/scampi
+# OPMDIR := $(DATADIR)/OPM
 PDBTMDIR := $(DATADIR)/pdbtm
 PROCDIR := $(DATADIR)/processed
-3LINES := $(addprefix ${PROCDIR}/,Topcons_Globular.3line Topcons_TMs.3line Scampi_Globular.3line Scampi_TMs.3line pdbtm.3line opm.3line)
-3LINESSCAMPI := $(addprefix ${SCAMPIDIR}/,Globular.3line TMs.3line)
+3LINES := $(addprefix ${PROCDIR}/,Topcons_Globular.3line Topcons_TMs.3line pdbtm.3line)
+# 3LINESSCAMPI := $(addprefix ${SCAMPIDIR}/,Globular.3line TMs.3line)
 3LINESTOPCONS := $(addprefix ${TOPCONSDIR}/,Globular.3line TMs.3line)
 3LINESPDBTM := $(PDBTMDIR)/pdbtm.3line
-3LINESOPM := $(OPMDIR)/opm.3line
-3LINESCLUST := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.3line Topcons_TMs.clust.3line Scampi_Globular.clust.3line Scampi_TMs.clust.3line pdbtm.clust.3line opm.clust.3line)
-FASTAS := $(addprefix ${PROCDIR}/,Topcons_Globular.fa Topcons_TMs.fa Scampi_Globular.fa Scampi_TMs.fa pdbtm.fa opm.fa)
-CLUST := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.fa Topcons_TMs.clust.fa Scampi_Globular.clust.fa Scampi_TMs.clust.fa pdbtm.clust.fa opm.clust.fa)
-MEMS := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.mems.pickle Topcons_TMs.clust.mems.pickle Scampi_Globular.clust.mems.pickle Scampi_TMs.clust.mems.pickle pdbtm.clust.mems.pickle opm.clust.mems.pickle)
-STATS := $(addprefix ${STATDIR}/,Topcons_Globular_stats.txt Topcons_TMs_stats.txt Scampi_Globular_stats.txt Scampi_TMs_stats.txt pdbtm_stats.txt opm_stats.txt)
-LISTS := $(addprefix ${STATDIR}/,pdbtm_1_list.txt pdbtm_2_list.txt opm_1_list.txt opm_2_list.txt)
+# 3LINESOPM := $(OPMDIR)/opm.3line
+3LINESCLUST := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.3line Topcons_TMs.clust.3line pdbtm.clust.3line)
+FASTAS := $(addprefix ${PROCDIR}/,Topcons_Globular.fa Topcons_TMs.fa pdbtm.fa)
+CLUST := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.fa Topcons_TMs.clust.fa pdbtm.clust.fa)
+MEMS := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.mems.pickle Topcons_TMs.clust.mems.pickle pdbtm.clust.mems.pickle)
+STATS := $(addprefix ${STATDIR}/,Topcons_Globular_stats.txt Topcons_TMs_stats.txt pdbtm_stats.txt)
+LISTS := $(addprefix ${STATDIR}/,pdbtm_1_list.txt pdbtm_2_list.txt)
 
 all: $(STATS) $(LISTS)
 
-$(RAWDIR)/opm_poly.json:
-	wget -O $@ https://lomize-group-opm.herokuapp.com/classtypes/1/primary_structures?pageSize=3000
-
-$(RAWDIR)/opm_bi.json:
-	wget -O $@ https://lomize-group-opm.herokuapp.com/classtypes/11/primary_structures?pageSize=3000
+# $(RAWDIR)/opm_poly.json:
+# 	wget -O $@ https://lomize-group-opm.herokuapp.com/classtypes/1/primary_structures?pageSize=3000
+# 
+# $(RAWDIR)/opm_bi.json:
+# 	wget -O $@ https://lomize-group-opm.herokuapp.com/classtypes/11/primary_structures?pageSize=3000
 
 $(RAWDIR)/pdbtm_alpha_entries.xml:
 	wget -O $@ http://pdbtm.enzim.hu/data/pdbtmalpha
 
-$(RAWDIR)/pdbtm_non_redundant_alpha_struct.txt:
-	curl http://pdbtm.enzim.hu/data/pdbtm_alpha_nr.list | tr '[:lower:]' '[:upper:]' | tr -d _ | sort | uniq  > $(RAWDIR)/pdbtm_non_redundant_alpha_struct.txt
+$(RAWDIR)/pdbtm_non_redundant_alpha_list.txt:
+	curl http://pdbtm.enzim.hu/data/pdbtm_alpha_nr.list | tr '[:lower:]' '[:upper:]' | tr -d _ | sort | uniq  > $(RAWDIR)/pdbtm_non_redundant_alpha_list.txt
 
-$(3LINESPDBTM) : $(RAWDIR)/pdbtm_non_redundant_alpha_struct.txt $(RAWDIR)/pdbtm_alpha_entries.xml
+$(RAWDIR)/pdbtm_redundant_alpha_list.txt:
+	curl http://pdbtm.enzim.hu/data/pdbtm_alpha.list | tr '[:lower:]' '[:upper:]' | tr -d _ | sort | uniq  > $(RAWDIR)/pdbtm_redundant_alpha_list.txt
+
+$(3LINESPDBTM) : $(RAWDIR)/pdbtm_non_redundant_alpha_list.txt $(RAWDIR)/pdbtm_alpha_entries.xml
 	mkdir -p $(PDBTMDIR)
 	./bin/parse_pdbtm.py $^ $@
 
@@ -46,27 +49,27 @@ $(RAWDIR)/pdb_chain_uniprot.tsv.gz:
 $(RAWDIR)/TOPCONS.zip:
 	wget -O $(RAWDIR)/TOPCONS.zip http://topcons.net/static/download/TOPCONS2.0_datasets.zip
 
-$(3LINESOPM): $(RAWDIR)/pdb_chain_uniprot.tsv.gz $(RAWDIR)/opm_bi.json $(RAWDIR)/opm_poly.json
-	mkdir -p $(OPMDIR)
-	./bin/opm_uniprot_api.py $(RAWDIR)/opm_bi.json $< $(OPMDIR)/opm_bi.3line
-	./bin/opm_uniprot_api.py $(RAWDIR)/opm_poly.json $< $(OPMDIR)/opm_poly.3line
-	grep -h "" $(OPMDIR)/opm_bi.3line $(OPMDIR)/opm_poly.3line > $@
+# $(3LINESOPM): $(RAWDIR)/pdb_chain_uniprot.tsv.gz $(RAWDIR)/opm_bi.json $(RAWDIR)/opm_poly.json
+# 	mkdir -p $(OPMDIR)
+# 	./bin/opm_uniprot_api.py $(RAWDIR)/opm_bi.json $< $(OPMDIR)/opm_bi.3line
+# 	./bin/opm_uniprot_api.py $(RAWDIR)/opm_poly.json $< $(OPMDIR)/opm_poly.3line
+# 	grep -h "" $(OPMDIR)/opm_bi.3line $(OPMDIR)/opm_poly.3line > $@
 
-$(3LINESSCAMPI): $(RAWDIR)/pdb_chain_uniprot.tsv.gz $(RAWDIR)/ss.txt.gz $(RAWDIR)/SCAMPI.zip
-	mkdir -p $(SCAMPIDIR)
-	unzip -o $(RAWDIR)/SCAMPI.zip -d $(SCAMPIDIR)
-	# Add in PDB ids for the SP+TM.3line, keep the original topology annotation
-	./bin/add_uniprot_to_3line.py $(SCAMPIDIR)/membranes.3line $(RAWDIR)/pdb_chain_uniprot.tsv.gz $(SCAMPIDIR)/TMs.3line
-	# Generate up lists of uniprot IDs to map against PDB and ss from RCSB
-	./bin/gen_uniprot_list.sh $(SCAMPIDIR)/globular.3line > $(SCAMPIDIR)/globularlist.txt
-	# Actually generate the 3line from the list, use the -t H flag to use H for alpha helix topology
-	./bin/make_3line_from_uniprot_list.py $(SCAMPIDIR)/globularlist.txt $(RAWDIR)/pdb_chain_uniprot.tsv.gz $(RAWDIR)/ss.txt.gz $(SCAMPIDIR)/Globular.3line -t H
-	# Make sure all proteins contain at least one helix
-	./bin/remove_nonTMs_from_3line.py $(SCAMPIDIR)/Globular.3line
-	# Clean up
-	rm -f $(SCAMPIDIR)/membranes.3line
-	rm -f $(SCAMPIDIR)/globularlist.txt
-	rm -f $(SCAMPIDIR)/globular.3line
+# $(3LINESSCAMPI): $(RAWDIR)/pdb_chain_uniprot.tsv.gz $(RAWDIR)/ss.txt.gz $(RAWDIR)/SCAMPI.zip
+# 	mkdir -p $(SCAMPIDIR)
+# 	unzip -o $(RAWDIR)/SCAMPI.zip -d $(SCAMPIDIR)
+# 	# Add in PDB ids for the SP+TM.3line, keep the original topology annotation
+# 	./bin/add_uniprot_to_3line.py $(SCAMPIDIR)/membranes.3line $(RAWDIR)/pdb_chain_uniprot.tsv.gz $(SCAMPIDIR)/TMs.3line
+# 	# Generate up lists of uniprot IDs to map against PDB and ss from RCSB
+# 	./bin/gen_uniprot_list.sh $(SCAMPIDIR)/globular.3line > $(SCAMPIDIR)/globularlist.txt
+# 	# Actually generate the 3line from the list, use the -t H flag to use H for alpha helix topology
+# 	./bin/make_3line_from_uniprot_list.py $(SCAMPIDIR)/globularlist.txt $(RAWDIR)/pdb_chain_uniprot.tsv.gz $(RAWDIR)/ss.txt.gz $(SCAMPIDIR)/Globular.3line -t H
+# 	# Make sure all proteins contain at least one helix
+# 	./bin/remove_nonTMs_from_3line.py $(SCAMPIDIR)/Globular.3line
+# 	# Clean up
+# 	rm -f $(SCAMPIDIR)/membranes.3line
+# 	rm -f $(SCAMPIDIR)/globularlist.txt
+# 	rm -f $(SCAMPIDIR)/globular.3line
 
 $(3LINESTOPCONS): $(RAWDIR)/pdb_chain_uniprot.tsv.gz $(RAWDIR)/ss.txt.gz $(RAWDIR)/TOPCONS.zip
 	mkdir -p $(TOPCONSDIR)
@@ -91,14 +94,14 @@ $(3LINESTOPCONS): $(RAWDIR)/pdb_chain_uniprot.tsv.gz $(RAWDIR)/ss.txt.gz $(RAWDI
 	rm -f $(TOPCONSDIR)/g2.txt
 	rm -f $(TOPCONSDIR)/SPTM.3line
 
-$(3LINES): $(3LINESSCAMPI) $(3LINESTOPCONS) $(3LINESPDBTM) $(3LINESOPM)
+$(3LINES):  $(3LINESTOPCONS) $(3LINESPDBTM)
 	mkdir -p $(PROCDIR)
-	cp $(SCAMPIDIR)/TMs.3line $(PROCDIR)/Scampi_TMs.3line
-	cp $(SCAMPIDIR)/Globular.3line $(PROCDIR)/Scampi_Globular.3line
+	# cp $(SCAMPIDIR)/TMs.3line $(PROCDIR)/Scampi_TMs.3line
+	# cp $(SCAMPIDIR)/Globular.3line $(PROCDIR)/Scampi_Globular.3line
 	cp $(TOPCONSDIR)/TMs.3line $(PROCDIR)/Topcons_TMs.3line
 	cp $(TOPCONSDIR)/Globular.3line $(PROCDIR)/Topcons_Globular.3line
 	cp $(3LINESPDBTM) $(PROCDIR)/pdbtm.3line
-	cp $(3LINESOPM) $(PROCDIR)/opm.3line
+	# cp $(3LINESOPM) $(PROCDIR)/opm.3line
 
 $(FASTAS) : %.fa: %.3line | $(3LINES)
 	sed '3~3d' $< > $@
@@ -118,8 +121,8 @@ $(STATS) : $(STATDIR)/%_stats.txt : $(PROCDIR)/%.clust.mems.pickle | $(MEMS)
 $(LISTS) : $(MEMS) $(3LINES)
 	./bin/gen_potential_list.py $(PROCDIR)/pdbtm.clust.mems.pickle $(PROCDIR)/pdbtm.clust.3line -b 1 > $(STATDIR)/pdbtm_1_list.txt
 	./bin/gen_potential_list.py $(PROCDIR)/pdbtm.clust.mems.pickle $(PROCDIR)/pdbtm.clust.3line -b 2 > $(STATDIR)/pdbtm_2_list.txt
-	./bin/gen_potential_list.py $(PROCDIR)/opm.clust.mems.pickle $(PROCDIR)/opm.clust.3line -b 1 > $(STATDIR)/opm_1_list.txt
-	./bin/gen_potential_list.py $(PROCDIR)/opm.clust.mems.pickle $(PROCDIR)/opm.clust.3line -b 2 > $(STATDIR)/opm_2_list.txt
+	# ./bin/gen_potential_list.py $(PROCDIR)/opm.clust.mems.pickle $(PROCDIR)/opm.clust.3line -b 1 > $(STATDIR)/opm_1_list.txt
+	# ./bin/gen_potential_list.py $(PROCDIR)/opm.clust.mems.pickle $(PROCDIR)/opm.clust.3line -b 2 > $(STATDIR)/opm_2_list.txt
 
 .PHONY: clean deepclean
 clean:
