@@ -17,9 +17,10 @@ FASTAS := $(addprefix ${PROCDIR}/,Topcons_Globular.fa Topcons_TMs.fa pdbtm.fa)
 CLUST := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.fa Topcons_TMs.clust.fa pdbtm.clust.fa)
 MEMS := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.mems.pickle Topcons_TMs.clust.mems.pickle pdbtm.clust.mems.pickle)
 STATS := $(addprefix ${STATDIR}/,Topcons_Globular_stats.txt Topcons_TMs_stats.txt pdbtm_stats.txt)
+LOGODDS := $(addprefix ${IMAGEDIR}/,Topcons_TMs_logodds.png pdbtm_logodds.png)
 LISTS := $(addprefix ${STATDIR}/,pdbtm_1_list.txt pdbtm_2_list.txt)
 
-all: $(STATS) $(LISTS)
+all: $(STATS) $(LISTS) $(LOGODDS)
 
 # $(RAWDIR)/opm_poly.json:
 # 	wget -O $@ https://lomize-group-opm.herokuapp.com/classtypes/1/primary_structures?pageSize=3000
@@ -117,6 +118,10 @@ $(MEMS) : %.clust.mems.pickle: %.clust.3line | $(3LINESCLUST)
 
 $(STATS) : $(STATDIR)/%_stats.txt : $(PROCDIR)/%.clust.mems.pickle | $(MEMS)
 	./bin/statsCharges.py $< > $@
+
+$(LOGODDS) : $(PROCDIR)/Topcons_TMs.clust.mems.pickle $(PROCDIR)/pdbtm.clust.mems.pickle
+	./bin/logodd_barchart.py $(PROCDIR)/Topcons_TMs.clust.mems.pickle
+	./bin/logodd_barchart.py $(PROCDIR)/pdbtm.clust.mems.pickle
 
 $(LISTS) : $(MEMS) $(3LINES)
 	./bin/gen_potential_list.py $(PROCDIR)/pdbtm.clust.mems.pickle $(PROCDIR)/pdbtm.clust.3line -b 1 > $(STATDIR)/pdbtm_1_list.txt
