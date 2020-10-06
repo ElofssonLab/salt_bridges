@@ -19,8 +19,10 @@ MEMS := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.mems.pickle Topcons_TMs.c
 STATS := $(addprefix ${STATDIR}/,Topcons_Globular_stats.txt Topcons_TMs_stats.txt pdbtm_stats.txt)
 LOGODDS := $(addprefix ${IMAGEDIR}/,Topcons_TMs_logodds.png pdbtm_logodds.png)
 LISTS := $(addprefix ${STATDIR}/,pdbtm_1_list.txt pdbtm_2_list.txt)
+PROTS := $(addprefix ${STATDIR}/,pdbtm_same_pairs.txt pdbtm_opp_pairs.txt Topcons_TMs_same_pairs.txt Topcons_TMs_opp_pairs.txt)
+RCSB := $(addprefix ${STATDIR}/,pdbtm_same_info.txt pdbtm_opp_info.txt Topcons_TMs_same_info.txt Topcons_TMs_opp_info.txt)
 
-all: $(STATS) $(LISTS) $(LOGODDS)
+all: $(STATS) $(LISTS) $(LOGODDS) $(RCSB)
 
 # $(RAWDIR)/opm_poly.json:
 # 	wget -O $@ https://lomize-group-opm.herokuapp.com/classtypes/1/primary_structures?pageSize=3000
@@ -118,6 +120,9 @@ $(MEMS) : %.clust.mems.pickle: %.clust.3line | $(3LINESCLUST)
 
 $(STATS) : $(STATDIR)/%_stats.txt : $(PROCDIR)/%.clust.mems.pickle | $(MEMS)
 	./bin/statsCharges.py $< > $@
+
+$(RCSB) : %_info.txt : %_pairs.txt | $(PROTS)
+	./bin/rcsb_info.sh $< > $@
 
 $(LOGODDS) : $(PROCDIR)/Topcons_TMs.clust.mems.pickle $(PROCDIR)/pdbtm.clust.mems.pickle
 	./bin/logodd_barchart.py $(PROCDIR)/Topcons_TMs.clust.mems.pickle

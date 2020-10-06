@@ -30,6 +30,7 @@ charged = 'KRDE'
 chargedplus = 'KRDEH'
 positiveplus = 'RHK'
 helices = pickle.load(open(args.pickle_file, 'rb'))
+name = args.pickle_file.split('/')[-1].split('.')[0]
 number_of_segs = 0
 edge = 5  # Number of residues to trim from start and end
 seg_aas = ""
@@ -132,8 +133,14 @@ prot_same_gaps_trimmed_sanH = [set() for i in range(10)]
 #         rowNum += 1
 # testlist = []
 protein_set = set()
+protein_set_with_charges = set()
 total_num_proteins = len(helices.items())
+seg_charges = []
+seg_charges_sanH = []
+seg_charges_trimmed = []
+seg_charges_sanH_trimmed = []
 total_segments = 0
+total_segments_with_charges = 0
 same_pair_ids = [[],[],[],[],[],[],[],[],[],[]]
 opp_pair_ids = [[],[],[],[],[],[],[],[],[],[]]
 for key, membranes in helices.items():
@@ -161,19 +168,23 @@ for key, membranes in helices.items():
         if len(re.findall('[' + chargedplus + ']', seg_full)) > 0:
             proteins_with_charges_full.add(key)
             segs_with_charges_full += 1
+            seg_charges.append(len(re.findall('[' + chargedplus + ']', seg_full)))
         # Proteins that contain charges(minus H) in membrane segments
         if len(re.findall('[' + charged + ']', seg_full)) > 0:
             proteins_with_charges_full_sanH.add(key)
             segs_with_charges_full_sanH += 1
+            seg_charges_sanH.append(len(re.findall('[' + charged + ']', seg_full)))
 
         # Proteins that contain charges in membrane segments, trimmed
         if len(re.findall('[' + chargedplus + ']', seg_trimmed)) > 0:
             proteins_with_charges_trimmed.add(key)
             segs_with_charges_trimmed += 1
+            seg_charges_trimmed.append(len(re.findall('[' + chargedplus + ']', seg_trimmed)))
         # Proteins that contain charges(minus H) in membrane segments, trimmed
         if len(re.findall('[' + charged + ']', seg_trimmed)) > 0:
             proteins_with_charges_trimmed_sanH.add(key)
             segs_with_charges_trimmed_sanH += 1
+            seg_charges_sanH_trimmed.append(len(re.findall('[' + charged + ']', seg_trimmed)))
 
         # Multi charges in membrane segments
         if len(re.findall('[' + chargedplus + ']', seg_full)) > 1:
@@ -287,14 +298,15 @@ for key, membranes in helices.items():
                                 prot_same_gaps_trimmed_sanH[i-1].add(key)
 
 num_prots = len(protein_set)
-# with open("same_pairs.txt",'w') as out_handle:
-#     for i in range(0,7):
-#         for pid in same_pair_ids[i]:
-#             out_handle.write(str(i+1) +' \t' + pid + '\n')
-# with open("opp_pairs.txt",'w') as out_handle:
-#     for i in range(0,7):
-#         for pid in opp_pair_ids[i]:
-#             out_handle.write(str(i+1) +' \t' + pid + '\n')
+
+with open("stats/{}_same_pairs.txt".format(name),'w') as out_handle:
+    for i in range(0,7):
+        for pid in same_pair_ids[i]:
+            out_handle.write(str(i+1) +' \t' + pid + '\n')
+with open("stats/{}_opp_pairs.txt".format(name),'w') as out_handle:
+    for i in range(0,7):
+        for pid in opp_pair_ids[i]:
+            out_handle.write(str(i+1) +' \t' + pid + '\n')
 ##########
 # Graphs #
 ##########
@@ -327,7 +339,6 @@ df_opp["Type"] = "Opp"
 df = pd.concat([df_charge, df_same, df_opp], ignore_index=True)
 df = df[df["Gap"] < 8]
 
-name = args.pickle_file.split('/')[-1].split('.')[0]
 sns.set_theme(style="white", context="talk")
 f, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 10), sharex=True)
 f.suptitle(name + ", distance between charges")
@@ -443,16 +454,17 @@ print("## been trimmed to not include the first and     ##")
 print("## last 5 residues to prevent boundary charges.  ##")
 print("###################################################")
 print()
-print()
 print("Total number of proteins:".ljust(70), total_num_proteins)
 print("Total number of transmembrane segments: ".ljust(70), total_segments)
 print()
 print("Number of proteins(with transmembrane regions >17):".ljust(70), num_prots)
-print("Number of transmembrane segments(min 17 residues): ".ljust(70), number_of_segs)
+print("Number of transmembrane segments(> 17 residues): ".ljust(70), number_of_segs)
 print()
 print("Amino acids in trans segments: ".ljust(70), len(seg_aas))
 print("Amino acids in trans segments, trimmed: ".ljust(70),
       len(seg_aas_trimmed))
+print()
+#############################################################
 print()
 print("Proteins with charged amino acids(in trans seg):".ljust(70),
       len(proteins_with_charges_full_sanH),
@@ -461,13 +473,6 @@ print("Proteins with charged amino acids(in trans seg), trimmed:"
       .ljust(70),
       len(proteins_with_charges_trimmed_sanH),
       '(', len(proteins_with_charges_trimmed), ')')
-print("Segments with charged amino acids:".ljust(70),
-      segs_with_charges_full_sanH,
-      '(', segs_with_charges_full, ')')
-print("Segments with charged amino acids, trimmed:".ljust(70),
-      segs_with_charges_trimmed_sanH,
-      '(', segs_with_charges_trimmed, ')')
-print()
 print("Proteins with multi charged amino acids(in trans seg):".ljust(70),
       len(proteins_with_multi_charges_full_sanH),
       '(', len(proteins_with_multi_charges_full), ')')
@@ -476,103 +481,121 @@ print("Proteins with multi charged amino acids(in trans seg), trimmed:"
       len(proteins_with_multi_charges_trimmed_sanH),
       '(', len(proteins_with_multi_charges_trimmed), ')')
 print()
+print("Segments with charged amino acids:".ljust(70),
+      segs_with_charges_full_sanH,
+      '(', segs_with_charges_full, ')')
+print("Segments with charged amino acids, trimmed:".ljust(70),
+      segs_with_charges_trimmed_sanH,
+      '(', segs_with_charges_trimmed, ')')
 print("Segments with multi charged amino acids:".ljust(70),
       len(segs_with_multi_charges_full_sanH),
       '(', len(segs_with_multi_charges_full), ')')
-print("Number of charges and count:")
-print(pd.Series(segs_with_multi_charges_full_sanH).value_counts().to_string())
-print("Number of charges and count with H:")
-print(pd.Series(segs_with_multi_charges_full).value_counts().to_string())
-print()
 print("Segments with multi charged amino acids, trimmed:".ljust(70),
       len(segs_with_multi_charges_trimmed_sanH),
       '(', len(segs_with_multi_charges_trimmed), ')')
-print("Number of charges and count:")
-print(pd.Series(segs_with_multi_charges_trimmed_sanH).
-      value_counts().to_string())
-print("Number of charges and count with H:")
-print(pd.Series(segs_with_multi_charges_trimmed).value_counts().to_string())
 print()
-print("Charged amino acids in trans segments:".ljust(70),
-      len(re.findall('[' + charged + ']', seg_aas)),
-      '(', len(re.findall('[' + chargedplus + ']', seg_aas)), ')')
-print(pd.Series(re.findall('[' + chargedplus + ']',
-                seg_aas)).value_counts().to_string())
-print("Charged amino acids in trans segments, trimmed:".ljust(70),
-      len(re.findall('[' + charged + ']', seg_aas_trimmed)),
-      '(', len(re.findall('[' + chargedplus + ']', seg_aas_trimmed)), ')')
-print(pd.Series(re.findall('[' + chargedplus + ']',
-      seg_aas_trimmed)).value_counts().to_string())
-print()
-print("##################################################")
-print("# Everything below is using the trimmed segments #")
-print("##################################################")
-print()
-#######################
-# Proteins with pairs #
-#######################
-print("Proteins with charged amino acids(pairs) in pos:")
-for i in range(1, 11):
-    print("i+{}: ".format(i),
-          len(prot_charged_gaps_trimmed_sanH[i-1]),
-          '(', len(prot_charged_gaps_trimmed[i-1]), ')')
-print()
-print("Proteins with opposite charged pairs:")
-for i in range(1, 11):
-    print("i+{}: ".format(i),
-          len(prot_opp_gaps_trimmed_sanH[i-1]),
-          '(', len(prot_opp_gaps_trimmed[i-1]), ')')
-print()
-print("Proteins with same charged pairs:")
-for i in range(1, 11):
-    print("i+{}: ".format(i),
-          len(prot_same_gaps_trimmed_sanH[i-1]),
-          '(', len(prot_same_gaps_trimmed[i-1]), ')')
-print()
+for i in range(1,11):
+    print("Segments with {} charged amino acid:".format(i).ljust(70),
+          seg_charges_sanH.count(i),
+          '(', seg_charges.count(i), ')')
+    print("Segments with {} charged amino acids, trimmed:".format(i).ljust(70),
+          seg_charges_sanH_trimmed.count(i),
+          '(', seg_charges_trimmed.count(i), ')')
+# print()
+# print("Number of charges and count:")
+# print(pd.Series(segs_with_multi_charges_full_sanH).value_counts().to_string())
+# print("Number of charges and count with H:")
+# print(pd.Series(segs_with_multi_charges_full).value_counts().to_string())
+# print()
+# print("Segments with multi charged amino acids, trimmed:".ljust(70),
+#       len(segs_with_multi_charges_trimmed_sanH),
+#       '(', len(segs_with_multi_charges_trimmed), ')')
+# print("Number of charges and count:")
+# print(pd.Series(segs_with_multi_charges_trimmed_sanH).
+#       value_counts().to_string())
+# print("Number of charges and count with H:")
+# print(pd.Series(segs_with_multi_charges_trimmed).value_counts().to_string())
+# print()
+# print("Charged amino acids in trans segments:".ljust(70),
+#       len(re.findall('[' + charged + ']', seg_aas)),
+#       '(', len(re.findall('[' + chargedplus + ']', seg_aas)), ')')
+# print(pd.Series(re.findall('[' + chargedplus + ']',
+#                 seg_aas)).value_counts().to_string())
+# print("Charged amino acids in trans segments, trimmed:".ljust(70),
+#       len(re.findall('[' + charged + ']', seg_aas_trimmed)),
+#       '(', len(re.findall('[' + chargedplus + ']', seg_aas_trimmed)), ')')
+# print(pd.Series(re.findall('[' + chargedplus + ']',
+#       seg_aas_trimmed)).value_counts().to_string())
+# print()
+# print("##################################################")
+# print("# Everything below is using the trimmed segments #")
+# print("##################################################")
+# print()
+# #######################
+# # Proteins with pairs #
+# #######################
+# print("Proteins with charged amino acids(pairs) in pos:")
+# for i in range(1, 11):
+#     print("i+{}: ".format(i),
+#           len(prot_charged_gaps_trimmed_sanH[i-1]),
+#           '(', len(prot_charged_gaps_trimmed[i-1]), ')')
+# print()
+# print("Proteins with opposite charged pairs:")
+# for i in range(1, 11):
+#     print("i+{}: ".format(i),
+#           len(prot_opp_gaps_trimmed_sanH[i-1]),
+#           '(', len(prot_opp_gaps_trimmed[i-1]), ')')
+# print()
+# print("Proteins with same charged pairs:")
+# for i in range(1, 11):
+#     print("i+{}: ".format(i),
+#           len(prot_same_gaps_trimmed_sanH[i-1]),
+#           '(', len(prot_same_gaps_trimmed[i-1]), ')')
+# print()
 #######################
 # Segments with pairs #
 #######################
-print("Segments with charged amino acids(pairs) in pos:")
-for i in range(1, 11):
-    print("i+{}: ".format(i),
-          len(segs_charged_gaps_trimmed_sanH[i-1]),
-          '(', len(segs_charged_gaps_trimmed[i-1]), ')')
-print()
-print("Segments with opposite charged pairs:")
-for i in range(1, 11):
-    print("i+{}: ".format(i),
-          len(segs_opp_gaps_trimmed_sanH[i-1]),
-          '(', len(segs_opp_gaps_trimmed[i-1]), ')')
-print()
-print("Segments with same charged pairs:")
-for i in range(1, 11):
-    print("i+{}: ".format(i),
-          len(segs_same_gaps_trimmed_sanH[i-1]),
-          '(', len(segs_same_gaps_trimmed[i-1]), ')')
-print()
-####################################
-# Charged amino acids in positions #
-####################################
-print("Charged amino acids(pairs) in pos:")
-for i in range(1, 11):
-    print("i+{}: ".format(i),
-          len(charged_gaps_trimmed_sanH[i-1]),
-          '(', len(charged_gaps_trimmed[i-1]), ')')
-    print(pd.Series(charged_gaps_trimmed[i-1]).value_counts().to_string())
-print()
-print("Opposite charged pairs:")
-for i in range(1, 11):
-    print("i+{}: ".format(i),
-          len(opp_gaps_trimmed_sanH[i-1]),
-          '(', len(opp_gaps_trimmed[i-1]), ')')
-    print(pd.Series(opp_gaps_trimmed[i-1]).value_counts().to_string())
-print()
-print("Same charged pairs:")
-for i in range(1, 11):
-    print("i+{}: ".format(i),
-          len(same_gaps_trimmed_sanH[i-1]),
-          '(', len(same_gaps_trimmed[i-1]), ')')
-    print(pd.Series(same_gaps_trimmed[i-1]).value_counts().to_string())
+# print("Segments with charged amino acids(pairs) in pos:")
+# for i in range(1, 11):
+#     print("i+{}: ".format(i),
+#           len(segs_charged_gaps_trimmed_sanH[i-1]),
+#           '(', len(segs_charged_gaps_trimmed[i-1]), ')')
+# print()
+# print("Segments with opposite charged pairs:")
+# for i in range(1, 11):
+#     print("i+{}: ".format(i),
+#           len(segs_opp_gaps_trimmed_sanH[i-1]),
+#           '(', len(segs_opp_gaps_trimmed[i-1]), ')')
+# print()
+# print("Segments with same charged pairs:")
+# for i in range(1, 11):
+#     print("i+{}: ".format(i),
+#           len(segs_same_gaps_trimmed_sanH[i-1]),
+#           '(', len(segs_same_gaps_trimmed[i-1]), ')')
+# print()
+# ####################################
+# # Charged amino acids in positions #
+# ####################################
+# print("Charged amino acids(pairs) in pos:")
+# for i in range(1, 11):
+#     print("i+{}: ".format(i),
+#           len(charged_gaps_trimmed_sanH[i-1]),
+#           '(', len(charged_gaps_trimmed[i-1]), ')')
+#     print(pd.Series(charged_gaps_trimmed[i-1]).value_counts().to_string())
+# print()
+# print("Opposite charged pairs:")
+# for i in range(1, 11):
+#     print("i+{}: ".format(i),
+#           len(opp_gaps_trimmed_sanH[i-1]),
+#           '(', len(opp_gaps_trimmed[i-1]), ')')
+#     print(pd.Series(opp_gaps_trimmed[i-1]).value_counts().to_string())
+# print()
+# print("Same charged pairs:")
+# for i in range(1, 11):
+#     print("i+{}: ".format(i),
+#           len(same_gaps_trimmed_sanH[i-1]),
+#           '(', len(same_gaps_trimmed[i-1]), ')')
+#     print(pd.Series(same_gaps_trimmed[i-1]).value_counts().to_string())
 # print("i+2: ", len(''.join(charged_gaps_trimmed[1]).replace('H', '')), '(', len(''.join(charged_gaps_trimmed[1])), ')')
 # print(pd.Series(charged_gaps_trimmed[1]).value_counts().to_string())
 # print("i+3: ", len(''.join(charged_gaps_trimmed[2]).replace('H', '')), '(', len(''.join(charged_gaps_trimmed[2])), ')')
