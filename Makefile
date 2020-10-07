@@ -152,4 +152,4 @@ deepclean: clean
 	rm -rf $(RAWDIR)/ss.txt.gz
 	rm -rf $(RAWDIR)/TOPCONS.zip
 	rm -rf $(RAWDIR)/pdbtm_alpha_entries.xml
-	rm -rf $(RAWDIR)/pdbtm_non_redundant_alpha_struct.txt
+	rm -rf $(RAWDIR)/pdbtm_non_redundant_alpha_list.txt
