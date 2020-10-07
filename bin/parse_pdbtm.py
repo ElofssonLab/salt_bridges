@@ -16,7 +16,7 @@ list_file = sys.argv[1]
 xml_file = sys.argv[2]
 out_file = sys.argv[3]
 
-debug = True
+debug = False
 struct_dict = {}
 with open(list_file) as list_handle:
     list_handle.readline()  # Header line
@@ -53,8 +53,8 @@ count = 0
 for prot in root.iter(namespace + "pdbtm"):
 # for prot in root.findall(namespace + "pdbtm"):
     pdb_id = prot.attrib["ID"].upper()
-    # if pdb_id in struct_dict:
-    if pdb_id == "5L25":
+    if pdb_id in struct_dict:
+    # if pdb_id == "5L25":
         if debug:
             print("Running {}...".format(pdb_id))
         if prot.attrib["TMP"] != "yes":
@@ -81,160 +81,62 @@ for prot in root.iter(namespace + "pdbtm"):
                 continue
             if debug:
                 print(chain_id)
-            pp_list = ppBuilder.build_peptides(pdb_struct[0][chain_id])
-            if not len(pp_list) > 0:
-                continue
-            end_id = pp_list[-1][-1].get_id()[1]
-            pp_iter = iter(pp_list)
-            if debug:
-                print(pp_list)
+            # pp_list = ppBuilder.build_peptides(pdb_struct[0][chain_id])
+            # if not len(pp_list) > 0:
+            #     continue
+            # struct_end_id = pp_list[-1][-1].get_id()[1]
+            # pp_iter = iter(pp_list)
+            # if debug:
+            #     print(pp_list)
             if int(chain.attrib["NUM_TM"]) > 0 and chain.attrib["TYPE"] == "alpha" and chain.attrib["CHAINID"] in struct_dict[pdb_id]:
-                topo = ''
-                pp = next(pp_iter)
-                j = 0
-                while True:
-                    if pp[j].get_id()[1] < end_id:
-                        pdb_start = pp[j].get_id()[1]
-                        break
-                    j += 1
-                # pdb_start = pp[0].get_id()[1]
-                pdb_end = pp[-1].get_id()[1]
-                # print(pdb_start, pdb_end)
-                #pp[0].get_id()[1] raw_seq = pp.get_sequence()
                 seq = ""
-                for res in pp:
-                    if not res.get_id()[1] > end_id:
-                        seq += three_to_one(res.get_resname())
+                topo = ""
+                # pp = next(pp_iter)
+                j = 0
+                # while True:
+                #     if pp[j].get_id()[1] < struct_end_id:
+                #         struct_pdb_start = pp[j].get_id()[1]
+                #         break
+                #     j += 1
+                # struct_pdb_end = pp[-1].get_id()[1]
+                raw_seq = chain.find(namespace + "SEQ").text.replace(' ', '').replace('\n', '')
+                # res_ids = set()
+                # num_ids = set(range(struct_pdb_start, struct_pdb_end + 1))
+                # for res in pp:
+                #     r_id = res.get_id()[1]
+                #     res_ids.add(r_id)
+                # peptide_missing_res = num_ids - res_ids
 
-                # if debug:
-                #     print(seq)
-                res_ids = set()
-                num_ids = set(range(pdb_start, pdb_end + 1))
-                for res in pp:
-                    r_id = res.get_id()[1]
-                    res_ids.add(r_id)
-                peptide_missing_res = num_ids - res_ids
-                # if debug:
-                #     if len(peptide_missing_res) > 0:
-                #         print(peptide_missing_res)
-                # # if len(pp.get_sequence()) != (pdb_end - pdb_start + 1):
-                # #     print("Lengths not matching", peptide_missing_res)
-                # # print("PDB", pdb_start, pdb_end)
-                # # print(seq)
-                # # Set prev_end low to mitigate when the start sequence is negative in the pdb/region
-                # prev_end = -999
                 save_protein = True
                 for region in chain.findall(namespace + "REGION"):
-                #     # if not first_seq:
-                #     #     first_seq = int(region.attrib["pdb_beg"])
-                #     # end_seq = int(region.attrib["pdb_end"])
-                #     # print(region.attrib)
-                #     save_region = True
                     reg_type = region.attrib["type"]
+                    reg_start = int(region.attrib["seq_beg"])
+                    reg_end = int(region.attrib["seq_end"])
                     if reg_type == 'H':
-                        # First region should never be helix, hence can test for no separation
-                        if T == 'M':
-                            if debug:
-                                print("No membrane separation")
-                            save_protein = False
-                            break
+                        pdb_start = int(region.attrib["pdb_beg"])
+                        pdb_end = int(region.attrib["pdb_end"])
                         T = 'M'
+                        m_len = pdb_end - pdb_start + 1
+                        if m_len > 15:
+                            for ss in range(pdb_start + 5, pdb_end + 1 - 5):
+                                try:
+                                    # print(ss, dssp[chain_id, (' ', ss, ' ')][2])
+                                    # If not the core of the longer membranes are predominantely helix, skip them but retain the protein and other membranes
+                                    if not dssp[chain_id, (' ', ss, ' ')][2] in 'H -':
+                                        # print("DSSP not correct", chain_id, ss)
+                                        T = 'i'
+                                        # save_protein = False 
+                                        # break
+                                except:
+                                    print("dssp fail", pdb_id, chain_id, ss)
+                                    save_protein = False
+                                    break
+                        seq += raw_seq[reg_start-1:reg_end]
                     else:
                         T = 'i'
-                    #########################################################
-                    #########################################################
-                    #########################################################
-                    reg_start = int(region.attrib["pdb_beg"])
-                    reg_end = int(region.attrib["pdb_end"])
-                    # print("Region {} {}".format(reg_start, reg_end))
-                    # print(reg_start, reg_end)
-                    while True:
-                        # If the region is before the start of the peptide, go for the next region
-                        if reg_end < pdb_start:
-                            break
-                        # Normal behavior
-                        ########################
-                        if reg_start < pdb_start:
-                            start = pdb_start
-                        elif reg_start > end_id and reg_end > end_id:
-                            # All done, no more pdb
-                            break
-                        elif reg_start > end_id and reg_end:
-                            # Special if first seq is dbxref, ie 1001 or the like
-                            start = pdb_start
-                        else:
-                            start = reg_start
-
-                        if reg_end > pdb_end:
-                            end = pdb_end
-                        else:
-                            end = reg_end
-                        ########################
-                        # if debug: 
-                        #     print(start, end)
-
-                        curr_missing = {i for i in peptide_missing_res if i >= start and i <= end}
-                        if debug:
-                            if len(curr_missing) > 0:
-                                print("Missing ", curr_missing)
-                        part_num = end - start + 1 - len(curr_missing)
-                        # if T == 'M':
-                        #     reg_dssp = ''
-                        #     # print("Starting dssp with ",start, end)
-                        #     # for t in range(start, end+1):
-                        #     #     print("DSSP for {}".format(t))
-                        #     #     print(dssp[chain_id, (' ', t, ' ')][2])
-                        #     for ss in set(range(start, end + 1)) - curr_missing:
-                        #         try:
-                        #             # print(dssp[chain_id, (' ', ss, ' ')][2])
-                        #             # print('M', start, end+1)
-                        #             # reg_dssp += dssp[chain_id, (' ', ss, ' ')][2]
-                        #             if not 'H' == dssp[chain_id, (' ', ss, ' ')][2]:
-                        #                 print("DSSP not correct")
-                        #                 save_protein = False 
-                        #                 # break
-                        #         except:
-                        #             print("dssp fail", pdb_id, chain_id, ss)
-                        #             save_protein = False
-                        #             break
-                        #     # if (len(reg_dssp) - reg_dssp.count('H') - reg_dssp.count('G') - reg_dssp.count('I')) > 1 and len(reg_dssp) > 10:
-                        #     #     if debug:
-                        #     #         print("DSSP not correct {}".format(pdb_id))
-                        #     #         print(reg_dssp)
-                        #     #     # Just skip this membrane?
-                        #     #     # break
-
-                        #     # #     # sys.exit()
-                        #     #     save_protein = False
-                        #     #     break
-                        if debug:
-                            print(part_num*T, start, end)
-                        topo += part_num*T
-                        # Region end is before the peptide end, break and grab next region
-                        if reg_end < pdb_end:
-                            break
-                        # Otherwise grab the next peptide
-                        else:
-                            try:
-                                pp = next(pp_iter)
-                            except StopIteration:
-                                break
-                            pdb_start = pp[0].get_id()[1]
-                            pdb_end = pp[-1].get_id()[1]
-                            for res in pp:
-                                if not res.get_id()[1] > end_id:
-                                    seq += three_to_one(res.get_resname())
-                            res_ids = set()
-                            num_ids = set(range(pdb_start, pdb_end + 1))
-                            for res in pp:
-                                r_id = res.get_id()[1]
-                                res_ids.add(r_id)
-                            peptide_missing_res = num_ids - res_ids
-                            
-                    # if not save_protein:
-                    #     break
+                        seq += raw_seq[reg_start-1:reg_end]
+                    topo += (reg_end - reg_start + 1)*T
                 if not save_protein:
-                    print("Not save")
                     continue
                 if len(str(seq)) != len(topo):
                     print("Seq and topo not matching, {}".format(pdb_id))
@@ -249,6 +151,98 @@ for prot in root.iter(namespace + "pdbtm"):
                 if debug:
                     print(out_text)
                     sys.exit()
+                    #########################################################
+                    #########################################################
+                    #########################################################
+                    # reg_start = int(region.attrib["pdb_beg"])
+                    # reg_end = int(region.attrib["pdb_end"])
+                    # # print("Region {} {}".format(reg_start, reg_end))
+                    # # print(reg_start, reg_end)
+                    # while True:
+                    #     # If the region is before the start of the peptide, go for the next region
+                    #     if reg_end < pdb_start:
+                    #         break
+                    #     # Normal behavior
+                    #     ########################
+                    #     if reg_start < pdb_start:
+                    #         start = pdb_start
+                    #     elif reg_start > struct_end_id and reg_end > struct_end_id:
+                    #         # All done, no more pdb
+                    #         break
+                    #     elif reg_start > struct_end_id and reg_end:
+                    #         # Special if first seq is dbxref, ie 1001 or the like
+                    #         start = pdb_start
+                    #     else:
+                    #         start = reg_start
+
+                    #     if reg_end > pdb_end:
+                    #         end = pdb_end
+                    #     else:
+                    #         end = reg_end
+                    #     ########################
+                    #     # if debug: 
+                    #     #     print(start, end)
+
+                    #     curr_missing = {i for i in peptide_missing_res if i >= start and i <= end}
+                    #     if debug:
+                    #         if len(curr_missing) > 0:
+                    #             print("Missing ", curr_missing)
+                    #     part_num = end - start + 1 - len(curr_missing)
+                    #     # if T == 'M':
+                    #     #     reg_dssp = ''
+                    #     #     # print("Starting dssp with ",start, end)
+                    #     #     # for t in range(start, end+1):
+                    #     #     #     print("DSSP for {}".format(t))
+                    #     #     #     print(dssp[chain_id, (' ', t, ' ')][2])
+                    #     #     for ss in set(range(start, end + 1)) - curr_missing:
+                    #     #         try:
+                    #     #             # print(dssp[chain_id, (' ', ss, ' ')][2])
+                    #     #             # print('M', start, end+1)
+                    #     #             # reg_dssp += dssp[chain_id, (' ', ss, ' ')][2]
+                    #     #             if not 'H' == dssp[chain_id, (' ', ss, ' ')][2]:
+                    #     #                 print("DSSP not correct")
+                    #     #                 save_protein = False 
+                    #     #                 # break
+                    #     #         except:
+                    #     #             print("dssp fail", pdb_id, chain_id, ss)
+                    #     #             save_protein = False
+                    #     #             break
+                    #     #     # if (len(reg_dssp) - reg_dssp.count('H') - reg_dssp.count('G') - reg_dssp.count('I')) > 1 and len(reg_dssp) > 10:
+                    #     #     #     if debug:
+                    #     #     #         print("DSSP not correct {}".format(pdb_id))
+                    #     #     #         print(reg_dssp)
+                    #     #     #     # Just skip this membrane?
+                    #     #     #     # break
+
+                    #     #     # #     # sys.exit()
+                    #     #     #     save_protein = False
+                    #     #     #     break
+                    #     if debug:
+                    #         print(part_num*T, start, end)
+                    #     topo += part_num*T
+                    #     # Region end is before the peptide end, break and grab next region
+                    #     if reg_end < pdb_end:
+                    #         break
+                    #     # Otherwise grab the next peptide
+                    #     else:
+                    #         try:
+                    #             pp = next(pp_iter)
+                    #         except StopIteration:
+                    #             break
+                    #         pdb_start = pp[0].get_id()[1]
+                    #         pdb_end = pp[-1].get_id()[1]
+                    #         for res in pp:
+                    #             if not res.get_id()[1] > struct_end_id:
+                    #                 seq += three_to_one(res.get_resname())
+                    #         res_ids = set()
+                    #         num_ids = set(range(pdb_start, pdb_end + 1))
+                    #         for res in pp:
+                    #             r_id = res.get_id()[1]
+                    #             res_ids.add(r_id)
+                    #         peptide_missing_res = num_ids - res_ids
+                    #         
+                    # # if not save_protein:
+                    # #     break
 
                     #########################################################
                     #########################################################
@@ -347,7 +341,6 @@ for prot in root.iter(namespace + "pdbtm"):
     #     print(out_text)
     #     sys.exit()
 
-            # sys.exit()
 with open(out_file, 'w') as out_handle:
     out_handle.write(out_text)
                 # print(">" + prot.attrib["ID"].upper() + chain.attrib["CHAINID"])

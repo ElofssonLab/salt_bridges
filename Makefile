@@ -39,7 +39,7 @@ $(RAWDIR)/pdbtm_non_redundant_alpha_list.txt:
 $(RAWDIR)/pdbtm_redundant_alpha_list.txt:
 	curl http://pdbtm.enzim.hu/data/pdbtm_alpha.list | tr '[:lower:]' '[:upper:]' | tr -d _ | sort | uniq  > $(RAWDIR)/pdbtm_redundant_alpha_list.txt
 
-$(3LINESPDBTM) : $(RAWDIR)/pdbtm_non_redundant_alpha_list.txt $(RAWDIR)/pdbtm_alpha_entries.xml
+$(3LINESPDBTM) : $(RAWDIR)/pdbtm_non_redundant_alpha_list.txt $(RAWDIR)/pdbtm_alpha_entries.xml 
 	mkdir -p $(PDBTMDIR)
 	./bin/parse_pdbtm.py $^ $@
 

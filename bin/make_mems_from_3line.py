@@ -28,9 +28,9 @@ for line in args.in_file:
     elif modu == 2:
         seq = line.strip()
     elif modu == 0:
-        print(pid)
+        # print(pid)
         topo = line.strip()
-        print(topo)
+        # print(topo)
         curr_letter = topo[0]
         start_pos = 0
         helices = []
