@@ -11,11 +11,14 @@ PROCDIR := $(DATADIR)/processed
 # 3LINESSCAMPI := $(addprefix ${SCAMPIDIR}/,Globular.3line TMs.3line)
 3LINESTOPCONS := $(addprefix ${TOPCONSDIR}/,Globular.3line TMs.3line)
 3LINESPDBTM := $(PDBTMDIR)/pdbtm.3line
+3LINESPDBTMRED := $(PDBTMDIR)/pdbtm_redundant.3line
+3LINESRED := $(PROCDIR)/pdbtm_redundant.3line
 # 3LINESOPM := $(OPMDIR)/opm.3line
 3LINESCLUST := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.3line Topcons_TMs.clust.3line pdbtm.clust.3line)
 FASTAS := $(addprefix ${PROCDIR}/,Topcons_Globular.fa Topcons_TMs.fa pdbtm.fa)
 CLUST := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.fa Topcons_TMs.clust.fa pdbtm.clust.fa)
 MEMS := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.mems.pickle Topcons_TMs.clust.mems.pickle pdbtm.clust.mems.pickle)
+MEMSRED := $(PROCDIR)/pdbtm_redundant.mems.pickle
 STATS := $(addprefix ${STATDIR}/,Topcons_Globular_stats.txt Topcons_TMs_stats.txt pdbtm_stats.txt)
 LOGODDS := $(addprefix ${IMAGEDIR}/,Topcons_TMs_logodds.png pdbtm_logodds.png)
 LISTS := $(addprefix ${STATDIR}/,pdbtm_1_list.txt pdbtm_2_list.txt)
@@ -42,6 +45,13 @@ $(RAWDIR)/pdbtm_redundant_alpha_list.txt:
 $(3LINESPDBTM) : $(RAWDIR)/pdbtm_non_redundant_alpha_list.txt $(RAWDIR)/pdbtm_alpha_entries.xml 
 	mkdir -p $(PDBTMDIR)
 	./bin/parse_pdbtm.py $^ $@
+
+$(3LINESPDBTMRED) : $(RAWDIR)/pdbtm_redundant_alpha_list.txt $(RAWDIR)/pdbtm_alpha_entries.xml 
+	mkdir -p $(PDBTMDIR)
+	./bin/parse_pdbtm.py $^ $@
+	cp $@ $(PROCDIR)/pdbtm_redundant.3line
+$(3LINESRED): $(3LINESPDBTMRED)
+	cp $< $@
 
 $(RAWDIR)/ss.txt.gz:
 	wget -P $(RAWDIR)/ https://cdn.rcsb.org/etl/kabschSander/ss.txt.gz
@@ -104,6 +114,7 @@ $(3LINES):  $(3LINESTOPCONS) $(3LINESPDBTM)
 	cp $(TOPCONSDIR)/TMs.3line $(PROCDIR)/Topcons_TMs.3line
 	cp $(TOPCONSDIR)/Globular.3line $(PROCDIR)/Topcons_Globular.3line
 	cp $(3LINESPDBTM) $(PROCDIR)/pdbtm.3line
+	# cp $(3LINESPDBTMRED) $(PROCDIR)/pdbtm_redundant.3line
 	# cp $(3LINESOPM) $(PROCDIR)/opm.3line
 
 $(FASTAS) : %.fa: %.3line | $(3LINES)
@@ -118,6 +129,9 @@ $(3LINESCLUST) : %.clust.3line: %.clust.fa | $(CLUST)
 $(MEMS) : %.clust.mems.pickle: %.clust.3line | $(3LINESCLUST)
 	./bin/make_mems_from_3line.py $< $@
 
+$(MEMSRED) : %.mems.pickle: %.3line | $(3LINESRED)
+	./bin/make_mems_from_3line.py $< $@
+
 $(STATS) : $(STATDIR)/%_stats.txt : $(PROCDIR)/%.clust.mems.pickle | $(MEMS)
 	./bin/statsCharges.py $< > $@
 
@@ -128,9 +142,9 @@ $(LOGODDS) : $(PROCDIR)/Topcons_TMs.clust.mems.pickle $(PROCDIR)/pdbtm.clust.mem
 	./bin/logodd_barchart.py $(PROCDIR)/Topcons_TMs.clust.mems.pickle
 	./bin/logodd_barchart.py $(PROCDIR)/pdbtm.clust.mems.pickle
 
-$(LISTS) : $(MEMS) $(3LINES)
-	./bin/gen_potential_list.py $(PROCDIR)/pdbtm.clust.mems.pickle $(PROCDIR)/pdbtm.clust.3line -b 1 > $(STATDIR)/pdbtm_1_list.txt
-	./bin/gen_potential_list.py $(PROCDIR)/pdbtm.clust.mems.pickle $(PROCDIR)/pdbtm.clust.3line -b 2 > $(STATDIR)/pdbtm_2_list.txt
+$(LISTS) : $(MEMSRED) $(3LINESRED)
+	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 1 > $(STATDIR)/pdbtm_redundant_1_list.txt
+	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 2 > $(STATDIR)/pdbtm_redundant_2_list.txt
 	# ./bin/gen_potential_list.py $(PROCDIR)/opm.clust.mems.pickle $(PROCDIR)/opm.clust.3line -b 1 > $(STATDIR)/opm_1_list.txt
 	# ./bin/gen_potential_list.py $(PROCDIR)/opm.clust.mems.pickle $(PROCDIR)/opm.clust.3line -b 2 > $(STATDIR)/opm_2_list.txt
 

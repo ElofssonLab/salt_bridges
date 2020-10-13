@@ -117,20 +117,24 @@ for prot in root.iter(namespace + "pdbtm"):
                         pdb_end = int(region.attrib["pdb_end"])
                         T = 'M'
                         m_len = pdb_end - pdb_start + 1
-                        if m_len > 15:
+                        if m_len > 10:
+                            # ss_string = ''
                             for ss in range(pdb_start + 5, pdb_end + 1 - 5):
                                 try:
                                     # print(ss, dssp[chain_id, (' ', ss, ' ')][2])
-                                    # If not the core of the longer membranes are predominantely helix, skip them but retain the protein and other membranes
-                                    if not dssp[chain_id, (' ', ss, ' ')][2] in 'H -':
+                                    # ss_string += dssp[chain_id, (' ', ss, ' ')][2]
+                                    # if not dssp[chain_id, (' ', ss, ' ')][2] in 'H -':
+                                    # If not the core of the longer membranes are ONLY helix, skip them but retain the protein and other membranes
+                                    if not dssp[chain_id, (' ', ss, ' ')][2] in 'H':
                                         # print("DSSP not correct", chain_id, ss)
-                                        T = 'i'
+                                        T = 'm'
                                         # save_protein = False 
                                         # break
                                 except:
                                     print("dssp fail", pdb_id, chain_id, ss)
                                     save_protein = False
                                     break
+                            # print(pdb_id, ss_string)
                         seq += raw_seq[reg_start-1:reg_end]
                     else:
                         T = 'i'
