@@ -13,19 +13,26 @@ PROCDIR := $(DATADIR)/processed
 3LINESPDBTM := $(PDBTMDIR)/pdbtm.3line
 3LINESPDBTMRED := $(PDBTMDIR)/pdbtm_redundant.3line
 3LINESRED := $(PROCDIR)/pdbtm_redundant.3line
+3LINESGLOB := $(PROCDIR)/scop_glob.3line
 # 3LINESOPM := $(OPMDIR)/opm.3line
 3LINESCLUST := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.3line Topcons_TMs.clust.3line pdbtm.clust.3line)
 FASTAS := $(addprefix ${PROCDIR}/,Topcons_Globular.fa Topcons_TMs.fa pdbtm.fa)
 CLUST := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.fa Topcons_TMs.clust.fa pdbtm.clust.fa)
 MEMS := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.mems.pickle Topcons_TMs.clust.mems.pickle pdbtm.clust.mems.pickle)
+A3MMEMS := $(PROCDIR)/pdbtm_a3m.mems.pickle
 MEMSRED := $(PROCDIR)/pdbtm_redundant.mems.pickle
+MEMSGLOB := $(PROCDIR)/scop_glob.mems.pickle
 STATS := $(addprefix ${STATDIR}/,Topcons_Globular_stats.txt Topcons_TMs_stats.txt pdbtm_stats.txt)
 LOGODDS := $(addprefix ${IMAGEDIR}/,Topcons_TMs_logodds.png pdbtm_logodds.png)
-LISTS := $(addprefix ${STATDIR}/,pdbtm_1_list.txt pdbtm_2_list.txt)
+LISTS := $(addprefix ${STATDIR}/,pdbtm_redundant_1_list.txt pdbtm_redundant_2_list.txt)
 PROTS := $(addprefix ${STATDIR}/,pdbtm_same_pairs.txt pdbtm_opp_pairs.txt Topcons_TMs_same_pairs.txt Topcons_TMs_opp_pairs.txt)
 RCSB := $(addprefix ${STATDIR}/,pdbtm_same_info.txt pdbtm_opp_info.txt Topcons_TMs_same_info.txt Topcons_TMs_opp_info.txt)
+GLOBCHARGES := $(PROCDIR)/scop_glob.charges.pickle
+# MEMCHARGES := $(PROCDIR)/pdbtm.clust.charges.pickle
+A3MCHARGES := $(PROCDIR)/pdbtm_a3m.charges.pickle
+VISIMAGES := $(addprefix ${IMAGEDIR}/, pdbtm_vis.png charges_vis.png mem_vs_glob.png)
 
-all: $(STATS) $(LISTS) $(LOGODDS) $(RCSB)
+all: $(STATS) $(LISTS) $(LOGODDS) $(RCSB) $(VISIMAGES)
 
 # $(RAWDIR)/opm_poly.json:
 # 	wget -O $@ https://lomize-group-opm.herokuapp.com/classtypes/1/primary_structures?pageSize=3000
@@ -52,6 +59,17 @@ $(3LINESPDBTMRED) : $(RAWDIR)/pdbtm_redundant_alpha_list.txt $(RAWDIR)/pdbtm_alp
 	cp $@ $(PROCDIR)/pdbtm_redundant.3line
 $(3LINESRED): $(3LINESPDBTMRED)
 	cp $< $@
+
+$(RAWDIR)/scop_globular_alpha.txt:
+	wget -O $(RAWDIR)/scop_raw.txt http://scop.mrc-lmb.cam.ac.uk/files/scop-cla-latest.txt
+	grep -e "TP=1," $(RAWDIR)/scop_raw.txt | grep -e "CL=1000000" | cut -c9-14 | tr -d ' ' |sort |uniq > $(RAWDIR)/scop_globular_alpha.txt
+	# rm $(RAWDIR)/scop_raw.txt
+
+$(PROCDIR)/scop_globular_alpha_reduced.txt: $(RAWDIR)/scop_globular_alpha.txt
+	comm -23 $< $(RAWDIR)/pdbtm_redundant_alpha_list.txt > $@
+
+$(3LINESGLOB): $(PROCDIR)/scop_globular_alpha_reduced.txt $(RAWDIR)/ss.txt.gz
+	./bin/make_3line_from_pdb_list.py $< $(RAWDIR)/ss.txt.gz $@
 
 $(RAWDIR)/ss.txt.gz:
 	wget -P $(RAWDIR)/ https://cdn.rcsb.org/etl/kabschSander/ss.txt.gz
@@ -129,7 +147,13 @@ $(3LINESCLUST) : %.clust.3line: %.clust.fa | $(CLUST)
 $(MEMS) : %.clust.mems.pickle: %.clust.3line | $(3LINESCLUST)
 	./bin/make_mems_from_3line.py $< $@
 
+$(A3MMEMS) : $(3LINESPDBTM)
+	./bin/make_mems_from_a3m.py $(PDBTMDIR)/pdbtm.3line $(DATADIR)/pdbtm_a3m $@
+
 $(MEMSRED) : %.mems.pickle: %.3line | $(3LINESRED)
+	./bin/make_mems_from_3line.py $< $@
+
+$(MEMSGLOB) : %.mems.pickle: %.3line | $(3LINESGLOB)
 	./bin/make_mems_from_3line.py $< $@
 
 $(STATS) : $(STATDIR)/%_stats.txt : $(PROCDIR)/%.clust.mems.pickle | $(MEMS)
@@ -145,8 +169,20 @@ $(LOGODDS) : $(PROCDIR)/Topcons_TMs.clust.mems.pickle $(PROCDIR)/pdbtm.clust.mem
 $(LISTS) : $(MEMSRED) $(3LINESRED)
 	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 1 > $(STATDIR)/pdbtm_redundant_1_list.txt
 	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 2 > $(STATDIR)/pdbtm_redundant_2_list.txt
-	# ./bin/gen_potential_list.py $(PROCDIR)/opm.clust.mems.pickle $(PROCDIR)/opm.clust.3line -b 1 > $(STATDIR)/opm_1_list.txt
-	# ./bin/gen_potential_list.py $(PROCDIR)/opm.clust.mems.pickle $(PROCDIR)/opm.clust.3line -b 2 > $(STATDIR)/opm_2_list.txt
+
+$(GLOBCHARGES) : $(MEMSGLOB)
+	./bin/make_charges_from_mems.py $< $@
+
+# $(MEMCHARGES) : %.clust.charges.pickle : %.clust.mems.pickle | $(MEMS)
+# 	./bin/make_charges_from_mems.py $< $@
+
+$(A3MCHARGES) : %.charges.pickle : %.mems.pickle | $(A3MMEMS)
+	./bin/make_charges_from_mems.py $< $@
+
+$(VISIMAGES) : $(A3MCHARGES) $(GLOBCHARGES)
+	./bin/visualizeAAs.py $(A3MCHARGES) $(IMAGEDIR)/pdbtm_vis.png "Charges"
+	./bin/visualizeAAs_Compare.py $(GLOBCHARGES) $(A3MCHARGES) $(IMAGEDIR)/charges_vis.png "pdbtm vs Globular"
+	./bin/visualizeAAs_Compare_all.py $(GLOBCHARGES) $(A3MCHARGES) $(IMAGEDIR)/mem_vs_glob.png "pdbtm vs Globular"
 
 .PHONY: clean deepclean
 clean:
@@ -163,6 +199,7 @@ deepclean: clean
 	rm -r $(STATS)
 	rm -r $(LISTS)
 	rm -rf $(RAWDIR)/pdb_chain_uniprot.tsv.gz
+	rm -rf $(RAWDIR)/scop*
 	rm -rf $(RAWDIR)/ss.txt.gz
 	rm -rf $(RAWDIR)/TOPCONS.zip
 	rm -rf $(RAWDIR)/pdbtm_alpha_entries.xml
