@@ -122,9 +122,10 @@ for i in range(7):
 # type_colors = pd.Series(types, index=df.columns).map(type_lut)
 # 
 # df = df[:, 1:]
-methods = ['single', 'complete', 'average', 'weighted', 'centroid', 'median', 'ward' ]
-# for method in methods:
-method='complete'
+# methods = ['single', 'complete', 'average', 'weighted', 'centroid', 'median', 'ward' ]
+methods = ['complete', 'ward' ]
+for method in methods:
+# method='complete'
 
 # plt.savefig(method + "_" + out_image)
 # f, axarr = plt.subplots(3, 3, figsize=(16, 14))
@@ -133,61 +134,62 @@ method='complete'
 # plt.suptitle("TMs alpha helices, trimmed, pdb50, len > 15, V2")
 # plt.suptitle(args.title)
 # for method in methods:
-df = pd.DataFrame()
-for i in range(7):
-    df1 = pd.DataFrame(globlogOdds[i],
-                      index=["Globular " + str(c) for c in aas],
-                      columns=[c for c in aas])
-    G_keep = ["Globular " + str(c) for c in keep]
-    df1 = df1.loc[G_keep][keep]
-    # df1.insert(loc=0,column= "Type",  value="Globular")
-    df2 = pd.DataFrame(memlogOdds[i],
-                      index=["Membranes " + str(c) for c in aas],
-                      columns=[c for c in aas])
-    # df2.insert( loc=0, column= "Type", value="Membranes")
-    M_keep = ["Membranes " + str(c) for c in keep]
-    df2 = df2.loc[M_keep][keep]
-    df_temp = pd.concat([df1, df2])
-    df_temp.columns = ["Gap " + str(i+1) + "-" + c for c in df_temp.columns]
-    df = pd.concat([df, df_temp], axis=1)
-df.insert(loc=0, column="Type", value=["Globular"]*keep_len + ["Membranes"]*keep_len)
+    df = pd.DataFrame()
+    for i in range(7):
+        df1 = pd.DataFrame(globlogOdds[i],
+                          index=["Globular " + str(c) for c in aas],
+                          columns=[c for c in aas])
+        G_keep = ["Globular " + str(c) for c in keep]
+        df1 = df1.loc[G_keep][keep]
+        # df1.insert(loc=0,column= "Type",  value="Globular")
+        df2 = pd.DataFrame(memlogOdds[i],
+                          index=["Membranes " + str(c) for c in aas],
+                          columns=[c for c in aas])
+        # df2.insert( loc=0, column= "Type", value="Membranes")
+        M_keep = ["Membranes " + str(c) for c in keep]
+        df2 = df2.loc[M_keep][keep]
+        df_temp = pd.concat([df1, df2])
+        df_temp.columns = ["Gap " + str(i+1) + "-" + c for c in df_temp.columns]
+        df = pd.concat([df, df_temp], axis=1)
+    df.insert(loc=0, column="Type", value=["Globular"]*keep_len + ["Membranes"]*keep_len)
 # for i in range(7):
 # i = 3
-plt.suptitle(args.title +  " sep " + str(i+1))
-    # df1 = pd.DataFrame(globlogOdds[i],
-    #                   index=["Globular " + str(c) for c in aas],
-    #                   columns=[c for c in aas])
-    # df1.insert(loc=0,column= "Type",  value="Globular")
-    # df2 = pd.DataFrame(memlogOdds[i],
-    #                   index=["Membranes " + str(c) for c in aas],
-    #                   columns=[c for c in aas])
-    # df2.insert( loc=0, column= "Type", value="Membranes")
-    # df = pd.concat([df1, df2])
-types =df.pop("Type") 
+    plt.suptitle(args.title +  " sep " + str(i+1))
+        # df1 = pd.DataFrame(globlogOdds[i],
+        #                   index=["Globular " + str(c) for c in aas],
+        #                   columns=[c for c in aas])
+        # df1.insert(loc=0,column= "Type",  value="Globular")
+        # df2 = pd.DataFrame(memlogOdds[i],
+        #                   index=["Membranes " + str(c) for c in aas],
+        #                   columns=[c for c in aas])
+        # df2.insert( loc=0, column= "Type", value="Membranes")
+        # df = pd.concat([df1, df2])
+    types =df.pop("Type") 
 # print(df.columns)
 # sys.exit()
-gap_list = [item for i in range(1, 8) for item in [i]*keep_len]
-gaps = pd.Series(gap_list, name="Gaps", index=df.columns)
-gap_c_list = [item for i in range(1, 8) for item in [(((100*i)%360)/360)]*keep_len]
-gaps_c = pd.Series(gap_c_list, name="C_cols", index=df.columns)
+    gap_list = [item for i in range(1, 8) for item in [i]*keep_len]
+    gaps = pd.Series(gap_list, name="Gaps", index=df.columns)
+    gap_c_list = [item for i in range(1, 8) for item in [(((100*i)%360)/360)]*keep_len]
+    gaps_c = pd.Series(gap_c_list, name="C_cols", index=df.columns)
 # type_list = pd.Series(["Globular"] * 20 + ["Membranes"]*20)
-lut = dict(zip(types.unique(), sns.husl_palette(2, s=.45)))
+    lut = dict(zip(types.unique(), sns.husl_palette(2, s=.45)))
 # lut_cols = dict(zip(gaps.unique(), sns.color_palette()))
-lut_cols = dict(zip(gaps.unique(), ["Crimson", "DarkSlateBlue", "Crimson", "Crimson", "DarkSlateBlue",  "DarkSlateBlue", "Crimson"] ))
+# lut_cols = dict(zip(gaps.unique(), ["Crimson", "DarkSlateBlue", "Crimson", "Crimson", "DarkSlateBlue",  "DarkSlateBlue", "Crimson"] ))
+    lut_cols = dict(zip(gaps.unique(), ["#b4a06d", "#d3605b", "#9bbe77", "#8dcc7c", "#c97961",  "#bf8e67", "#7dd980"] ))
 # cycl_cols = {v:cmocean.cm.phase(v) for v in gaps_c.unique()}
-cycl_cols = {v:plt.get_cmap("twilight")(v) for v in gaps_c.unique()}
-row_colors = types.map(lut)
-col_colors = gaps_c.map(cycl_cols)
-# col_colors = gaps.map(lut_cols)
-chart = sns.clustermap(df, row_cluster=True, col_cluster=True, figsize=(30, 10), cmap="coolwarm", center=0,
-               method=method, row_colors=row_colors, col_colors=col_colors, cbar_pos=None, vmin=-2, vmax=2,
-               linewidth=.75,
-               dendrogram_ratio=(0.05, 0.15),
-               colors_ratio=(0.005, 0.02),
-               )
-plt.setp(chart.ax_heatmap.xaxis.get_majorticklabels(), rotation=45, ha="right")
-plt.setp(chart.ax_row_colors.xaxis.get_majorticklabels(), rotation=45, ha="right")
-chart.savefig(args.out)
+# cycl_cols = {v:plt.get_cmap("twilight")(v) for v in gaps_c.unique()}
+    row_colors = types.map(lut)
+# col_colors = gaps_c.map(cycl_cols)
+    col_colors = gaps.map(lut_cols)
+    chart = sns.clustermap(df, row_cluster=True, col_cluster=True, figsize=(30, 10), cmap="coolwarm", center=0,
+                   method=method, row_colors=row_colors, col_colors=col_colors, cbar_pos=None, vmin=-2, vmax=2,
+                   linewidth=.75,
+                   dendrogram_ratio=(0.05, 0.15),
+                   colors_ratio=(0.005, 0.02),
+                   )
+    plt.setp(chart.ax_heatmap.xaxis.get_majorticklabels(), rotation=45, ha="right")
+    plt.setp(chart.ax_row_colors.xaxis.get_majorticklabels(), rotation=45, ha="right")
+    chart.savefig(args.out.replace(".png", method + ".png"))
 ##################################
 # plt.figure(i+2)
 # ax = sns.clustermap(df, ax=axarr[i // 3, i % 3], row_cluster=True, col_cluster=False, cmap="coolwarm", center=0, method=method, row_colors=row_colors)
