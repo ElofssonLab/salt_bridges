@@ -176,7 +176,31 @@ gaps_c = pd.Series(gap_c_list, name="C_cols", index=df.columns)
 lut = dict(zip(types.unique(), sns.husl_palette(2, s=.45)))
 # lut_cols = dict(zip(gaps.unique(), sns.color_palette()))
 # lut_cols = dict(zip(gaps.unique(), ["Crimson", "DarkSlateBlue", "Crimson", "Crimson", "DarkSlateBlue",  "DarkSlateBlue", "Crimson"] ))
-lut_cols = dict(zip(gaps.unique(), ["#b4a06d", "#d3605b", "#9bbe77", "#8dcc7c", "#c97961",  "#bf8e67", "#7dd980"] ))
+###################################################
+## Gradient from #6BE585 to #DD3E54 using 19 bins (for 0-180 degrees) at https://colordesigner.io/gradient-generator  #####
+###################################################
+## 0    #6be585
+## 10   #74df83
+## 20   #7dd980
+## 30   #85d37e
+## 40   #8dcc7c
+## 50   #94c579
+## 60   #9bbe77
+## 70   #a1b774
+## 80   #a8b072
+## 90   #aea86f
+## 100  #b4a06d
+## 110  #b9976a
+## 120  #bf8e67
+## 130  #c48464
+## 140  #c97961
+## 150  #ce6d5e
+## 160  #d3605b
+## 170  #d85157
+## 180  #dd3e54
+
+#                                    100        200         300         40          140     240             340     80
+lut_cols = dict(zip(gaps.unique(), ["#b4a06d", "#d3605b", "#9bbe77", "#8dcc7c", "#c97961",  "#bf8e67", "#7dd980", "#a8b072"] ))
 # cycl_cols = {v:cmocean.cm.phase(v) for v in gaps_c.unique()}
 # cycl_cols = {v:plt.get_cmap("twilight")(v) for v in gaps_c.unique()}
 row_colors = types.map(lut)

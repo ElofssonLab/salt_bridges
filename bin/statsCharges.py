@@ -12,6 +12,8 @@ import re
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+from matplotlib.colors import LinearSegmentedColormap
 # from matplotlib.sankey import Sankey
 
 parser = argparse.ArgumentParser()
@@ -339,25 +341,53 @@ df_opp["Type"] = "Opp"
 df = pd.concat([df_charge, df_same, df_opp], ignore_index=True)
 df = df[df["Gap"] < 9]
 
+nodes = [0, 0.5, 1]
+colors = ["#6BE585", "#DD3E54", "#6BE585"]
+degree_cmap = LinearSegmentedColormap.from_list("", list(zip(nodes, colors)))
+# print(cmap)
+grid = plt.GridSpec(3,6, wspace=0.4, hspace=0.1)
 sns.set_theme(style="white", context="talk")
-f, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(15, 10), sharex=True)
-f.suptitle(name + ", distance between charges")
+f = plt.figure(figsize=(12, 10))
+f, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 10), sharex=True)
+# ax1 = plt.subplot(grid[0,:5])
+# ax2 = plt.subplot(grid[1,:5])
+# ax3 = plt.subplot(grid[2,:5])
+# ax4 = plt.subplot(grid[:,5])
+f.suptitle("Distance between charges")
 sns.histplot(df[df["Type"]=="Charged"], x="Gap", color="grey", discrete=True, ax=ax1)
 ax1.axhline(0, color="k", clip_on=False)
-ax1.set_ylabel("Charged")
+ax1.set_ylabel("All charges")
+ax1.set_ylim([0,45])
+# ax1.get_xaxis().set_visible(False)
 sns.histplot(df[df["Type"]=="Opp"], x="Gap", color="grey", discrete=True, ax=ax2)
 ax2.axhline(0, color="k", clip_on=False)
-ax2.set_ylabel("Opp")
-sns.histplot(df[df["Type"]=="Same"], x="Gap", color="grey", discrete=True, ax=ax3)
+ax2.set_ylabel("Opposite charges")
+ax2.set_ylim([0,45])
+# ax2.get_xaxis().set_visible(False)
+h=sns.histplot(df[df["Type"]=="Same"], x="Gap", color="grey", discrete=True, ax=ax3)
 ax3.axhline(0, color="k", clip_on=False)
-ax3.set_ylabel("Same")
+ax3.set_ylabel("Same charges")
+ax3.set_ylim([0,45])
+# ax3.get_xaxis().set_visible(False)
+norm = mpl.colors.Normalize(vmin=0, vmax=360)
+# cbar_ax = f.add_axes([0.01, 0.01, 0.9, 0.2])
+cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=degree_cmap), ax=[ax1, ax2, ax3], orientation='vertical', ticks=[0,90,180,270,360])
+cbar.ax.set_yticklabels(["0°", "90°", "180°", "270°", "360°"])
+# ax4.get_xaxis().set_visible(False)
+# ax4.get_yaxis().set_visible(False)
+# lut_cols = dict(zip(gaps.unique(), ["#b4a06d", "#d3605b", "#9bbe77", "#8dcc7c", "#c97961",  "#bf8e67", "#7dd980", "#a8b072"] ))
 for ax in [ax1, ax2, ax3]:
-    ax.patches[0].set_facecolor("crimson")
-    ax.patches[2].set_facecolor("orange")
-    ax.patches[3].set_facecolor("yellow")
+    ax.patches[0].set_facecolor("#b4a06d")
+    ax.patches[1].set_facecolor("#d3605b")
+    ax.patches[2].set_facecolor("#9bbe77")
+    ax.patches[3].set_facecolor("#8dcc7c")
+    ax.patches[4].set_facecolor("#c97961")
+    ax.patches[5].set_facecolor("#bf8e67")
+    ax.patches[6].set_facecolor("#7dd980")
+    ax.patches[7].set_facecolor("#a8b072")
     # ax.xtick(range(1,10))
 sns.despine(bottom=True)
-plt.tight_layout(h_pad=2)
+# plt.tight_layout(h_pad=2)
 plt.savefig('images/' + name + '.png')
 # sns_plot = sns.displot(df, x="Gap", binwidth=1, discrete=True, hue="Type")
 # sns_plot.fig.set_figwidth(15)
