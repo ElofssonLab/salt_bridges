@@ -337,10 +337,10 @@ df_same["Type"] = "Same"
 df_opp = pd.DataFrame(opp_hist_data_sanH, columns=["Gap"])
 df_opp["Type"] = "Opp"
 df = pd.concat([df_charge, df_same, df_opp], ignore_index=True)
-df = df[df["Gap"] < 8]
+df = df[df["Gap"] < 9]
 
 sns.set_theme(style="white", context="talk")
-f, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 10), sharex=True)
+f, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(15, 10), sharex=True)
 f.suptitle(name + ", distance between charges")
 sns.histplot(df[df["Type"]=="Charged"], x="Gap", color="grey", discrete=True, ax=ax1)
 ax1.axhline(0, color="k", clip_on=False)
@@ -355,6 +355,7 @@ for ax in [ax1, ax2, ax3]:
     ax.patches[0].set_facecolor("crimson")
     ax.patches[2].set_facecolor("orange")
     ax.patches[3].set_facecolor("yellow")
+    # ax.xtick(range(1,10))
 sns.despine(bottom=True)
 plt.tight_layout(h_pad=2)
 plt.savefig('images/' + name + '.png')

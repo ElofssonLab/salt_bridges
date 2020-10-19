@@ -77,22 +77,28 @@ for i in range(10):
     # -1.96*math.sqrt(1/a+1/b+1/c+1/d))))
     # ci.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d),
     # math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d)))
-f, axarr = plt.subplots(3, 3, figsize=(16, 14))
+# f, axarr = plt.subplots(3, 3, figsize=(16, 14))
+f, axarr = plt.subplots(2, 4, figsize=(24, 10))
 # axarr[-1, -1].axis('off')
 # axarr[-1, -2].axis('off')
 # plt.suptitle("TMs alpha helices, trimmed, pdb50, len > 15, V2")
 plt.suptitle(args.title)
-for i in range(9):
+for i in range(8):
     # print(i)
+    if i == 3 or i==7:
+        show_cbar=True
+    else:
+        show_cbar=False
+    # show_cbar = True
     df = pd.DataFrame(logOdds[i],
                       index=[c for c in aas],
                       columns=[c for c in aas])
     ax = sns.heatmap(df,
-                     ax=axarr[i // 3, i % 3],
+                     ax=axarr[i // 4, i % 4],
                      vmin=-2,
                      vmax=2,
                      cmap="coolwarm",
-                     center=0)
+                     center=0, cbar=show_cbar)
     ax.title.set_text("Gap " + str(i + 1))
 plt.tight_layout()
 plt.subplots_adjust(top=0.93)
