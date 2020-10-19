@@ -37,14 +37,14 @@ aaCount, aaPairs, aaHits = pickle.load(open(in_pickle, 'rb'))
     # open('data/chargeDataGlobularFromPDBRed50TrimmedLen15v2.pickle',
     #      'rb'))
 
-logOdds = np.zeros([7, 20, 20])
+logOdds = np.zeros([10, 20, 20])
 ci = []
 # print([aas.index(c) for c in chargedplus])
 aaIndex = [aas.index(c) for c in positiveplus]
 # print(sum(aaHits[0][chargesPlusIndex][chargesPlusIndex]))
 # for ind, aa in enumerate(aasOri):
 #    print(aa, aaCount[ind])
-for i in range(7):
+for i in range(10):
     for first in range(20):
         for second in range(20):
             a = aaHits[i][first][second]
@@ -78,11 +78,12 @@ for i in range(7):
     # ci.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d),
     # math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d)))
 f, axarr = plt.subplots(3, 3, figsize=(16, 14))
-axarr[-1, -1].axis('off')
-axarr[-1, -2].axis('off')
+# axarr[-1, -1].axis('off')
+# axarr[-1, -2].axis('off')
 # plt.suptitle("TMs alpha helices, trimmed, pdb50, len > 15, V2")
 plt.suptitle(args.title)
-for i in range(7):
+for i in range(9):
+    # print(i)
     df = pd.DataFrame(logOdds[i],
                       index=[c for c in aas],
                       columns=[c for c in aas])

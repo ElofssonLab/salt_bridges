@@ -55,16 +55,16 @@ helicies = pickle.load(open(args.helices, 'rb'))
 # helicies = pickle.load(open('helicies.pickle','rb'))
 totalmemstring = ''
 totalmembranes = 0
-samehitcounter = [0, 0, 0, 0, 0, 0, 0]
-hitcounter = [0, 0, 0, 0, 0, 0, 0]
-misscounter = [0, 0, 0, 0, 0, 0, 0]
+samehitcounter = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+hitcounter = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+misscounter = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 totalcharges = []
 pairs = [[], [], [], [], [], [], []]
 aas = 'ACDEFGHIKLMNPQRSTVWY'
-aaHits = np.zeros([7, 20, 20])
-aaPairs = np.zeros(7)
+aaHits = np.zeros([10, 20, 20])
+aaPairs = np.zeros(10)
 # Dim 1, first and second in pair
-aaCount = np.zeros([2, 7, 20])
+aaCount = np.zeros([2, 10, 20])
 memLens = []
 prolinMems = []
 pPositions = []
@@ -105,7 +105,7 @@ for key, membranes in helicies.items():
             # print(aa)
             # aaCount[aas.index(aa)] += 1 # Old way of counting AA
             # Now count the for each gap
-            for i in range(1, 8):
+            for i in range(1, 11):
                 if memLen <= place + i:
                     break
                 if aa in aas:

@@ -300,11 +300,11 @@ for key, membranes in helices.items():
 num_prots = len(protein_set)
 
 with open("stats/{}_same_pairs.txt".format(name),'w') as out_handle:
-    for i in range(0,7):
+    for i in range(0,10):
         for pid in same_pair_ids[i]:
             out_handle.write(str(i+1) +' \t' + pid + '\n')
 with open("stats/{}_opp_pairs.txt".format(name),'w') as out_handle:
-    for i in range(0,7):
+    for i in range(0,10):
         for pid in opp_pair_ids[i]:
             out_handle.write(str(i+1) +' \t' + pid + '\n')
 ##########
