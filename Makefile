@@ -30,7 +30,7 @@ RCSB := $(addprefix ${STATDIR}/,pdbtm_same_info.txt pdbtm_opp_info.txt Topcons_T
 GLOBCHARGES := $(PROCDIR)/scop_glob.charges.pickle
 # MEMCHARGES := $(PROCDIR)/pdbtm.clust.charges.pickle
 A3MCHARGES := $(PROCDIR)/pdbtm_a3m.charges.pickle
-VISIMAGES := $(addprefix ${IMAGEDIR}/, pdbtm_vis.png charges_vis.png mem_vs_glob.png)
+VISIMAGES := $(addprefix ${IMAGEDIR}/, pdbtm_vis.png mem_cluster.png)
 
 all: $(STATS) $(LISTS) $(LOGODDS) $(RCSB) $(VISIMAGES)
 
@@ -181,8 +181,9 @@ $(A3MCHARGES) : %.charges.pickle : %.mems.pickle | $(A3MMEMS)
 
 $(VISIMAGES) : $(A3MCHARGES) $(GLOBCHARGES)
 	./bin/visualizeAAs.py $(A3MCHARGES) $(IMAGEDIR)/pdbtm_vis.png "Charges"
-	./bin/visualizeAAs_Compare.py $(GLOBCHARGES) $(A3MCHARGES) $(IMAGEDIR)/charges_vis.png "pdbtm vs Globular"
-	./bin/visualizeAAs_Compare_all.py $(GLOBCHARGES) $(A3MCHARGES) $(IMAGEDIR)/mem_vs_glob.png "pdbtm vs Globular"
+	./bin/visualizeAAs_mem.py $(A3MCHARGES) $(IMAGEDIR)/mem_cluster.png "Membrane Charges"
+	# ./bin/visualizeAAs_Compare.py $(GLOBCHARGES) $(A3MCHARGES) $(IMAGEDIR)/charges_vis.png "pdbtm vs Globular"
+	# ./bin/visualizeAAs_Compare_all.py $(GLOBCHARGES) $(A3MCHARGES) $(IMAGEDIR)/mem_vs_glob.png "pdbtm vs Globular"
 
 .PHONY: clean deepclean
 clean:

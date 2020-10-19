@@ -2,16 +2,19 @@
 """Membrane charge caluclations."""
 import matplotlib.pyplot as plt
 import numpy as np
+import cmocean
 import pandas as pd
 import math
 import seaborn as sns
 import pickle
 import argparse
+import sys
 # import random
 # import collections
 parser = argparse.ArgumentParser()
 
-parser.add_argument("charges", type=str, help="In charge pickle")
+# parser.add_argument("glob", type=str, help="In glob charges pickle")
+parser.add_argument("mems", type=str, help="In membrane charges pickle")
 parser.add_argument("out", type=str, help="Out image name")
 parser.add_argument("title", type=str, help="Image title")
 
@@ -23,44 +26,78 @@ negative = 'DE'
 charged = 'KRDE'
 chargedplus = 'KRDEH'
 positiveplus = 'RHK'
+# keep = [c for c in 'HQNEKDR']
+keep = [c for c in 'EKDR']
+keep_len = len(keep)
 # aas = 'ACDEFGHIKLMNPQRSTVWY'
 aasOri = 'ACDEFGHIKLMNPQRSTVWY'
 # Regular AA group, [nonpolar, polar, positive, negative]
-aas = 'GAVCPLIMWFSTYNQHKRDE'
+# aas = 'GAVCPLIMWFSTYNQHKRDE'
+# Hessa order
+# aas = 'ILFVCMAWTYGSNHPQREKD'
 # Engleman order
 aas = 'FMILVCWATGSPYHQNEKDR'
+# prefix = ["Globular"] * 20 + ["Membranes"]*20
+prefix = ["Membranes"]*20
+new_cols = []
+for i, p in enumerate(prefix):
+    new_cols.append(p + " " + aas[i%20])
 # in_pickle = 'data/pdbtm/pdbtm_redundant_alpha_struct_scop_reduced_culled_charge.pickle'
-in_pickle = args.charges
+# in_glob_pickle = args.glob
+in_mem_pickle = args.mems
 # out_image = in_pickle.split('/')[-1].split('.')[0] + "_AA_vis.png"
-out_image = args.out
-aaCount, aaPairs, aaHits = pickle.load(open(in_pickle, 'rb'))
+# out_image = args.out
+# glob_aaCount, glob_aaPairs, glob_aaHits = pickle.load(open(in_glob_pickle, 'rb'))
+mem_aaCount, mem_aaPairs, mem_aaHits = pickle.load(open(in_mem_pickle, 'rb'))
     # open('data/chargeDataGlobularFromPDBRed50TrimmedLen15v2.pickle',
     #      'rb'))
 
-logOdds = np.zeros([7, 20, 20])
+# globlogOdds = np.zeros([7, 20, 20])
+memlogOdds = np.zeros([7, 20, 20])
 ci = []
 # print([aas.index(c) for c in chargedplus])
 aaIndex = [aas.index(c) for c in positiveplus]
 # print(sum(aaHits[0][chargesPlusIndex][chargesPlusIndex]))
 # for ind, aa in enumerate(aasOri):
 #    print(aa, aaCount[ind])
+# for i in range(7):
+#     for first in range(20):
+#         for second in range(20):
+#             a = glob_aaHits[i][first][second]
+#             b = glob_aaPairs[i] - a
+#             # print(a, b, a/b)
+#             c = glob_aaCount[0][i][first] * glob_aaCount[1][i][second]
+#             # Need square to handle pairs, first and second
+#             # d = sum(aaCount)**2 # Old version
+#             # d is aaPairs for this gap times 2 for each of the two
+#             # amino acids as each pair contains two AAs.
+#             d = glob_aaPairs[i]**2 - c
+#             # print(a, b, c, d)
+#             odds = (a / b) / (c / d)
+#             if odds == 0.0:
+#                 logOddsValue = -math.inf
+#                 print("Odds 0 at gap: ", i + 1)
+#                 print("A-D: ", a, b, c, d)
+#                 print("First and second AA: ", aasOri[first], aasOri[second])
+#                 # print(aasOri[first], aasOri[second], a, b, c, d, odds)
+#             else:
+#                 # std_err = math.sqrt(1/a + 1/b + 1/c + 1/d)
+#                 logOddsValue = math.log(odds)
+#             globlogOdds[i][aas.index(aasOri[first])][aas.index(aasOri[second])]\
+#                 = logOddsValue
 for i in range(7):
     for first in range(20):
         for second in range(20):
-            a = aaHits[i][first][second]
-            b = aaPairs[i]  #  - a  # Not odds
+            a = mem_aaHits[i][first][second]
+            b = mem_aaPairs[i]  # - a, not odds
             # print(a, b, a/b)
-            c = aaCount[0][i][first] * aaCount[1][i][second]
+            c = mem_aaCount[0][i][first] * mem_aaCount[1][i][second]
             # Need square to handle pairs, first and second
             # d = sum(aaCount)**2 # Old version
             # d is aaPairs for this gap times 2 for each of the two
             # amino acids as each pair contains two AAs.
-            d = aaPairs[i]**2  # - c  # same as above, not odds
-            # print(a, b, c, d)
+            d = mem_aaPairs[i]**2  #  - c, not odds
             odds = (a / b) / (c / d)
-#     # print("Odds ratio for gap {}: {:.2f}".format(i+1, (odds)))
-    # print("Log odds ratio for gap {}: {:.2f}".format(i+1, math.log(odds)))
-    # logOdds.append(math.log(odds))
             if odds == 0.0:
                 logOddsValue = -math.inf
                 print("Odds 0 at gap: ", i + 1)
@@ -69,33 +106,108 @@ for i in range(7):
                 # print(aasOri[first], aasOri[second], a, b, c, d, odds)
             else:
                 logOddsValue = math.log(odds)
-            logOdds[i][aas.index(aasOri[first])][aas.index(aasOri[second])]\
+                # std_err = math.sqrt(1/a + 1/b + 1/c + 1/d)
+            memlogOdds[i][aas.index(aasOri[first])][aas.index(aasOri[second])]\
                 = logOddsValue
-    # print("Upper 95% CI: {:.2f}".format((math.log(odds)
-    # +1.96*math.sqrt(1/a+1/b+1/c+1/d))))
-    # print("Lower 95% CI: {:.2f}".format((math.log(odds)
-    # -1.96*math.sqrt(1/a+1/b+1/c+1/d))))
-    # ci.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d),
-    # math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d)))
-f, axarr = plt.subplots(3, 3, figsize=(16, 14))
-axarr[-1, -1].axis('off')
-axarr[-1, -2].axis('off')
+
+# print(df)
+# df.columns = new_cols
+# used_types = ["Globular", "Membrane"]
+# type_pal = sns.husl_palette(2, s=.45)
+# type_lut = dict(zip(map(str, used_types), type_pal))
+# types = df.columns.get_level_values("Type")
+# print(types)
+# used_types = ["Globular", "Membrane"]
+# type_pal = sns.husl_palette(2, s=.45)
+# type_lut = dict(zip(map(str, used_types), type_pal))
+# type_colors = pd.Series(types, index=df.columns).map(type_lut)
+# 
+# df = df[:, 1:]
+# methods = ['single', 'complete', 'average', 'weighted', 'centroid', 'median', 'ward' ]
+methods = ['complete', 'ward' ]
+# for method in methods:
+method='complete'
+
+# plt.savefig(method + "_" + out_image)
+# f, axarr = plt.subplots(3, 3, figsize=(16, 14))
+# axarr[-1, -1].axis('off')
+# axarr[-1, -2].axis('off')
 # plt.suptitle("TMs alpha helices, trimmed, pdb50, len > 15, V2")
-plt.suptitle(args.title)
+# plt.suptitle(args.title)
+# for method in methods:
+df = pd.DataFrame()
 for i in range(7):
-    df = pd.DataFrame(logOdds[i],
-                      index=[c for c in aas],
+    # df1 = pd.DataFrame(globlogOdds[i],
+    #                   index=["Globular " + str(c) for c in aas],
+    #                   columns=[c for c in aas])
+    # G_keep = ["Globular " + str(c) for c in keep]
+    # df1 = df1.loc[G_keep][keep]
+    # df1.insert(loc=0,column= "Type",  value="Globular")
+    df2 = pd.DataFrame(memlogOdds[i],
+                      index=["Membranes " + str(c) for c in aas],
                       columns=[c for c in aas])
-    ax = sns.heatmap(df,
-                     ax=axarr[i // 3, i % 3],
-                     vmin=-2,
-                     vmax=2,
-                     cmap="coolwarm",
-                     center=0)
-    ax.title.set_text("Gap " + str(i + 1))
-plt.tight_layout()
-plt.subplots_adjust(top=0.93)
-f.savefig(out_image)
+    # df2.insert( loc=0, column= "Type", value="Membranes")
+    M_keep = ["Membranes " + str(c) for c in keep]
+    df2 = df2.loc[M_keep][keep]
+    # df_temp = pd.concat([df1, df2])
+    df2.columns = ["Gap " + str(i+1) + "-" + c for c in df2.columns]
+    df = pd.concat([df, df2], axis=1)
+df.insert(loc=0, column="Type", value=["Membranes"]*keep_len)
+# for i in range(7):
+# i = 3
+plt.suptitle(args.title +  " sep " + str(i+1))
+    # df1 = pd.DataFrame(globlogOdds[i],
+    #                   index=["Globular " + str(c) for c in aas],
+    #                   columns=[c for c in aas])
+    # df1.insert(loc=0,column= "Type",  value="Globular")
+    # df2 = pd.DataFrame(memlogOdds[i],
+    #                   index=["Membranes " + str(c) for c in aas],
+    #                   columns=[c for c in aas])
+    # df2.insert( loc=0, column= "Type", value="Membranes")
+    # df = pd.concat([df1, df2])
+types =df.pop("Type") 
+# print(df.columns)
+# sys.exit()
+gap_list = [item for i in range(1, 8) for item in [i]*keep_len]
+gaps = pd.Series(gap_list, name="Gaps", index=df.columns)
+gap_c_list = [item for i in range(1, 8) for item in [(((100*i)%360)/360)]*keep_len]
+gaps_c = pd.Series(gap_c_list, name="C_cols", index=df.columns)
+# type_list = pd.Series(["Globular"] * 20 + ["Membranes"]*20)
+lut = dict(zip(types.unique(), sns.husl_palette(2, s=.45)))
+# lut_cols = dict(zip(gaps.unique(), sns.color_palette()))
+# lut_cols = dict(zip(gaps.unique(), ["Crimson", "DarkSlateBlue", "Crimson", "Crimson", "DarkSlateBlue",  "DarkSlateBlue", "Crimson"] ))
+lut_cols = dict(zip(gaps.unique(), ["#b4a06d", "#d3605b", "#9bbe77", "#8dcc7c", "#c97961",  "#bf8e67", "#7dd980"] ))
+# cycl_cols = {v:cmocean.cm.phase(v) for v in gaps_c.unique()}
+# cycl_cols = {v:plt.get_cmap("twilight")(v) for v in gaps_c.unique()}
+row_colors = types.map(lut)
+# col_colors = gaps_c.map(cycl_cols)
+col_colors = gaps.map(lut_cols)
+chart = sns.clustermap(df, row_cluster=True, col_cluster=True, figsize=(30, 10), cmap="coolwarm", center=0,
+               method=method, row_colors=row_colors, col_colors=col_colors, cbar_pos=None, vmin=-2, vmax=2,
+               linewidth=.75,
+               dendrogram_ratio=(0.05, 0.15),
+               colors_ratio=(0.005, 0.02),
+               )
+plt.setp(chart.ax_heatmap.xaxis.get_majorticklabels(), rotation=45, ha="right")
+plt.setp(chart.ax_row_colors.xaxis.get_majorticklabels(), rotation=45, ha="right")
+chart.savefig(args.out)
+##################################
+# plt.figure(i+2)
+# ax = sns.clustermap(df, ax=axarr[i // 3, i % 3], row_cluster=True, col_cluster=False, cmap="coolwarm", center=0, method=method, row_colors=row_colors)
+    # df = pd.DataFrame(logOdds[i],
+    #                   index=[c for c in aas],
+    #                   columns=[c for c in aas])
+    # ax = sns.heatmap(df,
+    #                  ax=axarr[i // 3, i % 3],
+    #                  vmin=-2,
+    #                  vmax=2,
+    #                  cmap="coolwarm",
+    #                  center=0)
+    # ax.title.set_text("Gap " + str(i + 1))
+# plt.tight_layout()
+# plt.subplots_adjust(top=0.93)
+# plt.show()
+#########################################################################
 # f.savefig('images/'
 #           + 'logOddsGlobularTrimmed'
 #           + 'HeatmapGroupOrderFromPDBRed50Len15v2.png')
