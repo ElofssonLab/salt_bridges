@@ -457,6 +457,7 @@ sns.despine(bottom=True, left=True)
 c_ax = f.add_axes([0.6, 0.6, 0.3,0.3],projection='polar')
 # c_ax._direction = 2*np.pi
 c_ax.set_theta_offset(-np.pi/2)
+c_ax.set_theta_direction(-1)
 # c_ax.set_xticks([1, 2, 3, 4, 5, 6, 7, 8])
 # c_ax.set_xticklabels(["Gap 1", "Gap 2", "Gap 3", "Gap 4", "Gap 5", "Gap 6", "Gap 7", "Gap 8"])
 norm = mpl.colors.Normalize(0.0, 2*np.pi)
