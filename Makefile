@@ -181,8 +181,10 @@ $(A3MCHARGES) : %.charges.pickle : %.mems.pickle | $(A3MMEMS)
 
 $(VISIMAGES) : $(A3MCHARGES) $(GLOBCHARGES)
 	./bin/visualizeAAs.py $(A3MCHARGES) $(IMAGEDIR)/pdbtm_vis.svg "Charges"
+	./bin/visualizeAAs.py $(A3MCHARGES) $(IMAGEDIR)/pdbtm_vis.png "Charges"
 	# ./bin/visualizeAAs.py $(A3MCHARGES) $(IMAGEDIR)/pdbtm_vis.svg "Charges"
 	./bin/visualizeAAs_mem.py $(A3MCHARGES) $(IMAGEDIR)/mem_cluster.svg "Membrane Charges"
+	./bin/visualizeAAs_mem.py $(A3MCHARGES) $(IMAGEDIR)/mem_cluster.png "Membrane Charges"
 	# ./bin/visualizeAAs_Compare.py $(GLOBCHARGES) $(A3MCHARGES) $(IMAGEDIR)/charges_vis.svg "pdbtm vs Globular"
 	# ./bin/visualizeAAs_Compare_all.py $(GLOBCHARGES) $(A3MCHARGES) $(IMAGEDIR)/mem_vs_glob.svg "pdbtm vs Globular"
 

@@ -212,7 +212,7 @@ lut_cols = dict(zip(steps.unique(), [degree_cmap(s/360) for s in step_index] ))
 row_colors = types.map(lut)
 # col_colors = steps_c.map(cycl_cols)
 col_colors = steps.map(lut_cols)
-chart = sns.clustermap(df, row_cluster=True, col_cluster=True, figsize=(30, 10), cmap="coolwarm", center=0,
+chart = sns.clustermap(df, row_cluster=True, col_cluster=True, figsize=(30, 6), cmap="coolwarm", center=0,
                method=method, col_colors=col_colors, cbar_pos=None, vmin=-2, vmax=2,
                linewidth=.75,
                dendrogram_ratio=(0.05, 0.15),
