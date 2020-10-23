@@ -346,7 +346,7 @@ colors = ["#FDE725FF", "#440154FF", "#FDE725FF"]
 # Regular red and green
 # colors = ["#6BE585", "#DD3E54", "#6BE585"]
 # degree_cmap = LinearSegmentedColormap.from_list("", list(zip(nodes, colors)))
-degree_cmap = LinearSegmentedColormap.from_list("", list(zip(nodes, colors)))
+# degree_cmap = LinearSegmentedColormap.from_list("", list(zip(nodes, colors)))
 degree_cmap = mpl.colors.ListedColormap(mpl.cm.get_cmap('viridis_r').colors + mpl.cm.get_cmap('viridis').colors)
 # print(cmap)
 grid = plt.GridSpec(3,6, wspace=0.4, hspace=0.1)

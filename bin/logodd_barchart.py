@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Membrane charge caluclations."""
-import matplotlib
-matplotlib.use('Agg')
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import math
@@ -279,20 +279,16 @@ ax2.xaxis.set_tick_params(length=0)
 ax2.set_xticks([])
 ax3.set_xticks([1, 2, 3, 4, 5, 6, 7, 8])
 
+degree_cmap = mpl.colors.ListedColormap(mpl.cm.get_cmap('viridis_r').colors + mpl.cm.get_cmap('viridis').colors)
 for ax in [ax1, ax2, ax3]:
     # ax.grid(False)
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
     ax.spines['left'].set_visible(False)
     ax.spines['bottom'].set_visible(False)
-    ax.patches[0].set_facecolor("#b4a06d")
-    ax.patches[1].set_facecolor("#d3605b")
-    ax.patches[2].set_facecolor("#9bbe77")
-    ax.patches[3].set_facecolor("#8dcc7c")
-    ax.patches[4].set_facecolor("#c97961")
-    ax.patches[5].set_facecolor("#bf8e67")
-    ax.patches[6].set_facecolor("#7dd980")
-    ax.patches[7].set_facecolor("#a8b072")
+    for i in range(8):
+        color_index = (i*100 + 100) % 360
+        ax.patches[i].set_facecolor(degree_cmap(color_index/360))
 
 name = args.input_file.split('/')[-1].split('.')[0]
 for ext in [".png", ".svg"]:
