@@ -23,14 +23,14 @@ A3MMEMS := $(PROCDIR)/pdbtm_a3m.mems.pickle
 MEMSRED := $(PROCDIR)/pdbtm_redundant.mems.pickle
 MEMSGLOB := $(PROCDIR)/scop_glob.mems.pickle
 STATS := $(addprefix ${STATDIR}/,pdbtm_stats.txt)
-LOGODDS := $(addprefix ${IMAGEDIR}/,Topcons_TMs_logodds.png pdbtm_logodds.png)
+LOGODDS := $(addprefix ${IMAGEDIR}/,Topcons_TMs_logodds.svg pdbtm_logodds.svg)
 LISTS := $(addprefix ${STATDIR}/,pdbtm_redundant_1_list.txt pdbtm_redundant_2_list.txt)
 PROTS := $(addprefix ${STATDIR}/,pdbtm_same_pairs.txt pdbtm_opp_pairs.txt)
 RCSB := $(addprefix ${STATDIR}/,pdbtm_same_info.txt pdbtm_opp_info.txt)
 GLOBCHARGES := $(PROCDIR)/scop_glob.charges.pickle
 # MEMCHARGES := $(PROCDIR)/pdbtm.clust.charges.pickle
 A3MCHARGES := $(PROCDIR)/pdbtm_a3m.charges.pickle
-VISIMAGES := $(addprefix ${IMAGEDIR}/, pdbtm_vis.png mem_cluster.png)
+VISIMAGES := $(addprefix ${IMAGEDIR}/, pdbtm_vis.svg pdbtm_vis.png mem_cluster.svg mem_cluster.png)
 
 all: $(STATS) $(LISTS) $(LOGODDS) $(RCSB) $(VISIMAGES)
 
@@ -180,10 +180,11 @@ $(A3MCHARGES) : %.charges.pickle : %.mems.pickle | $(A3MMEMS)
 	./bin/make_charges_from_mems.py $< $@
 
 $(VISIMAGES) : $(A3MCHARGES) $(GLOBCHARGES)
-	./bin/visualizeAAs.py $(A3MCHARGES) $(IMAGEDIR)/pdbtm_vis.png "Charges"
-	./bin/visualizeAAs_mem.py $(A3MCHARGES) $(IMAGEDIR)/mem_cluster.png "Membrane Charges"
-	# ./bin/visualizeAAs_Compare.py $(GLOBCHARGES) $(A3MCHARGES) $(IMAGEDIR)/charges_vis.png "pdbtm vs Globular"
-	# ./bin/visualizeAAs_Compare_all.py $(GLOBCHARGES) $(A3MCHARGES) $(IMAGEDIR)/mem_vs_glob.png "pdbtm vs Globular"
+	./bin/visualizeAAs.py $(A3MCHARGES) $(IMAGEDIR)/pdbtm_vis.svg "Charges"
+	# ./bin/visualizeAAs.py $(A3MCHARGES) $(IMAGEDIR)/pdbtm_vis.svg "Charges"
+	./bin/visualizeAAs_mem.py $(A3MCHARGES) $(IMAGEDIR)/mem_cluster.svg "Membrane Charges"
+	# ./bin/visualizeAAs_Compare.py $(GLOBCHARGES) $(A3MCHARGES) $(IMAGEDIR)/charges_vis.svg "pdbtm vs Globular"
+	# ./bin/visualizeAAs_Compare_all.py $(GLOBCHARGES) $(A3MCHARGES) $(IMAGEDIR)/mem_vs_glob.svg "pdbtm vs Globular"
 
 .PHONY: clean deepclean
 clean:

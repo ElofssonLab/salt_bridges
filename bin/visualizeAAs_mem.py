@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Membrane charge caluclations."""
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import cmocean
@@ -45,7 +46,7 @@ for i, p in enumerate(prefix):
 # in_pickle = 'data/pdbtm/pdbtm_redundant_alpha_struct_scop_reduced_culled_charge.pickle'
 # in_glob_pickle = args.glob
 in_mem_pickle = args.mems
-# out_image = in_pickle.split('/')[-1].split('.')[0] + "_AA_vis.png"
+# out_image = in_pickle.split('/')[-1].split('.')[0] + "_AA_vis.svg"
 # out_image = args.out
 # glob_aaCount, glob_aaPairs, glob_aaHits = pickle.load(open(in_glob_pickle, 'rb'))
 mem_aaCount, mem_aaPairs, mem_aaHits = pickle.load(open(in_mem_pickle, 'rb'))
@@ -199,21 +200,26 @@ lut = dict(zip(types.unique(), sns.husl_palette(2, s=.45)))
 ## 170  #d85157
 ## 180  #dd3e54
 
+degree_cmap = mpl.colors.ListedColormap(mpl.cm.get_cmap('viridis_r').colors + mpl.cm.get_cmap('viridis').colors)
 #                                    100        200         300         40          140     240             340     80
-lut_cols = dict(zip(steps.unique(), ["#b4a06d", "#d3605b", "#9bbe77", "#8dcc7c", "#c97961",  "#bf8e67", "#7dd980", "#a8b072"] ))
+step_index = [x%360 for x in range(100, 900, 100)]
+# print(step_index)
+# lut_cols = dict(zip(steps.unique(), ["#b4a06d", "#d3605b", "#9bbe77", "#8dcc7c", "#c97961",  "#bf8e67", "#7dd980", "#a8b072"] ))
+lut_cols = dict(zip(steps.unique(), [degree_cmap(s/360) for s in step_index] ))
+# print(lut_cols)
 # cycl_cols = {v:cmocean.cm.phase(v) for v in steps_c.unique()}
 # cycl_cols = {v:plt.get_cmap("twilight")(v) for v in steps_c.unique()}
 row_colors = types.map(lut)
 # col_colors = steps_c.map(cycl_cols)
 col_colors = steps.map(lut_cols)
 chart = sns.clustermap(df, row_cluster=True, col_cluster=True, figsize=(30, 10), cmap="coolwarm", center=0,
-               method=method, row_colors=row_colors, col_colors=col_colors, cbar_pos=None, vmin=-2, vmax=2,
+               method=method, col_colors=col_colors, cbar_pos=None, vmin=-2, vmax=2,
                linewidth=.75,
                dendrogram_ratio=(0.05, 0.15),
                colors_ratio=(0.005, 0.02),
                )
 plt.setp(chart.ax_heatmap.xaxis.get_majorticklabels(), rotation=45, ha="right")
-plt.setp(chart.ax_row_colors.xaxis.get_majorticklabels(), rotation=45, ha="right")
+# plt.setp(chart.ax_row_colors.xaxis.get_majorticklabels(), rotation=45, ha="right")
 chart.savefig(args.out)
 ##################################
 # plt.figure(i+2)
@@ -234,7 +240,7 @@ chart.savefig(args.out)
 #########################################################################
 # f.savefig('images/'
 #           + 'logOddsGlobularTrimmed'
-#           + 'HeatmapGroupOrderFromPDBRed50Len15v2.png')
+#           + 'HeatmapGroupOrderFromPDBRed50Len15v2.svg')
 # # print(logOdds)
 # # print(ci)
 # y_r = [logOdds[i] - ci[i][0] for i in range(len(ci))]
@@ -256,7 +262,7 @@ chart.savefig(args.out)
 # plt.title('Log odds ratio from a charged residue')
 # plt.axhline(xmax=8, color='black')
 # plt.grid(True)
-# plt.savefig("positiveplus.png")
+# plt.savefig("positiveplus.svg")
 # # ###### Build above and below graph
 # # allthreshold = chargedbaseline**2
 # # values = np.array(chargedpairs)
@@ -270,7 +276,7 @@ chart.savefig(args.out)
 # # axarr[0, 0].set_ylim([0, 0.0065])
 # # axarr[0, 0].plot([0.,7],[allthreshold, allthreshold], 'k--')
 # # axarr[0, 0].set_title("Above or below expected pair, all charged")
-# # # fig.savefig("pairsAllCharged.png")
+# # # fig.savefig("pairsAllCharged.svg")
 # # # print("Same charge hit: ", samehitcounter)
 # # # print("Opposite charge hit: ", hitcounter)
 # # # print("Non charged: :", misscounter)
@@ -357,7 +363,7 @@ chart.savefig(args.out)
 # # axarr[0, 0].set_ylim([0, 0.0065])
 # # axarr[0, 0].plot([0.,7],[allthreshold, allthreshold], 'k--')
 # # axarr[0, 0].set_title("Above or below expected pair, all charged")
-# # # fig.savefig("pairsAllCharged.png")
+# # # fig.savefig("pairsAllCharged.svg")
 # # # plt.clf()
 # # #######
 # # samethreshold = posbaseline**2 + negbaseline**2
@@ -372,7 +378,7 @@ chart.savefig(args.out)
 # # axarr[0, 1].set_ylim([0, 0.0045])
 # # axarr[0, 1].plot([0.,7],[samethreshold, samethreshold], 'k--')
 # # axarr[0, 1].set_title("Above or below expected pair, same charged")
-# # # fig.savefig("pairsSameCharge.png")
+# # # fig.savefig("pairsSameCharge.svg")
 # # # plt.clf()
 # # ##############
 # # diffthreshold = posbaseline*negbaseline + negbaseline*posbaseline
@@ -387,7 +393,7 @@ chart.savefig(args.out)
 # # axarr[0, 2].set_ylim([0, 0.0045])
 # # axarr[0, 2].plot([0.,7],[diffthreshold, diffthreshold], 'k--')
 # # axarr[0, 2].set_title("Above or below expected pair, different charged")
-# # # fig.savefig("pairsDiffCharge.png")
+# # # fig.savefig("pairsDiffCharge.svg")
 # # # plt.clf()
 # # ##################
 # # posnegthreshold = posbaseline*negbaseline
@@ -402,7 +408,7 @@ chart.savefig(args.out)
 # # axarr[1, 0].set_ylim([0, 0.0025])
 # # axarr[1, 0].plot([0.,7],[posnegthreshold, posnegthreshold], 'k--')
 # # axarr[1, 0].set_title("Above or below expected pair, pos to neg ")
-# # # fig.savefig("pairsPosNeg.png")
+# # # fig.savefig("pairsPosNeg.svg")
 # # # plt.clf()
 # # ##################
 # # negposthreshold = posbaseline*negbaseline
@@ -417,7 +423,7 @@ chart.savefig(args.out)
 # # axarr[1, 1].set_ylim([0, 0.0025])
 # # axarr[1, 1].plot([0.,7],[negposthreshold, negposthreshold], 'k--')
 # # axarr[1, 1].set_title("Above or below expected pair, neg to pos")
-# # # fig.savefig("pairsNegPos.png")
+# # # fig.savefig("pairsNegPos.svg")
 # # # plt.clf()
 # # ##################
 # # posposthreshold = posbaseline**2
@@ -432,7 +438,7 @@ chart.savefig(args.out)
 # # axarr[1, 2].set_ylim([0, 0.0025])
 # # axarr[1, 2].plot([0.,7],[posposthreshold, posposthreshold], 'k--')
 # # axarr[1, 2].set_title("Above or below expected pair, pos to pos")
-# # # fig.savefig("pairsPosPos.png")
+# # # fig.savefig("pairsPosPos.svg")
 # # # plt.clf()
 # # ##################
 # # negnegthreshold = negbaseline**2
@@ -447,20 +453,20 @@ chart.savefig(args.out)
 # # axarr[2, 0].set_ylim([0, 0.0025])
 # # axarr[2, 0].plot([0.,7],[negnegthreshold, negnegthreshold], 'k--')
 # # axarr[2, 0].set_title("Above or below expected pair, neg to neg")
-# # # fig.savefig("pairsNegNeg.png")
+# # # fig.savefig("pairsNegNeg.svg")
 # # # plt.clf()
 # # ##################
 # # fig.subplots_adjust(hspace=0.3)
-# # fig.savefig("unirefpairs.png")
+# # fig.savefig("unirefpairs.svg")
 # # plt.clf()
 # # # plt.bar(range(1,len(normsamehitcounter)+1),normsamehitcounter)
 # # # plt.title("Same hit counter")
-# # # plt.savefig('normsamehitcounter.png')
+# # # plt.savefig('normsamehitcounter.svg')
 # # # plt.clf()
 # # # plt.bar(range(1,len(normhitcounter)+1),normhitcounter)
 # # # plt.title("Hit counter")
-# # # plt.savefig('normhitcounter.png')
+# # # plt.savefig('normhitcounter.svg')
 # # # plt.clf()
 # # # plt.bar(range(1,len(normmisscounter)+1),normmisscounter)
 # # # plt.title("Miss counter")
-# # # # plt.savefig('normmisscounter.png')
+# # # # plt.savefig('normmisscounter.svg')

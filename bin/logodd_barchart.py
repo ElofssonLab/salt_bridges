@@ -217,7 +217,7 @@ for i in range(8):
 # print(logOddsOpp)
 # print(ciOpp)
 
-f, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 10), sharex=True)
+f, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 10)) # , sharex=True)
 ###### Totalt ######
 y_r = [logOdds[i] - ci[i][0] for i in range(len(ci))]
 threshold = 0
@@ -233,9 +233,9 @@ ax1.bar(x, logOdds, yerr=y_r, color=['g', 'r', 'g', 'g', 'r', 'r', 'g', 'r'], al
 # plt.xticks(range(len(logOdds)), [str(i) for i in range(1,len(logOdds)+1)])
 ax1.set_ylabel('All charges')
 # ax1.set_xlabel('Step distance from first charged residue')
-ax1.set_title('Log odds ratios')
+# ax1.set_title('Log odds ratios')
 ax1.axhline(xmax=8, color='black')
-ax1.grid(True)
+# ax1.grid(True)
 ###### Opp ######
 y_r = [logOddsOpp[i] - ciOpp[i][0] for i in range(len(ciOpp))]
 threshold = 0
@@ -253,7 +253,7 @@ ax2.set_ylabel('Opposite charges')
 # ax2.set_xlabel('Step distance from first charged residue')
 # ax2.set_title('Log odds ratio for opposite pairs')
 ax2.axhline(xmax=8, color='black')
-ax2.grid(True)
+# ax2.grid(True)
 ###### Totalt ######
 y_r = [logOddsSame[i] - ciSame[i][0] for i in range(len(ciSame))]
 threshold = 0
@@ -267,17 +267,20 @@ below_threshold = np.minimum(values, threshold)
 # plt.bar(x, above_threshold, 0.35, color="r", yerr=y_r, bottom=below_threshold)
 ax3.bar(x, logOddsSame, yerr=y_r, color=['g', 'r', 'g', 'g', 'r', 'r', 'g', 'r'], alpha=0.8, align='center')
 # plt.xticks(range(len(logOdds)), [str(i) for i in range(1,len(logOdds)+1)])
-ax3.set_ylabel('Same chages')
-ax3.set_xlabel('Step distance from first charged residue')
+ax3.set_ylabel('Same charges')
+ax3.set_xlabel('Step')
 # ax3.set_title('Log odds ratio for same pairs')
 ax3.axhline(xmax=8, color='black')
-ax3.grid(True)
+# ax3.grid(True)
 # plt.axis('off')
 ax1.set_xticks([])
+ax1.xaxis.set_tick_params(length=0)
+ax2.xaxis.set_tick_params(length=0)
 ax2.set_xticks([])
+ax3.set_xticks([1, 2, 3, 4, 5, 6, 7, 8])
 
 for ax in [ax1, ax2, ax3]:
-    ax.grid(False)
+    # ax.grid(False)
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
     ax.spines['left'].set_visible(False)
@@ -292,7 +295,8 @@ for ax in [ax1, ax2, ax3]:
     ax.patches[7].set_facecolor("#a8b072")
 
 name = args.input_file.split('/')[-1].split('.')[0]
-plt.savefig('images/' + name + '_logodds.png')
+for ext in [".png", ".svg"]:
+    plt.savefig('images/' + name + '_logodds' + ext)
 
 # ###### Build above and below graph
 # allthreshold = chargedbaseline**2
@@ -306,7 +310,7 @@ plt.savefig('images/' + name + '_logodds.png')
 # axarr[0, 0].set_ylim([0, 0.0065])
 # axarr[0, 0].plot([0.,7],[allthreshold, allthreshold], 'k--')
 # axarr[0, 0].set_title("Above or below expected pair, all charged")
-# # fig.savefig("pairsAllCharged.png")
+# # fig.savefig("pairsAllCharged.svg")
 
 
 # # print("Same charge hit: ", samehitcounter)
@@ -388,7 +392,7 @@ plt.savefig('images/' + name + '_logodds.png')
 # axarr[0, 0].set_ylim([0, 0.0065])
 # axarr[0, 0].plot([0.,7],[allthreshold, allthreshold], 'k--')
 # axarr[0, 0].set_title("Above or below expected pair, all charged")
-# # fig.savefig("pairsAllCharged.png")
+# # fig.savefig("pairsAllCharged.svg")
 # # plt.clf()
 # #######
 # samethreshold = posbaseline**2 + negbaseline**2
@@ -402,7 +406,7 @@ plt.savefig('images/' + name + '_logodds.png')
 # axarr[0, 1].set_ylim([0, 0.0045])
 # axarr[0, 1].plot([0.,7],[samethreshold, samethreshold], 'k--')
 # axarr[0, 1].set_title("Above or below expected pair, same charged")
-# # fig.savefig("pairsSameCharge.png")
+# # fig.savefig("pairsSameCharge.svg")
 # # plt.clf()
 # ##############
 # diffthreshold = posbaseline*negbaseline + negbaseline*posbaseline
@@ -416,7 +420,7 @@ plt.savefig('images/' + name + '_logodds.png')
 # axarr[0, 2].set_ylim([0, 0.0045])
 # axarr[0, 2].plot([0.,7],[diffthreshold, diffthreshold], 'k--')
 # axarr[0, 2].set_title("Above or below expected pair, different charged")
-# # fig.savefig("pairsDiffCharge.png")
+# # fig.savefig("pairsDiffCharge.svg")
 # # plt.clf()
 # ##################
 # posnegthreshold = posbaseline*negbaseline
@@ -430,7 +434,7 @@ plt.savefig('images/' + name + '_logodds.png')
 # axarr[1, 0].set_ylim([0, 0.0025])
 # axarr[1, 0].plot([0.,7],[posnegthreshold, posnegthreshold], 'k--')
 # axarr[1, 0].set_title("Above or below expected pair, pos to neg ")
-# # fig.savefig("pairsPosNeg.png")
+# # fig.savefig("pairsPosNeg.svg")
 # # plt.clf()
 # ##################
 # negposthreshold = posbaseline*negbaseline
@@ -444,7 +448,7 @@ plt.savefig('images/' + name + '_logodds.png')
 # axarr[1, 1].set_ylim([0, 0.0025])
 # axarr[1, 1].plot([0.,7],[negposthreshold, negposthreshold], 'k--')
 # axarr[1, 1].set_title("Above or below expected pair, neg to pos")
-# # fig.savefig("pairsNegPos.png")
+# # fig.savefig("pairsNegPos.svg")
 # # plt.clf()
 # ##################
 # posposthreshold = posbaseline**2
@@ -458,7 +462,7 @@ plt.savefig('images/' + name + '_logodds.png')
 # axarr[1, 2].set_ylim([0, 0.0025])
 # axarr[1, 2].plot([0.,7],[posposthreshold, posposthreshold], 'k--')
 # axarr[1, 2].set_title("Above or below expected pair, pos to pos")
-# # fig.savefig("pairsPosPos.png")
+# # fig.savefig("pairsPosPos.svg")
 # # plt.clf()
 # ##################
 # negnegthreshold = negbaseline**2
@@ -472,20 +476,20 @@ plt.savefig('images/' + name + '_logodds.png')
 # axarr[2, 0].set_ylim([0, 0.0025])
 # axarr[2, 0].plot([0.,7],[negnegthreshold, negnegthreshold], 'k--')
 # axarr[2, 0].set_title("Above or below expected pair, neg to neg")
-# # fig.savefig("pairsNegNeg.png")
+# # fig.savefig("pairsNegNeg.svg")
 # # plt.clf()
 # ##################
 # fig.subplots_adjust(hspace=0.3)
-# fig.savefig("unirefpairs.png")
+# fig.savefig("unirefpairs.svg")
 # plt.clf()
 # # plt.bar(range(1,len(normsamehitcounter)+1),normsamehitcounter)
 # # plt.title("Same hit counter")
-# # plt.savefig('normsamehitcounter.png')
+# # plt.savefig('normsamehitcounter.svg')
 # # plt.clf()
 # # plt.bar(range(1,len(normhitcounter)+1),normhitcounter)
 # # plt.title("Hit counter")
-# # plt.savefig('normhitcounter.png')
+# # plt.savefig('normhitcounter.svg')
 # # plt.clf()
 # # plt.bar(range(1,len(normmisscounter)+1),normmisscounter)
 # # plt.title("Miss counter")
-# # # plt.savefig('normmisscounter.png')
+# # # plt.savefig('normmisscounter.svg')
