@@ -68,14 +68,14 @@ for i in range(7):
             c = glob_aaCount[0][i][first] * glob_aaCount[1][i][second]
             # Need square to handle pairs, first and second
             # d = sum(aaCount)**2 # Old version
-            # d is aaPairs for this gap times 2 for each of the two
+            # d is aaPairs for this step times 2 for each of the two
             # amino acids as each pair contains two AAs.
             d = glob_aaPairs[i]**2 - c
             # print(a, b, c, d)
             odds = (a / b) / (c / d)
             if odds == 0.0:
                 logOddsValue = -math.inf
-                print("Odds 0 at gap: ", i + 1)
+                print("Odds 0 at step: ", i + 1)
                 print("A-D: ", a, b, c, d)
                 print("First and second AA: ", aasOri[first], aasOri[second])
                 # print(aasOri[first], aasOri[second], a, b, c, d, odds)
@@ -93,13 +93,13 @@ for i in range(7):
             c = mem_aaCount[0][i][first] * mem_aaCount[1][i][second]
             # Need square to handle pairs, first and second
             # d = sum(aaCount)**2 # Old version
-            # d is aaPairs for this gap times 2 for each of the two
+            # d is aaPairs for this step times 2 for each of the two
             # amino acids as each pair contains two AAs.
             d = mem_aaPairs[i]**2 - c
             odds = (a / b) / (c / d)
             if odds == 0.0:
                 logOddsValue = -math.inf
-                print("Odds 0 at gap: ", i + 1)
+                print("Odds 0 at step: ", i + 1)
                 print("A-D: ", a, b, c, d)
                 print("First and second AA: ", aasOri[first], aasOri[second])
                 # print(aasOri[first], aasOri[second], a, b, c, d, odds)
@@ -149,7 +149,7 @@ for method in methods:
         M_keep = ["Membranes " + str(c) for c in keep]
         df2 = df2.loc[M_keep][keep]
         df_temp = pd.concat([df1, df2])
-        df_temp.columns = ["Gap " + str(i+1) + "-" + c for c in df_temp.columns]
+        df_temp.columns = ["Step " + str(i+1) + "-" + c for c in df_temp.columns]
         df = pd.concat([df, df_temp], axis=1)
     df.insert(loc=0, column="Type", value=["Globular"]*keep_len + ["Membranes"]*keep_len)
 # for i in range(7):
@@ -167,20 +167,20 @@ for method in methods:
     types =df.pop("Type") 
 # print(df.columns)
 # sys.exit()
-    gap_list = [item for i in range(1, 8) for item in [i]*keep_len]
-    gaps = pd.Series(gap_list, name="Gaps", index=df.columns)
-    gap_c_list = [item for i in range(1, 8) for item in [(((100*i)%360)/360)]*keep_len]
-    gaps_c = pd.Series(gap_c_list, name="C_cols", index=df.columns)
+    step_list = [item for i in range(1, 8) for item in [i]*keep_len]
+    steps = pd.Series(step_list, name="Steps", index=df.columns)
+    step_c_list = [item for i in range(1, 8) for item in [(((100*i)%360)/360)]*keep_len]
+    steps_c = pd.Series(step_c_list, name="C_cols", index=df.columns)
 # type_list = pd.Series(["Globular"] * 20 + ["Membranes"]*20)
     lut = dict(zip(types.unique(), sns.husl_palette(2, s=.45)))
 # lut_cols = dict(zip(gaps.unique(), sns.color_palette()))
 # lut_cols = dict(zip(gaps.unique(), ["Crimson", "DarkSlateBlue", "Crimson", "Crimson", "DarkSlateBlue",  "DarkSlateBlue", "Crimson"] ))
-    lut_cols = dict(zip(gaps.unique(), ["#b4a06d", "#d3605b", "#9bbe77", "#8dcc7c", "#c97961",  "#bf8e67", "#7dd980"] ))
+    lut_cols = dict(zip(steps.unique(), ["#b4a06d", "#d3605b", "#9bbe77", "#8dcc7c", "#c97961",  "#bf8e67", "#7dd980"] ))
 # cycl_cols = {v:cmocean.cm.phase(v) for v in gaps_c.unique()}
 # cycl_cols = {v:plt.get_cmap("twilight")(v) for v in gaps_c.unique()}
     row_colors = types.map(lut)
 # col_colors = gaps_c.map(cycl_cols)
-    col_colors = gaps.map(lut_cols)
+    col_colors = steps.map(lut_cols)
     chart = sns.clustermap(df, row_cluster=True, col_cluster=True, figsize=(30, 10), cmap="coolwarm", center=0,
                    method=method, row_colors=row_colors, col_colors=col_colors, cbar_pos=None, vmin=-2, vmax=2,
                    linewidth=.75,
@@ -202,7 +202,7 @@ for method in methods:
     #                  vmax=2,
     #                  cmap="coolwarm",
     #                  center=0)
-    # ax.title.set_text("Gap " + str(i + 1))
+    # ax.title.set_text("Step " + str(i + 1))
 # plt.tight_layout()
 # plt.subplots_adjust(top=0.93)
 # plt.show()
@@ -227,7 +227,7 @@ for method in methods:
 #   color=['g' if c > 0 else 'r' for c in logOdds], alpha=0.8, align='center')
 # # plt.xticks(range(len(logOdds)), [str(i) for i in range(1,len(logOdds)+1)])
 # plt.ylabel('Log odds ratio')
-# plt.xlabel('Gap distance from first charged residue')
+# plt.xlabel('Step distance from first charged residue')
 # plt.title('Log odds ratio from a charged residue')
 # plt.axhline(xmax=8, color='black')
 # plt.grid(True)

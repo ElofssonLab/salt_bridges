@@ -53,15 +53,15 @@ helicies = pickle.load(open(args.input_file, 'rb'))
 # helicies = pickle.load(open('helicies.pickle','rb'))
 totalmemstring = ''
 totalmembranes = 0
-samehitcounter = [0, 0, 0, 0, 0, 0, 0]
-hitcounter = [0, 0, 0, 0, 0, 0, 0]
-misscounter = [0, 0, 0, 0, 0, 0, 0]
+samehitcounter = [0, 0, 0, 0, 0, 0, 0,0]
+hitcounter = [0, 0, 0, 0, 0, 0, 0,0]
+misscounter = [0, 0, 0, 0, 0, 0, 0,0]
 totalcharges = []
-pairs = [[], [], [], [], [], [], []]
-chargeCount =[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]]
-poschargeCount =[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]]
-negchargeCount =[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]]
-aaCount =[0,0,0,0,0,0,0]
+pairs = [[], [], [], [], [], [], [], []]
+chargeCount =[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]]
+poschargeCount =[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]]
+negchargeCount =[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]]
+aaCount =[0,0,0,0,0,0,0,0]
 for key, membranes in helicies.items():
     # print(key)
     for place, mem in membranes:
@@ -76,7 +76,7 @@ for key, membranes in helicies.items():
         for place, aa in enumerate(mem):
             if aa in charged:
                 chargesinmem += 1
-            for i in range(1, 8):
+            for i in range(1, 9):
                 if memLen <= place + i:
                     break
                 pairs[i-1].append(aa+mem[place+i])
@@ -174,15 +174,15 @@ logOddsSame = []
 ci = []
 ciOpp = []
 ciSame = []
-for i in range(7):
+for i in range(8):
     ###### For All charges ######
     a = totalhits[i]                # Number of pairs, there is a charge
     b = len(pairs[i])       # Number of total observed pairs
     c = chargeCount[i][0]*chargeCount[i][1]             # How many baseline pairs for this distance?
     d = aaCount[i]**2       # Number of non-hits for baseline
     odds = (a/b)/(c/d)
-    print("Odds ratio for gap {}: {:.2f}".format(i+1, (odds)))
-    print("Log odds ratio for gap {}: {:.2f}".format(i+1, math.log(odds)))
+    print("Odds ratio for step {}: {:.2f}".format(i+1, (odds)))
+    print("Log odds ratio for step {}: {:.2f}".format(i+1, math.log(odds)))
     logOdds.append(math.log(odds))
     print("Upper 95% CI: {:.2f}".format((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d))))
     print("Lower 95% CI: {:.2f}".format((math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d))))
@@ -202,6 +202,11 @@ for i in range(7):
     b = len(pairs[i])       # Number of total observed pairs
     c = poschargeCount[i][0]*poschargeCount[i][1] + negchargeCount[i][0]*negchargeCount[i][1]  # Only calculate opposite pairs
     d = aaCount[i]**2       # Number of non-hits for baseline
+    # Quickfix for topcons step 8, pseudo count, does not impact anything else
+    if a == 0:
+        a = 1
+    if c == 0:
+        c = 1
     odds = (a/b)/(c/d)
     logOddsSame.append(math.log(odds))
     ciSame.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d), math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d)))
@@ -224,10 +229,10 @@ above_threshold = np.maximum(values - threshold, 0)
 below_threshold = np.minimum(values, threshold)
 # plt.bar(x, below_threshold, 0.35, color="g", yerr=y_r)
 # plt.bar(x, above_threshold, 0.35, color="r", yerr=y_r, bottom=below_threshold)
-ax1.bar(x, logOdds, yerr=y_r, color=['g', 'r', 'g', 'g', 'r', 'r', 'g'], alpha=0.8, align='center')
+ax1.bar(x, logOdds, yerr=y_r, color=['g', 'r', 'g', 'g', 'r', 'r', 'g', 'r'], alpha=0.8, align='center')
 # plt.xticks(range(len(logOdds)), [str(i) for i in range(1,len(logOdds)+1)])
 ax1.set_ylabel('Log odds ratio')
-# ax1.set_xlabel('Gap distance from first charged residue')
+# ax1.set_xlabel('Step distance from first charged residue')
 ax1.set_title('Log odds ratio for all charged pairs')
 ax1.axhline(xmax=8, color='black')
 ax1.grid(True)
@@ -242,10 +247,10 @@ above_threshold = np.maximum(values - threshold, 0)
 below_threshold = np.minimum(values, threshold)
 # plt.bar(x, below_threshold, 0.35, color="g", yerr=y_r)
 # plt.bar(x, above_threshold, 0.35, color="r", yerr=y_r, bottom=below_threshold)
-ax2.bar(x, logOddsOpp, yerr=y_r, color=['g', 'r', 'g', 'g', 'r', 'r', 'g'], alpha=0.8, align='center')
+ax2.bar(x, logOddsOpp, yerr=y_r, color=['g', 'r', 'g', 'g', 'r', 'r', 'g', 'r'], alpha=0.8, align='center')
 # plt.xticks(range(len(logOdds)), [str(i) for i in range(1,len(logOdds)+1)])
 ax2.set_ylabel('Log odds ratio')
-# ax2.set_xlabel('Gap distance from first charged residue')
+# ax2.set_xlabel('Step distance from first charged residue')
 ax2.set_title('Log odds ratio for opposite pairs')
 ax2.axhline(xmax=8, color='black')
 ax2.grid(True)
@@ -260,10 +265,10 @@ above_threshold = np.maximum(values - threshold, 0)
 below_threshold = np.minimum(values, threshold)
 # plt.bar(x, below_threshold, 0.35, color="g", yerr=y_r)
 # plt.bar(x, above_threshold, 0.35, color="r", yerr=y_r, bottom=below_threshold)
-ax3.bar(x, logOddsSame, yerr=y_r, color=['g', 'r', 'g', 'g', 'r', 'r', 'g'], alpha=0.8, align='center')
+ax3.bar(x, logOddsSame, yerr=y_r, color=['g', 'r', 'g', 'g', 'r', 'r', 'g', 'r'], alpha=0.8, align='center')
 # plt.xticks(range(len(logOdds)), [str(i) for i in range(1,len(logOdds)+1)])
 ax3.set_ylabel('Log odds ratio')
-ax3.set_xlabel('Gap distance from first charged residue')
+ax3.set_xlabel('Step distance from first charged residue')
 ax3.set_title('Log odds ratio for same pairs')
 ax3.axhline(xmax=8, color='black')
 ax3.grid(True)

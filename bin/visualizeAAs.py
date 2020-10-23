@@ -53,17 +53,17 @@ for i in range(10):
             c = aaCount[0][i][first] * aaCount[1][i][second]
             # Need square to handle pairs, first and second
             # d = sum(aaCount)**2 # Old version
-            # d is aaPairs for this gap times 2 for each of the two
+            # d is aaPairs for this step times 2 for each of the two
             # amino acids as each pair contains two AAs.
             d = aaPairs[i]**2  # - c  # same as above, not odds
             # print(a, b, c, d)
             odds = (a / b) / (c / d)
-#     # print("Odds ratio for gap {}: {:.2f}".format(i+1, (odds)))
-    # print("Log odds ratio for gap {}: {:.2f}".format(i+1, math.log(odds)))
+#     # print("Odds ratio for step {}: {:.2f}".format(i+1, (odds)))
+    # print("Log odds ratio for step {}: {:.2f}".format(i+1, math.log(odds)))
     # logOdds.append(math.log(odds))
             if odds == 0.0:
                 logOddsValue = -math.inf
-                print("Odds 0 at gap: ", i + 1)
+                print("Odds 0 at step: ", i + 1)
                 print("A-D: ", a, b, c, d)
                 print("First and second AA: ", aasOri[first], aasOri[second])
                 # print(aasOri[first], aasOri[second], a, b, c, d, odds)
@@ -99,7 +99,7 @@ for i in range(8):
                      vmax=2,
                      cmap="coolwarm",
                      center=0, cbar=show_cbar)
-    ax.title.set_text("Gap " + str(i + 1))
+    ax.title.set_text("Step " + str(i + 1))
 plt.tight_layout()
 plt.subplots_adjust(top=0.93)
 f.savefig(out_image)
@@ -123,7 +123,7 @@ f.savefig(out_image)
 #   color=['g' if c > 0 else 'r' for c in logOdds], alpha=0.8, align='center')
 # # plt.xticks(range(len(logOdds)), [str(i) for i in range(1,len(logOdds)+1)])
 # plt.ylabel('Log odds ratio')
-# plt.xlabel('Gap distance from first charged residue')
+# plt.xlabel('Step distance from first charged residue')
 # plt.title('Log odds ratio from a charged residue')
 # plt.axhline(xmax=8, color='black')
 # plt.grid(True)

@@ -61,24 +61,24 @@ segs_with_multi_charges_trimmed_sanH = list()
 AAS = 'ACDEFGHIKLMNPQRSTVWY'
 aa_pairs_full = np.zeros((len(AAS), len(AAS)), dtype=int)
 aa_pairs_trimmed = np.zeros((len(AAS), len(AAS)), dtype=int)
-charged_gaps_trimmed = [[] for i in range(10)]
-charged_gaps_trimmed_sanH = [[] for i in range(10)]
-segs_charged_gaps_trimmed = [set() for i in range(10)]
-segs_charged_gaps_trimmed_sanH = [set() for i in range(10)]
-prot_charged_gaps_trimmed = [set() for i in range(10)]
-prot_charged_gaps_trimmed_sanH = [set() for i in range(10)]
-opp_gaps_trimmed = [[] for i in range(10)]
-opp_gaps_trimmed_sanH = [[] for i in range(10)]
-segs_opp_gaps_trimmed = [set() for i in range(10)]
-segs_opp_gaps_trimmed_sanH = [set() for i in range(10)]
-prot_opp_gaps_trimmed = [set() for i in range(10)]
-prot_opp_gaps_trimmed_sanH = [set() for i in range(10)]
-same_gaps_trimmed = [[] for i in range(10)]
-same_gaps_trimmed_sanH = [[] for i in range(10)]
-segs_same_gaps_trimmed = [set() for i in range(10)]
-segs_same_gaps_trimmed_sanH = [set() for i in range(10)]
-prot_same_gaps_trimmed = [set() for i in range(10)]
-prot_same_gaps_trimmed_sanH = [set() for i in range(10)]
+charged_steps_trimmed = [[] for i in range(10)]
+charged_steps_trimmed_sanH = [[] for i in range(10)]
+segs_charged_steps_trimmed = [set() for i in range(10)]
+segs_charged_steps_trimmed_sanH = [set() for i in range(10)]
+prot_charged_steps_trimmed = [set() for i in range(10)]
+prot_charged_steps_trimmed_sanH = [set() for i in range(10)]
+opp_steps_trimmed = [[] for i in range(10)]
+opp_steps_trimmed_sanH = [[] for i in range(10)]
+segs_opp_steps_trimmed = [set() for i in range(10)]
+segs_opp_steps_trimmed_sanH = [set() for i in range(10)]
+prot_opp_steps_trimmed = [set() for i in range(10)]
+prot_opp_steps_trimmed_sanH = [set() for i in range(10)]
+same_steps_trimmed = [[] for i in range(10)]
+same_steps_trimmed_sanH = [[] for i in range(10)]
+segs_same_steps_trimmed = [set() for i in range(10)]
+segs_same_steps_trimmed_sanH = [set() for i in range(10)]
+prot_same_steps_trimmed = [set() for i in range(10)]
+prot_same_steps_trimmed_sanH = [set() for i in range(10)]
 # proteinsExamples = {}
 # proteinsExamplesSansH = 0
 # proteinSet = set()
@@ -97,21 +97,21 @@ prot_same_gaps_trimmed_sanH = [set() for i in range(10)]
 # TMdata = {}
 # mems_aa = ''
 # mems_aa_trimmed = ''
-# opposite_gaps_trimmed = [[],
+# opposite_steps_trimmed = [[],
 #                          [],
 #                          [],
 #                          [],
 #                          [],
 #                          [],
 #                          []]
-# charge_gaps_trimmed = [[],
+# charge_steps_trimmed = [[],
 #                        [],
 #                        [],
 #                        [],
 #                        [],
 #                        [],
 #                        []]
-# opposite_gaps_trimmed_noH = [[],
+# opposite_steps_trimmed_noH = [[],
 #                              [],
 #                              [],
 #                              [],
@@ -250,54 +250,54 @@ for key, membranes in helices.items():
 
                 if first_aa in chargedplus and second_aa in chargedplus:
                     # Any charges pairs
-                    charged_gaps_trimmed[i-1].append(first_aa + second_aa)
-                    segs_charged_gaps_trimmed[i-1].add(key + str(mem_num))
-                    prot_charged_gaps_trimmed[i-1].add(key)
+                    charged_steps_trimmed[i-1].append(first_aa + second_aa)
+                    segs_charged_steps_trimmed[i-1].add(key + str(mem_num))
+                    prot_charged_steps_trimmed[i-1].add(key)
                     if first_aa != "H" and second_aa != "H":
-                        charged_gaps_trimmed_sanH[i-1].append(first_aa +
+                        charged_steps_trimmed_sanH[i-1].append(first_aa +
                                                               second_aa)
-                        segs_charged_gaps_trimmed_sanH[i-1].add(key +
+                        segs_charged_steps_trimmed_sanH[i-1].add(key +
                                                                 str(mem_num))
-                        prot_charged_gaps_trimmed_sanH[i-1].add(key)
+                        prot_charged_steps_trimmed_sanH[i-1].add(key)
                     # Opposite charges pairs
                     if ((first_aa in positiveplus and
                          second_aa in negative) or
                         (first_aa in negative and
                          second_aa in positiveplus)):
-                            opp_gaps_trimmed[i-1].append(first_aa + second_aa)
-                            segs_opp_gaps_trimmed[i-1].add(key + str(mem_num))
-                            prot_opp_gaps_trimmed[i-1].add(key)
+                            opp_steps_trimmed[i-1].append(first_aa + second_aa)
+                            segs_opp_steps_trimmed[i-1].add(key + str(mem_num))
+                            prot_opp_steps_trimmed[i-1].add(key)
                             if first_aa != 'H' and second_aa != 'H':
                                 if first_aa in negative and second_aa in positive:
                                     opp_pair_ids[i-1].append(key + '\tnegpos')
                                 else:
                                     opp_pair_ids[i-1].append(key + '\tposneg')
-                                opp_gaps_trimmed_sanH[i-1].append(
+                                opp_steps_trimmed_sanH[i-1].append(
                                                        first_aa + second_aa)
-                                segs_opp_gaps_trimmed_sanH[i-1].\
+                                segs_opp_steps_trimmed_sanH[i-1].\
                                     add(key + str(mem_num))
-                                prot_opp_gaps_trimmed_sanH[i-1].add(key)
+                                prot_opp_steps_trimmed_sanH[i-1].add(key)
 
                     # Same charge pairs
                     if ((first_aa in positiveplus and
                          second_aa in positiveplus) or
                         (first_aa in negative and
                          second_aa in negative)):
-                            same_gaps_trimmed[i-1].append(first_aa +
+                            same_steps_trimmed[i-1].append(first_aa +
                                                           second_aa)
-                            segs_same_gaps_trimmed[i-1].add(key +
+                            segs_same_steps_trimmed[i-1].add(key +
                                                             str(mem_num))
-                            prot_same_gaps_trimmed[i-1].add(key)
+                            prot_same_steps_trimmed[i-1].add(key)
                             if first_aa != 'H' and second_aa != 'H':
                                 if first_aa in negative:
                                     same_pair_ids[i-1].append(key + '\tneg')
                                 else:
                                     same_pair_ids[i-1].append(key + '\tpos')
-                                same_gaps_trimmed_sanH[i-1].append(
+                                same_steps_trimmed_sanH[i-1].append(
                                                        first_aa + second_aa)
-                                segs_same_gaps_trimmed_sanH[i-1].\
+                                segs_same_steps_trimmed_sanH[i-1].\
                                     add(key + str(mem_num))
-                                prot_same_gaps_trimmed_sanH[i-1].add(key)
+                                prot_same_steps_trimmed_sanH[i-1].add(key)
 
 num_prots = len(protein_set)
 
@@ -315,31 +315,31 @@ with open("stats/{}_opp_pairs.txt".format(name),'w') as out_handle:
 
 charge_hist_data = list(np.concatenate(
                         [[i+1]*len(pos)
-                            for i, pos in enumerate(charged_gaps_trimmed)]))
+                            for i, pos in enumerate(charged_steps_trimmed)]))
 charge_hist_data_sanH = list(np.concatenate(
                         [[i+1]*len(pos)
                             for i, pos in
-                            enumerate(charged_gaps_trimmed_sanH)]))
+                            enumerate(charged_steps_trimmed_sanH)]))
 opp_hist_data = list(np.concatenate(
                         [[i+1]*len(pos)
-                            for i, pos in enumerate(opp_gaps_trimmed)]))
+                            for i, pos in enumerate(opp_steps_trimmed)]))
 opp_hist_data_sanH = list(np.concatenate(
                         [[i+1]*len(pos)
-                            for i, pos in enumerate(opp_gaps_trimmed_sanH)]))
+                            for i, pos in enumerate(opp_steps_trimmed_sanH)]))
 same_hist_data = list(np.concatenate(
                         [[i+1]*len(pos)
-                            for i, pos in enumerate(same_gaps_trimmed)]))
+                            for i, pos in enumerate(same_steps_trimmed)]))
 same_hist_data_sanH = list(np.concatenate(
                         [[i+1]*len(pos)
-                            for i, pos in enumerate(same_gaps_trimmed_sanH)]))
-df_charge = pd.DataFrame(charge_hist_data_sanH, columns=["Gap"])
+                            for i, pos in enumerate(same_steps_trimmed_sanH)]))
+df_charge = pd.DataFrame(charge_hist_data_sanH, columns=["Step"])
 df_charge["Type"] = "Charged"
-df_same = pd.DataFrame(same_hist_data_sanH, columns=["Gap"])
+df_same = pd.DataFrame(same_hist_data_sanH, columns=["Step"])
 df_same["Type"] = "Same"
-df_opp = pd.DataFrame(opp_hist_data_sanH, columns=["Gap"])
+df_opp = pd.DataFrame(opp_hist_data_sanH, columns=["Step"])
 df_opp["Type"] = "Opp"
 df = pd.concat([df_same, df_opp], ignore_index=True)
-df = df[df["Gap"] < 9]
+df = df[df["Step"] < 9]
 
 nodes = [0, 0.5, 1]
 colors = ["#6BE585", "#DD3E54", "#6BE585"]
@@ -354,17 +354,17 @@ sns.set_theme(style="white", context="talk")
 # # ax3 = plt.subplot(grid[2,:5])
 # # ax4 = plt.subplot(grid[:,5])
 # f.suptitle("Distance between charges")
-# sns.histplot(df[df["Type"]=="Charged"], x="Gap", color="grey", discrete=True, ax=ax1)
+# sns.histplot(df[df["Type"]=="Charged"], x="Step", color="grey", discrete=True, ax=ax1)
 # ax1.axhline(0, color="k", clip_on=False)
 # ax1.set_ylabel("All charges")
 # ax1.set_ylim([0,45])
 # # ax1.get_xaxis().set_visible(False)
-# sns.histplot(df[df["Type"]=="Opp"], x="Gap", color="grey", discrete=True, ax=ax2)
+# sns.histplot(df[df["Type"]=="Opp"], x="Step", color="grey", discrete=True, ax=ax2)
 # ax2.axhline(0, color="k", clip_on=False)
 # ax2.set_ylabel("Opposite charges")
 # ax2.set_ylim([0,45])
 # # ax2.get_xaxis().set_visible(False)
-# h=sns.histplot(df[df["Type"]=="Same"], x="Gap", color="grey", discrete=True, ax=ax3)
+# h=sns.histplot(df[df["Type"]=="Same"], x="Step", color="grey", discrete=True, ax=ax3)
 # ax3.axhline(0, color="k", clip_on=False)
 # ax3.set_ylabel("Same charges")
 # ax3.set_ylim([0,45])
@@ -396,19 +396,19 @@ f, ax = plt.subplots(1,1,figsize=(12, 10))
 # ax3 = plt.subplot(grid[2,:5])
 # ax4 = plt.subplot(grid[:,5])
 f.suptitle("Distance between charges")
-h = sns.histplot(df, x="Gap", color="grey", hue="Type", discrete=True, multiple="stack", shrink=.8)
+h = sns.histplot(df, x="Step", color="grey", hue="Type", discrete=True, multiple="stack", shrink=.8)
 ax.get_legend().remove()
-# sns.catplot(data=df, x="Gap", color="grey", hue="Type")
+# sns.catplot(data=df, x="Step", color="grey", hue="Type")
 #ax1.axhline(0, color="k", clip_on=False)
 #ax1.set_ylabel("All charges")
 #ax1.set_ylim([0,45])
 ## ax1.get_xaxis().set_visible(False)
-#sns.histplot(df[df["Type"]=="Opp"], x="Gap", color="grey", discrete=True, ax=ax2)
+#sns.histplot(df[df["Type"]=="Opp"], x="Step", color="grey", discrete=True, ax=ax2)
 #ax2.axhline(0, color="k", clip_on=False)
 #ax2.set_ylabel("Opposite charges")
 #ax2.set_ylim([0,45])
 ## ax2.get_xaxis().set_visible(False)
-#h=sns.histplot(df[df["Type"]=="Same"], x="Gap", color="grey", discrete=True, ax=ax3)
+#h=sns.histplot(df[df["Type"]=="Same"], x="Step", color="grey", discrete=True, ax=ax3)
 #ax3.axhline(0, color="k", clip_on=False)
 #ax3.set_ylabel("Same charges")
 #ax3.set_ylim([0,45])
@@ -459,17 +459,17 @@ c_ax = f.add_axes([0.6, 0.6, 0.3,0.3],projection='polar')
 c_ax.set_theta_offset(-np.pi/2)
 c_ax.set_theta_direction(-1)
 # c_ax.set_xticks([1, 2, 3, 4, 5, 6, 7, 8])
-# c_ax.set_xticklabels(["Gap 1", "Gap 2", "Gap 3", "Gap 4", "Gap 5", "Gap 6", "Gap 7", "Gap 8"])
+# c_ax.set_xticklabels(["Step 1", "Step 2", "Step 3", "Step 4", "Step 5", "Step 6", "Step 7", "Step 8"])
 norm = mpl.colors.Normalize(0.0, 2*np.pi)
 # quant_steps = 2056
 cb = mpl.colorbar.ColorbarBase(c_ax, cmap=degree_cmap,
                                    norm=norm,
                                    orientation='horizontal')
 cb.set_ticks(np.linspace(0,2*np.pi, 18, endpoint=False).tolist())
-cb.set_ticklabels(["\n\nFirst charged\nresidue", " ", "Gap 4", " ", "Gap 8", "Gap 1", " ", "Gap 5", " ", " ", "Gap 2", " ", "Gap 6", " ", " ", "Gap 3", " ", "Gap 7"])
+cb.set_ticklabels(["\n\nFirst charged\nresidue", " ", "Step 4", " ", "Step 8", "Step 1", " ", "Step 5", " ", " ", "Step 2", " ", "Step 6", " ", " ", "Step 3", " ", "Step 7"])
 cb.ax.plot([0,0],[0,1])
 cb.ax.xaxis.set_tick_params(pad=20, length=0)
-# c_ax.set_thetagrids(np.linspace(0,360, 18, endpoint=False).tolist(), ["0", " ", "Gap 4", " ", "Gap 8", "Gap 1", " ", "Gap 5", " ", " ", "Gap 2", " ", "Gap 6", " ", " ", "Gap 3", " ", "Gap 7"])
+# c_ax.set_thetagrids(np.linspace(0,360, 18, endpoint=False).tolist(), ["0", " ", "Step 4", " ", "Step 8", "Step 1", " ", "Step 5", " ", " ", "Step 2", " ", "Step 6", " ", " ", "Step 3", " ", "Step 7"])
 cb.outline.set_visible(False)                                 
 # c_ax.set_axis_off()
 # #c_ax.set_rlim([-1, 1])
@@ -558,7 +558,7 @@ plt.savefig('images/' + name + '.png')
 #                         proteinSet.add(key)
 #                         proteinsExamplesSansH += 1
 #                 # aaHits[i - 1][first][second] += 1
-#                 # # Count both first and second AA for each gap sized i
+#                 # # Count both first and second AA for each step sized i
 #                 # aaCount[0][i - 1][first] += 1
 #                 # aaCount[1][i - 1][second] += 1
 
