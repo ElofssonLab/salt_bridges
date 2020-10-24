@@ -15,11 +15,11 @@ PROCDIR := $(DATADIR)/processed
 3LINESRED := $(PROCDIR)/pdbtm_redundant.3line
 3LINESGLOB := $(PROCDIR)/scop_glob.3line
 # 3LINESOPM := $(OPMDIR)/opm.3line
-3LINESCLUST := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.3line Topcons_TMs.clust.3line pdbtm.clust.3line)
-FASTAS := $(addprefix ${PROCDIR}/,Topcons_Globular.fa Topcons_TMs.fa pdbtm.fa)
-CLUST := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.fa Topcons_TMs.clust.fa pdbtm.clust.fa)
-MEMS := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.mems.pickle Topcons_TMs.clust.mems.pickle pdbtm.clust.mems.pickle)
-A3MMEMS := $(PROCDIR)/pdbtm_a3m.mems.pickle
+3LINESCLUST := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.3line Topcons_TMs.clust.3line pdbtm.clust.3line scop_glob.clust.3line)
+FASTAS := $(addprefix ${PROCDIR}/,Topcons_Globular.fa Topcons_TMs.fa pdbtm.fa scop_glob.fa)
+CLUST := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.fa Topcons_TMs.clust.fa pdbtm.clust.fa scop_glob.clust.fa)
+MEMS := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.mems.pickle Topcons_TMs.clust.mems.pickle pdbtm.clust.mems.pickle scop_glob.clust.mems.pickle)
+A3MMEMS := $(PROCDIR)/pdbtm_a3m.mems.pickle $(PROCDIR)/scop_clust_a3m.mems.pickle
 MEMSRED := $(PROCDIR)/pdbtm_redundant.mems.pickle
 MEMSGLOB := $(PROCDIR)/scop_glob.mems.pickle
 STATS := $(addprefix ${STATDIR}/,pdbtm_stats.txt)
@@ -29,7 +29,7 @@ PROTS := $(addprefix ${STATDIR}/,pdbtm_same_pairs.txt pdbtm_opp_pairs.txt)
 RCSB := $(addprefix ${STATDIR}/,pdbtm_same_info.txt pdbtm_opp_info.txt)
 GLOBCHARGES := $(PROCDIR)/scop_glob.charges.pickle
 # MEMCHARGES := $(PROCDIR)/pdbtm.clust.charges.pickle
-A3MCHARGES := $(PROCDIR)/pdbtm_a3m.charges.pickle
+A3MCHARGES := $(PROCDIR)/pdbtm_a3m.charges.pickle $(PROCDIR)/scop_glob_a3m.charges.pickle
 VISIMAGES := $(addprefix ${IMAGEDIR}/, pdbtm_vis.svg pdbtm_vis.png mem_cluster.svg mem_cluster.png)
 
 all: $(STATS) $(LISTS) $(LOGODDS) $(RCSB) $(VISIMAGES)
@@ -147,8 +147,9 @@ $(3LINESCLUST) : %.clust.3line: %.clust.fa | $(CLUST)
 $(MEMS) : %.clust.mems.pickle: %.clust.3line | $(3LINESCLUST)
 	./bin/make_mems_from_3line.py $< $@
 
-$(A3MMEMS) : $(3LINESPDBTM)
-	./bin/make_mems_from_a3m.py $(PDBTMDIR)/pdbtm.3line $(DATADIR)/pdbtm_a3m $@
+$(A3MMEMS) : $(3LINESPDBTM) $(3LINESGLOB)
+	./bin/make_mems_from_a3m.py $(PDBTMDIR)/pdbtm.3line $(DATADIR)/pdbtm_a3m $(PROCDIR)/pdbtm_a3m.mems.pickle
+	./bin/make_mems_from_a3m.py $(PROCDIR)/scop_glob.clust.3line $(DATADIR)/scop_a3m $(PROCDIR)/scop_glob_a3m.mems.pickle
 
 $(MEMSRED) : %.mems.pickle: %.3line | $(3LINESRED)
 	./bin/make_mems_from_3line.py $< $@
@@ -180,11 +181,11 @@ $(A3MCHARGES) : %.charges.pickle : %.mems.pickle | $(A3MMEMS)
 	./bin/make_charges_from_mems.py $< $@
 
 $(VISIMAGES) : $(A3MCHARGES) $(GLOBCHARGES)
-	./bin/visualizeAAs.py $(A3MCHARGES) $(IMAGEDIR)/pdbtm_vis.svg "Charges"
-	./bin/visualizeAAs.py $(A3MCHARGES) $(IMAGEDIR)/pdbtm_vis.png "Charges"
+	./bin/visualizeAAs.py $(PROCDIR)/pdbtm_a3m.charges.pickle $(IMAGEDIR)/pdbtm_vis.svg "Charges"
+	./bin/visualizeAAs.py $(PROCDIR)/pdbtm_a3m.charges.pickle $(IMAGEDIR)/pdbtm_vis.png "Charges"
 	# ./bin/visualizeAAs.py $(A3MCHARGES) $(IMAGEDIR)/pdbtm_vis.svg "Charges"
-	./bin/visualizeAAs_mem.py $(A3MCHARGES) $(IMAGEDIR)/mem_cluster.svg "Membrane Charges"
-	./bin/visualizeAAs_mem.py $(A3MCHARGES) $(IMAGEDIR)/mem_cluster.png "Membrane Charges"
+	./bin/visualizeAAs_mem.py $(PROCDIR)/pdbtm_a3m.charges.pickle $(IMAGEDIR)/mem_cluster.svg "Membrane Charges"
+	./bin/visualizeAAs_mem.py $(PROCDIR)/pdbtm_a3m.charges.pickle $(IMAGEDIR)/mem_cluster.png "Membrane Charges"
 	# ./bin/visualizeAAs_Compare.py $(GLOBCHARGES) $(A3MCHARGES) $(IMAGEDIR)/charges_vis.svg "pdbtm vs Globular"
 	# ./bin/visualizeAAs_Compare_all.py $(GLOBCHARGES) $(A3MCHARGES) $(IMAGEDIR)/mem_vs_glob.svg "pdbtm vs Globular"
 
