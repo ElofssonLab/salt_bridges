@@ -16,6 +16,7 @@ import matplotlib as mpl
 from matplotlib.colors import LinearSegmentedColormap
 # from matplotlib.sankey import Sankey
 
+plt.rcParams.update({'font.size': 22})
 parser = argparse.ArgumentParser()
 
 parser.add_argument("pickle_file", type=str, help="Pickle with membranes")
@@ -309,268 +310,268 @@ with open("stats/{}_opp_pairs.txt".format(name),'w') as out_handle:
     for i in range(0,10):
         for pid in opp_pair_ids[i]:
             out_handle.write(str(i+1) +' \t' + pid + '\n')
-##########
-# Graphs #
-##########
-
-charge_hist_data = list(np.concatenate(
-                        [[i+1]*len(pos)
-                            for i, pos in enumerate(charged_steps_trimmed)]))
-charge_hist_data_sanH = list(np.concatenate(
-                        [[i+1]*len(pos)
-                            for i, pos in
-                            enumerate(charged_steps_trimmed_sanH)]))
-opp_hist_data = list(np.concatenate(
-                        [[i+1]*len(pos)
-                            for i, pos in enumerate(opp_steps_trimmed)]))
-opp_hist_data_sanH = list(np.concatenate(
-                        [[i+1]*len(pos)
-                            for i, pos in enumerate(opp_steps_trimmed_sanH)]))
-same_hist_data = list(np.concatenate(
-                        [[i+1]*len(pos)
-                            for i, pos in enumerate(same_steps_trimmed)]))
-same_hist_data_sanH = list(np.concatenate(
-                        [[i+1]*len(pos)
-                            for i, pos in enumerate(same_steps_trimmed_sanH)]))
-df_charge = pd.DataFrame(charge_hist_data_sanH, columns=["Step"])
-df_charge["Type"] = "Charged"
-df_same = pd.DataFrame(same_hist_data_sanH, columns=["Step"])
-df_same["Type"] = "Same"
-df_opp = pd.DataFrame(opp_hist_data_sanH, columns=["Step"])
-df_opp["Type"] = "Opp"
-df = pd.concat([df_same, df_opp], ignore_index=True)
-df = df[df["Step"] < 9]
-
-nodes = [0, 0.25, 0.5, 0.75, 1]
-colors = ["#FDE725FF", "#440154FF", "#FDE725FF"]
-# Regular red and green
-# colors = ["#6BE585", "#DD3E54", "#6BE585"]
-# degree_cmap = LinearSegmentedColormap.from_list("", list(zip(nodes, colors)))
-# degree_cmap = LinearSegmentedColormap.from_list("", list(zip(nodes, colors)))
-degree_cmap = mpl.colors.ListedColormap(mpl.cm.get_cmap('viridis_r').colors + mpl.cm.get_cmap('viridis').colors)
-# print(cmap)
-grid = plt.GridSpec(3,6, wspace=0.4, hspace=0.1)
-sns.set_theme(style="white", context="talk")
-# f = plt.figure(figsize=(12, 10))
-# f, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 10), sharex=True)
+# ##########
+# # Graphs #
+# ##########
+# 
+# charge_hist_data = list(np.concatenate(
+#                         [[i+1]*len(pos)
+#                             for i, pos in enumerate(charged_steps_trimmed)]))
+# charge_hist_data_sanH = list(np.concatenate(
+#                         [[i+1]*len(pos)
+#                             for i, pos in
+#                             enumerate(charged_steps_trimmed_sanH)]))
+# opp_hist_data = list(np.concatenate(
+#                         [[i+1]*len(pos)
+#                             for i, pos in enumerate(opp_steps_trimmed)]))
+# opp_hist_data_sanH = list(np.concatenate(
+#                         [[i+1]*len(pos)
+#                             for i, pos in enumerate(opp_steps_trimmed_sanH)]))
+# same_hist_data = list(np.concatenate(
+#                         [[i+1]*len(pos)
+#                             for i, pos in enumerate(same_steps_trimmed)]))
+# same_hist_data_sanH = list(np.concatenate(
+#                         [[i+1]*len(pos)
+#                             for i, pos in enumerate(same_steps_trimmed_sanH)]))
+# df_charge = pd.DataFrame(charge_hist_data_sanH, columns=["Step"])
+# df_charge["Type"] = "Charged"
+# df_same = pd.DataFrame(same_hist_data_sanH, columns=["Step"])
+# df_same["Type"] = "Same"
+# df_opp = pd.DataFrame(opp_hist_data_sanH, columns=["Step"])
+# df_opp["Type"] = "Opp"
+# df = pd.concat([df_same, df_opp], ignore_index=True)
+# df = df[df["Step"] < 9]
+# 
+# nodes = [0, 0.25, 0.5, 0.75, 1]
+# colors = ["#FDE725FF", "#440154FF", "#FDE725FF"]
+# # Regular red and green
+# # colors = ["#6BE585", "#DD3E54", "#6BE585"]
+# # degree_cmap = LinearSegmentedColormap.from_list("", list(zip(nodes, colors)))
+# # degree_cmap = LinearSegmentedColormap.from_list("", list(zip(nodes, colors)))
+# degree_cmap = mpl.colors.ListedColormap(mpl.cm.get_cmap('viridis_r').colors + mpl.cm.get_cmap('viridis').colors)
+# # print(cmap)
+# grid = plt.GridSpec(3,6, wspace=0.4, hspace=0.1)
+# sns.set_theme(style="white", context="talk")
+# # f = plt.figure(figsize=(12, 10))
+# # f, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 10), sharex=True)
+# # # ax1 = plt.subplot(grid[0,:5])
+# # # ax2 = plt.subplot(grid[1,:5])
+# # # ax3 = plt.subplot(grid[2,:5])
+# # # ax4 = plt.subplot(grid[:,5])
+# # f.suptitle("Distance between charges")
+# # sns.histplot(df[df["Type"]=="Charged"], x="Step", color="grey", discrete=True, ax=ax1)
+# # ax1.axhline(0, color="k", clip_on=False)
+# # ax1.set_ylabel("All charges")
+# # ax1.set_ylim([0,45])
+# # # ax1.get_xaxis().set_visible(False)
+# # sns.histplot(df[df["Type"]=="Opp"], x="Step", color="grey", discrete=True, ax=ax2)
+# # ax2.axhline(0, color="k", clip_on=False)
+# # ax2.set_ylabel("Opposite charges")
+# # ax2.set_ylim([0,45])
+# # # ax2.get_xaxis().set_visible(False)
+# # h=sns.histplot(df[df["Type"]=="Same"], x="Step", color="grey", discrete=True, ax=ax3)
+# # ax3.axhline(0, color="k", clip_on=False)
+# # ax3.set_ylabel("Same charges")
+# # ax3.set_ylim([0,45])
+# # # ax3.get_xaxis().set_visible(False)
+# # norm = mpl.colors.Normalize(vmin=0, vmax=360)
+# # # cbar_ax = f.add_axes([0.01, 0.01, 0.9, 0.2])
+# # cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=degree_cmap), ax=[ax1, ax2, ax3], orientation='vertical', ticks=[0,90,180,270,360])
+# # cbar.ax.set_yticklabels(["0°", "90°", "180°", "270°", "360°"])
+# # # ax4.get_xaxis().set_visible(False)
+# # # ax4.get_yaxis().set_visible(False)
+# # # lut_cols = dict(zip(gaps.unique(), ["#b4a06d", "#d3605b", "#9bbe77", "#8dcc7c", "#c97961",  "#bf8e67", "#7dd980", "#a8b072"] ))
+# # for ax in [ax1, ax2, ax3]:
+# #     ax.patches[0].set_facecolor("#b4a06d")
+# #     ax.patches[1].set_facecolor("#d3605b")
+# #     ax.patches[2].set_facecolor("#9bbe77")
+# #     ax.patches[3].set_facecolor("#8dcc7c")
+# #     ax.patches[4].set_facecolor("#c97961")
+# #     ax.patches[5].set_facecolor("#bf8e67")
+# #     ax.patches[6].set_facecolor("#7dd980")
+# #     ax.patches[7].set_facecolor("#a8b072")
+# #     # ax.xtick(range(1,10))
+# # sns.despine(bottom=True)
+# # # plt.tight_layout(h_pad=2)
+# # plt.savefig('images/' + name + '.svg')
+# # f = plt.figure(figsize=(12, 10))
+# f, ax = plt.subplots(1,1,figsize=(12, 10))
 # # ax1 = plt.subplot(grid[0,:5])
 # # ax2 = plt.subplot(grid[1,:5])
 # # ax3 = plt.subplot(grid[2,:5])
 # # ax4 = plt.subplot(grid[:,5])
-# f.suptitle("Distance between charges")
-# sns.histplot(df[df["Type"]=="Charged"], x="Step", color="grey", discrete=True, ax=ax1)
-# ax1.axhline(0, color="k", clip_on=False)
-# ax1.set_ylabel("All charges")
-# ax1.set_ylim([0,45])
-# # ax1.get_xaxis().set_visible(False)
-# sns.histplot(df[df["Type"]=="Opp"], x="Step", color="grey", discrete=True, ax=ax2)
-# ax2.axhline(0, color="k", clip_on=False)
-# ax2.set_ylabel("Opposite charges")
-# ax2.set_ylim([0,45])
-# # ax2.get_xaxis().set_visible(False)
-# h=sns.histplot(df[df["Type"]=="Same"], x="Step", color="grey", discrete=True, ax=ax3)
-# ax3.axhline(0, color="k", clip_on=False)
-# ax3.set_ylabel("Same charges")
-# ax3.set_ylim([0,45])
-# # ax3.get_xaxis().set_visible(False)
-# norm = mpl.colors.Normalize(vmin=0, vmax=360)
-# # cbar_ax = f.add_axes([0.01, 0.01, 0.9, 0.2])
-# cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=degree_cmap), ax=[ax1, ax2, ax3], orientation='vertical', ticks=[0,90,180,270,360])
-# cbar.ax.set_yticklabels(["0°", "90°", "180°", "270°", "360°"])
-# # ax4.get_xaxis().set_visible(False)
-# # ax4.get_yaxis().set_visible(False)
-# # lut_cols = dict(zip(gaps.unique(), ["#b4a06d", "#d3605b", "#9bbe77", "#8dcc7c", "#c97961",  "#bf8e67", "#7dd980", "#a8b072"] ))
-# for ax in [ax1, ax2, ax3]:
-#     ax.patches[0].set_facecolor("#b4a06d")
-#     ax.patches[1].set_facecolor("#d3605b")
-#     ax.patches[2].set_facecolor("#9bbe77")
-#     ax.patches[3].set_facecolor("#8dcc7c")
-#     ax.patches[4].set_facecolor("#c97961")
-#     ax.patches[5].set_facecolor("#bf8e67")
-#     ax.patches[6].set_facecolor("#7dd980")
-#     ax.patches[7].set_facecolor("#a8b072")
-#     # ax.xtick(range(1,10))
-# sns.despine(bottom=True)
+# # f.suptitle("Distance between charges")
+# h = sns.histplot(df, x="Step", color="grey", hue="Type", discrete=True, multiple="stack", shrink=.8)
+# ax.get_legend().remove()
+# # sns.catplot(data=df, x="Step", color="grey", hue="Type")
+# #ax1.axhline(0, color="k", clip_on=False)
+# #ax1.set_ylabel("All charges")
+# #ax1.set_ylim([0,45])
+# ## ax1.get_xaxis().set_visible(False)
+# #sns.histplot(df[df["Type"]=="Opp"], x="Step", color="grey", discrete=True, ax=ax2)
+# #ax2.axhline(0, color="k", clip_on=False)
+# #ax2.set_ylabel("Opposite charges")
+# #ax2.set_ylim([0,45])
+# ## ax2.get_xaxis().set_visible(False)
+# #h=sns.histplot(df[df["Type"]=="Same"], x="Step", color="grey", discrete=True, ax=ax3)
+# #ax3.axhline(0, color="k", clip_on=False)
+# #ax3.set_ylabel("Same charges")
+# #ax3.set_ylim([0,45])
+# ## ax3.get_xaxis().set_visible(False)
+# #norm = mpl.colors.Normalize(vmin=0, vmax=360)
+# ## cbar_ax = f.add_axes([0.01, 0.01, 0.9, 0.2])
+# #cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=degree_cmap), ax=[ax1, ax2, ax3], orientation='vertical', ticks=[0,90,180,270,360])
+# #cbar.ax.set_yticklabels(["0°", "90°", "180°", "270°", "360°"])
+# ## ax4.get_xaxis().set_visible(False)
+# ## ax4.get_yaxis().set_visible(False)
+# ## lut_cols = dict(zip(gaps.unique(), ["#b4a06d", "#d3605b", "#9bbe77", "#8dcc7c", "#c97961",  "#bf8e67", "#7dd980", "#a8b072"] ))
+# #for ax in [ax1, ax2, ax3]:
+# hatches = {0:"///", 1:"\\\\\\", 2:"|||"}
+# # alphas = {0:.4, 1:.4, 2:1}
+# for i in range(2):
+#     for j in range(8):
+#         color_index = (j*100 + 100) % 360
+#         # ax.patches[j+i*8].set_facecolor("#b4a06d")
+#         ax.patches[j+i*8].set_facecolor(degree_cmap(color_index/360))
+#         ax.patches[j+i*8].set_hatch(hatches[i])
+#         # # ax.patches[0+i*8].set_alpha(alphas[i])
+#         # ax.patches[1+i*8].set_facecolor("#d3605b")
+#         # ax.patches[1+i*8].set_hatch(hatches[i])
+#         # # ax.patches[1+i*8].set_alpha(alphas[i])
+#         # ax.patches[2+i*8].set_facecolor("#9bbe77")
+#         # ax.patches[2+i*8].set_hatch(hatches[i])
+#         # # ax.patches[2+i*8].set_alpha(alphas[i])
+#         # ax.patches[3+i*8].set_facecolor("#8dcc7c")
+#         # ax.patches[3+i*8].set_hatch(hatches[i])
+#         # # ax.patches[3+i*8].set_alpha(alphas[i])
+#         # ax.patches[4+i*8].set_facecolor("#c97961")
+#         # ax.patches[4+i*8].set_hatch(hatches[i])
+#         # # ax.patches[4+i*8].set_alpha(alphas[i])
+#         # ax.patches[5+i*8].set_facecolor("#bf8e67")
+#         # ax.patches[5+i*8].set_hatch(hatches[i])
+#         # # ax.patches[5+i*8].set_alpha(alphas[i])
+#         # ax.patches[6+i*8].set_facecolor("#7dd980")
+#         # ax.patches[6+i*8].set_hatch(hatches[i])
+#         # # ax.patches[6+i*8].set_alpha(alphas[i])
+#         # ax.patches[7+i*8].set_facecolor("#a8b072")
+#         # ax.patches[7+i*8].set_hatch(hatches[i])
+#         # ax.patches[7+i*8].set_alpha(alphas[i])
+# #    # ax.xtick(range(1,10))
+# sns.despine(bottom=True, left=True)
 # # plt.tight_layout(h_pad=2)
-# plt.savefig('images/' + name + '.svg')
-# f = plt.figure(figsize=(12, 10))
-f, ax = plt.subplots(1,1,figsize=(12, 10))
-# ax1 = plt.subplot(grid[0,:5])
-# ax2 = plt.subplot(grid[1,:5])
-# ax3 = plt.subplot(grid[2,:5])
-# ax4 = plt.subplot(grid[:,5])
-# f.suptitle("Distance between charges")
-h = sns.histplot(df, x="Step", color="grey", hue="Type", discrete=True, multiple="stack", shrink=.8)
-ax.get_legend().remove()
-# sns.catplot(data=df, x="Step", color="grey", hue="Type")
-#ax1.axhline(0, color="k", clip_on=False)
-#ax1.set_ylabel("All charges")
-#ax1.set_ylim([0,45])
-## ax1.get_xaxis().set_visible(False)
-#sns.histplot(df[df["Type"]=="Opp"], x="Step", color="grey", discrete=True, ax=ax2)
-#ax2.axhline(0, color="k", clip_on=False)
-#ax2.set_ylabel("Opposite charges")
-#ax2.set_ylim([0,45])
-## ax2.get_xaxis().set_visible(False)
-#h=sns.histplot(df[df["Type"]=="Same"], x="Step", color="grey", discrete=True, ax=ax3)
-#ax3.axhline(0, color="k", clip_on=False)
-#ax3.set_ylabel("Same charges")
-#ax3.set_ylim([0,45])
-## ax3.get_xaxis().set_visible(False)
-#norm = mpl.colors.Normalize(vmin=0, vmax=360)
-## cbar_ax = f.add_axes([0.01, 0.01, 0.9, 0.2])
-#cbar = plt.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=degree_cmap), ax=[ax1, ax2, ax3], orientation='vertical', ticks=[0,90,180,270,360])
-#cbar.ax.set_yticklabels(["0°", "90°", "180°", "270°", "360°"])
-## ax4.get_xaxis().set_visible(False)
-## ax4.get_yaxis().set_visible(False)
-## lut_cols = dict(zip(gaps.unique(), ["#b4a06d", "#d3605b", "#9bbe77", "#8dcc7c", "#c97961",  "#bf8e67", "#7dd980", "#a8b072"] ))
-#for ax in [ax1, ax2, ax3]:
-hatches = {0:"///", 1:"\\\\\\", 2:"|||"}
-# alphas = {0:.4, 1:.4, 2:1}
-for i in range(2):
-    for j in range(8):
-        color_index = (j*100 + 100) % 360
-        # ax.patches[j+i*8].set_facecolor("#b4a06d")
-        ax.patches[j+i*8].set_facecolor(degree_cmap(color_index/360))
-        ax.patches[j+i*8].set_hatch(hatches[i])
-        # # ax.patches[0+i*8].set_alpha(alphas[i])
-        # ax.patches[1+i*8].set_facecolor("#d3605b")
-        # ax.patches[1+i*8].set_hatch(hatches[i])
-        # # ax.patches[1+i*8].set_alpha(alphas[i])
-        # ax.patches[2+i*8].set_facecolor("#9bbe77")
-        # ax.patches[2+i*8].set_hatch(hatches[i])
-        # # ax.patches[2+i*8].set_alpha(alphas[i])
-        # ax.patches[3+i*8].set_facecolor("#8dcc7c")
-        # ax.patches[3+i*8].set_hatch(hatches[i])
-        # # ax.patches[3+i*8].set_alpha(alphas[i])
-        # ax.patches[4+i*8].set_facecolor("#c97961")
-        # ax.patches[4+i*8].set_hatch(hatches[i])
-        # # ax.patches[4+i*8].set_alpha(alphas[i])
-        # ax.patches[5+i*8].set_facecolor("#bf8e67")
-        # ax.patches[5+i*8].set_hatch(hatches[i])
-        # # ax.patches[5+i*8].set_alpha(alphas[i])
-        # ax.patches[6+i*8].set_facecolor("#7dd980")
-        # ax.patches[6+i*8].set_hatch(hatches[i])
-        # # ax.patches[6+i*8].set_alpha(alphas[i])
-        # ax.patches[7+i*8].set_facecolor("#a8b072")
-        # ax.patches[7+i*8].set_hatch(hatches[i])
-        # ax.patches[7+i*8].set_alpha(alphas[i])
-#    # ax.xtick(range(1,10))
-sns.despine(bottom=True, left=True)
-# plt.tight_layout(h_pad=2)
-# azimuths = np.arange(0, 361, 1)
-# zeniths = np.arange(50, 70, 1)
-# values = azimuths * np.ones((20, 361))
-c_ax = f.add_axes([0.6, 0.6, 0.3,0.3],projection='polar')
-# c_ax._direction = 2*np.pi
-c_ax.set_theta_offset(np.pi/2)
-c_ax.set_theta_direction(-1)
-# c_ax.set_xticks([1, 2, 3, 4, 5, 6, 7, 8])
-# c_ax.set_xticklabels(["Step 1", "Step 2", "Step 3", "Step 4", "Step 5", "Step 6", "Step 7", "Step 8"])
-norm = mpl.colors.Normalize(0.0, 2*np.pi)
-# quant_steps = 2056
-cb = mpl.colorbar.ColorbarBase(c_ax, cmap=degree_cmap,
-                                   norm=norm,
-                                   orientation='horizontal')
-cb.set_ticks(np.linspace(0,2*np.pi, 18, endpoint=False).tolist())
-cb.set_ticklabels(["", " ", "Step 4", " ", "Step 8", "Step 1", " ", "Step 5", " ", " ", "Step 2", " ", "Step 6", " ", " ", "Step 3", " ", "Step 7"])
-cb.ax.plot([0,0],[0,1])
-cb.ax.set_title("First charged residue\n\n")
-cb.ax.xaxis.set_tick_params(pad=20, length=0)
-# c_ax.set_thetagrids(np.linspace(0,360, 18, endpoint=False).tolist(), ["0", " ", "Step 4", " ", "Step 8", "Step 1", " ", "Step 5", " ", " ", "Step 2", " ", "Step 6", " ", " ", "Step 3", " ", "Step 7"])
-cb.outline.set_visible(False)                                 
-# c_ax.set_axis_off()
-# #c_ax.set_rlim([-1, 1])
-# # c_ax.pcolormesh(azimuths*np.pi/180.0, zeniths, values, cmap=degree_cmap, shading='nearest')
-# c_ax.set_yticklabels([])
-# c_ax.get_yaxis().set_visible(False)
-c_ax.set_rlim([-2,1])
-for ext in [".png", ".svg"]:
-    plt.savefig('images/' + name + ext)
-# f.savefig('test.svg')
-# f, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(7,5), sharex=True)
-# # # Charged pairs
-# # plt.hist(charge_hist_data, bins=np.arange(12)-0.5)
+# # azimuths = np.arange(0, 361, 1)
+# # zeniths = np.arange(50, 70, 1)
+# # values = azimuths * np.ones((20, 361))
+# c_ax = f.add_axes([0.6, 0.6, 0.3,0.3],projection='polar')
+# # c_ax._direction = 2*np.pi
+# c_ax.set_theta_offset(np.pi/2)
+# c_ax.set_theta_direction(-1)
+# # c_ax.set_xticks([1, 2, 3, 4, 5, 6, 7, 8])
+# # c_ax.set_xticklabels(["Step 1", "Step 2", "Step 3", "Step 4", "Step 5", "Step 6", "Step 7", "Step 8"])
+# norm = mpl.colors.Normalize(0.0, 2*np.pi)
+# # quant_steps = 2056
+# cb = mpl.colorbar.ColorbarBase(c_ax, cmap=degree_cmap,
+#                                    norm=norm,
+#                                    orientation='horizontal')
+# cb.set_ticks(np.linspace(0,2*np.pi, 18, endpoint=False).tolist())
+# cb.set_ticklabels(["", " ", "Step 4", " ", "Step 8", "Step 1", " ", "Step 5", " ", " ", "Step 2", " ", "Step 6", " ", " ", "Step 3", " ", "Step 7"])
+# cb.ax.plot([0,0],[0,1])
+# cb.ax.set_title("First charged residue\n\n")
+# cb.ax.xaxis.set_tick_params(pad=20, length=0)
+# # c_ax.set_thetagrids(np.linspace(0,360, 18, endpoint=False).tolist(), ["0", " ", "Step 4", " ", "Step 8", "Step 1", " ", "Step 5", " ", " ", "Step 2", " ", "Step 6", " ", " ", "Step 3", " ", "Step 7"])
+# cb.outline.set_visible(False)                                 
+# # c_ax.set_axis_off()
+# # #c_ax.set_rlim([-1, 1])
+# # # c_ax.pcolormesh(azimuths*np.pi/180.0, zeniths, values, cmap=degree_cmap, shading='nearest')
+# # c_ax.set_yticklabels([])
+# # c_ax.get_yaxis().set_visible(False)
+# c_ax.set_rlim([-2,1])
+# for ext in [".png", ".svg"]:
+#     plt.savefig('images/' + name + ext)
+# # f.savefig('test.svg')
+# # f, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(7,5), sharex=True)
+# # # # Charged pairs
+# # # plt.hist(charge_hist_data, bins=np.arange(12)-0.5)
+# # # plt.xticks(range(1, 11))
+# # # plt.yticks(range(0, 200, 5))
+# # # plt.xlim([0, 11])
+# # # plt.ylim([0, 200])
+# # # plt.title("Distance between charged AA's")
+# # # plt.savefig('images/charged_pairs.svg')
+# # # plt.clf()
+# # # Charged pairs sanH
+# # plt.hist(charge_hist_data_sanH, bins=np.arange(12)-0.5)
 # # plt.xticks(range(1, 11))
-# # plt.yticks(range(0, 200, 5))
+# # plt.yticks(range(0, 400, 5))
 # # plt.xlim([0, 11])
-# # plt.ylim([0, 200])
-# # plt.title("Distance between charged AA's")
-# # plt.savefig('images/charged_pairs.svg')
+# # plt.ylim([0, 400])
+# # plt.title("Distance between charged AA's san H")
+# # plt.savefig('images/charged_pairs_sanH.svg')
 # # plt.clf()
-# # Charged pairs sanH
-# plt.hist(charge_hist_data_sanH, bins=np.arange(12)-0.5)
-# plt.xticks(range(1, 11))
-# plt.yticks(range(0, 400, 5))
-# plt.xlim([0, 11])
-# plt.ylim([0, 400])
-# plt.title("Distance between charged AA's san H")
-# plt.savefig('images/charged_pairs_sanH.svg')
-# plt.clf()
-# # # Opposite pairs
-# # plt.hist(opp_hist_data, bins=np.arange(12)-0.5)
+# # # # Opposite pairs
+# # # plt.hist(opp_hist_data, bins=np.arange(12)-0.5)
+# # # plt.xticks(range(1, 11))
+# # # plt.yticks(range(0, 200, 5))
+# # # plt.xlim([0, 11])
+# # # plt.ylim([0, 200])
+# # # plt.title("Distance between opposite charged AA's")
+# # # plt.savefig('images/opp_pairs.svg')
+# # # plt.clf()
+# # # Opposite pairs sanH
+# # plt.hist(opp_hist_data_sanH, bins=np.arange(12)-0.5)
 # # plt.xticks(range(1, 11))
-# # plt.yticks(range(0, 200, 5))
+# # plt.yticks(range(0, 400, 5))
 # # plt.xlim([0, 11])
-# # plt.ylim([0, 200])
-# # plt.title("Distance between opposite charged AA's")
-# # plt.savefig('images/opp_pairs.svg')
+# # plt.ylim([0, 400])
+# # plt.title("Distance between opposite charged AA's san H")
+# # plt.savefig('images/opp_pairs_sanH.svg')
 # # plt.clf()
-# # Opposite pairs sanH
-# plt.hist(opp_hist_data_sanH, bins=np.arange(12)-0.5)
-# plt.xticks(range(1, 11))
-# plt.yticks(range(0, 400, 5))
-# plt.xlim([0, 11])
-# plt.ylim([0, 400])
-# plt.title("Distance between opposite charged AA's san H")
-# plt.savefig('images/opp_pairs_sanH.svg')
-# plt.clf()
-# # # Same charged pairs
-# # plt.hist(same_hist_data, bins=np.arange(12)-0.5)
+# # # # Same charged pairs
+# # # plt.hist(same_hist_data, bins=np.arange(12)-0.5)
+# # # plt.xticks(range(1, 11))
+# # # plt.yticks(range(0, 200, 5))
+# # # plt.xlim([0, 11])
+# # # plt.ylim([0, 200])
+# # # plt.title("Distance between same charged AA's")
+# # # plt.savefig('images/same_pairs.svg')
+# # # plt.clf()
+# # # Same charged pairs sanH
+# # plt.hist(same_hist_data_sanH, bins=np.arange(12)-0.5)
 # # plt.xticks(range(1, 11))
-# # plt.yticks(range(0, 200, 5))
+# # plt.yticks(range(0, 400, 5))
 # # plt.xlim([0, 11])
-# # plt.ylim([0, 200])
-# # plt.title("Distance between same charged AA's")
-# # plt.savefig('images/same_pairs.svg')
+# # plt.ylim([0, 400])
+# # plt.title("Distance between same charged AA's san H")
+# # plt.savefig('images/same_pairs_sanH.svg')
 # # plt.clf()
-# # Same charged pairs sanH
-# plt.hist(same_hist_data_sanH, bins=np.arange(12)-0.5)
-# plt.xticks(range(1, 11))
-# plt.yticks(range(0, 400, 5))
-# plt.xlim([0, 11])
-# plt.ylim([0, 400])
-# plt.title("Distance between same charged AA's san H")
-# plt.savefig('images/same_pairs_sanH.svg')
-# plt.clf()
+# # 
+# # sys.exit()
+# #
+# #                     deltaG = dgCalc.calc_segment_DG(fullMem)
+# #                     # Add five is midmem
+# #                     globalPlace = mem[0] + edge
+# #                     # globalPlace = TMdata[key][0].index(midMem)
+# #                     # Plus one for the globalPlace and plus 1 for the place
+# #                     # in the membrane, 0 -> 1 offset
+# #                     proteinsExamples[key +
+# #                                      str(globalPlace + place) +
+# #                                      str(globalPlace + place + i)] = \
+# #                                     [midMem,
+# #                                      place,
+# #                                      i,
+# #                                      globalPlace + place,
+# #                                      aa,
+# #                                      secAA,
+# #                                      deltaG]
+# #                     proteinSetAll.add(key)
+# #                     if aa != 'H' and secAA != 'H':
+# #                         proteinSet.add(key)
+# #                         proteinsExamplesSansH += 1
+# #                 # aaHits[i - 1][first][second] += 1
+# #                 # # Count both first and second AA for each step sized i
+# #                 # aaCount[0][i - 1][first] += 1
+# #                 # aaCount[1][i - 1][second] += 1
 # 
-# sys.exit()
-#
-#                     deltaG = dgCalc.calc_segment_DG(fullMem)
-#                     # Add five is midmem
-#                     globalPlace = mem[0] + edge
-#                     # globalPlace = TMdata[key][0].index(midMem)
-#                     # Plus one for the globalPlace and plus 1 for the place
-#                     # in the membrane, 0 -> 1 offset
-#                     proteinsExamples[key +
-#                                      str(globalPlace + place) +
-#                                      str(globalPlace + place + i)] = \
-#                                     [midMem,
-#                                      place,
-#                                      i,
-#                                      globalPlace + place,
-#                                      aa,
-#                                      secAA,
-#                                      deltaG]
-#                     proteinSetAll.add(key)
-#                     if aa != 'H' and secAA != 'H':
-#                         proteinSet.add(key)
-#                         proteinsExamplesSansH += 1
-#                 # aaHits[i - 1][first][second] += 1
-#                 # # Count both first and second AA for each step sized i
-#                 # aaCount[0][i - 1][first] += 1
-#                 # aaCount[1][i - 1][second] += 1
-
 
 print("###################################################")
 print("## Numbers within parenthesis are inclusive of H ##")

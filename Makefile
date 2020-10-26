@@ -19,20 +19,20 @@ PROCDIR := $(DATADIR)/processed
 FASTAS := $(addprefix ${PROCDIR}/,Topcons_Globular.fa Topcons_TMs.fa pdbtm.fa scop_glob.fa)
 CLUST := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.fa Topcons_TMs.clust.fa pdbtm.clust.fa scop_glob.clust.fa)
 MEMS := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.mems.pickle Topcons_TMs.clust.mems.pickle pdbtm.clust.mems.pickle scop_glob.clust.mems.pickle)
-A3MMEMS := $(PROCDIR)/pdbtm_a3m.mems.pickle $(PROCDIR)/scop_clust_a3m.mems.pickle
+A3MMEMS := $(PROCDIR)/pdbtm_a3m.mems.pickle $(PROCDIR)/scop_glob_a3m.mems.pickle
 MEMSRED := $(PROCDIR)/pdbtm_redundant.mems.pickle
 MEMSGLOB := $(PROCDIR)/scop_glob.mems.pickle
 STATS := $(addprefix ${STATDIR}/,pdbtm_stats.txt)
-LOGODDS := $(addprefix ${IMAGEDIR}/,Topcons_TMs_logodds.svg pdbtm_logodds.svg)
+# LOGODDS := $(addprefix ${IMAGEDIR}/,Topcons_TMs_logodds.svg pdbtm_logodds.svg)
 LISTS := $(addprefix ${STATDIR}/,pdbtm_redundant_1_list.txt pdbtm_redundant_2_list.txt)
 PROTS := $(addprefix ${STATDIR}/,pdbtm_same_pairs.txt pdbtm_opp_pairs.txt)
 RCSB := $(addprefix ${STATDIR}/,pdbtm_same_info.txt pdbtm_opp_info.txt)
 GLOBCHARGES := $(PROCDIR)/scop_glob.charges.pickle
 # MEMCHARGES := $(PROCDIR)/pdbtm.clust.charges.pickle
 A3MCHARGES := $(PROCDIR)/pdbtm_a3m.charges.pickle $(PROCDIR)/scop_glob_a3m.charges.pickle
-VISIMAGES := $(addprefix ${IMAGEDIR}/, pdbtm_vis.svg pdbtm_vis.png mem_cluster.svg mem_cluster.png)
+VISIMAGES := $(addprefix ${IMAGEDIR}/, pdbtm_vis.svg pdbtm_vis.png scop_glob_vis.svg scop_glob_vis.png mem_cluster.svg mem_cluster.png pdbtm_pairs.png pdbtm_pairs.svg)
 
-all: $(STATS) $(LISTS) $(LOGODDS) $(RCSB) $(VISIMAGES)
+all: $(STATS) $(LISTS) $(RCSB) $(VISIMAGES)
 
 # $(RAWDIR)/opm_poly.json:
 # 	wget -O $@ https://lomize-group-opm.herokuapp.com/classtypes/1/primary_structures?pageSize=3000
@@ -163,9 +163,9 @@ $(STATS) : $(STATDIR)/%_stats.txt : $(PROCDIR)/%.clust.mems.pickle | $(MEMS)
 $(RCSB) : %_info.txt : %_pairs.txt | $(PROTS)
 	./bin/rcsb_info.sh $< > $@
 
-$(LOGODDS) : $(PROCDIR)/Topcons_TMs.clust.mems.pickle $(PROCDIR)/pdbtm.clust.mems.pickle
-	./bin/logodd_barchart.py $(PROCDIR)/Topcons_TMs.clust.mems.pickle
-	./bin/logodd_barchart.py $(PROCDIR)/pdbtm.clust.mems.pickle
+# $(LOGODDS) : $(PROCDIR)/Topcons_TMs.clust.mems.pickle $(PROCDIR)/pdbtm.clust.mems.pickle
+# 	./bin/logodd_barchart.py $(PROCDIR)/Topcons_TMs.clust.mems.pickle
+# 	./bin/logodd_barchart.py $(PROCDIR)/pdbtm.clust.mems.pickle
 
 $(LISTS) : $(MEMSRED) $(3LINESRED)
 	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 1 > $(STATDIR)/pdbtm_redundant_1_list.txt
@@ -181,11 +181,14 @@ $(A3MCHARGES) : %.charges.pickle : %.mems.pickle | $(A3MMEMS)
 	./bin/make_charges_from_mems.py $< $@
 
 $(VISIMAGES) : $(A3MCHARGES) $(GLOBCHARGES)
-	./bin/visualizeAAs.py $(PROCDIR)/pdbtm_a3m.charges.pickle $(IMAGEDIR)/pdbtm_vis.svg "Charges"
-	./bin/visualizeAAs.py $(PROCDIR)/pdbtm_a3m.charges.pickle $(IMAGEDIR)/pdbtm_vis.png "Charges"
+	./bin/visualizeAAs.py $(PROCDIR)/pdbtm_a3m.charges.pickle $(IMAGEDIR)/pdbtm_vis.svg ""
+	./bin/visualizeAAs.py $(PROCDIR)/pdbtm_a3m.charges.pickle $(IMAGEDIR)/pdbtm_vis.png ""
+	./bin/visualizeAAs.py $(PROCDIR)/scop_glob_a3m.charges.pickle $(IMAGEDIR)/scop_glob_vis.svg ""
+	./bin/visualizeAAs.py $(PROCDIR)/scop_glob_a3m.charges.pickle $(IMAGEDIR)/scop_glob_vis.png ""
+	./bin/visualize_pairs.py $(PROCDIR)/pdbtm.clust.mems.pickle
 	# ./bin/visualizeAAs.py $(A3MCHARGES) $(IMAGEDIR)/pdbtm_vis.svg "Charges"
-	./bin/visualizeAAs_mem.py $(PROCDIR)/pdbtm_a3m.charges.pickle $(IMAGEDIR)/mem_cluster.svg "Membrane Charges"
-	./bin/visualizeAAs_mem.py $(PROCDIR)/pdbtm_a3m.charges.pickle $(IMAGEDIR)/mem_cluster.png "Membrane Charges"
+	./bin/visualizeAAs_mem.py $(PROCDIR)/pdbtm_a3m.charges.pickle $(IMAGEDIR)/mem_cluster.svg ""
+	./bin/visualizeAAs_mem.py $(PROCDIR)/pdbtm_a3m.charges.pickle $(IMAGEDIR)/mem_cluster.png ""
 	# ./bin/visualizeAAs_Compare.py $(GLOBCHARGES) $(A3MCHARGES) $(IMAGEDIR)/charges_vis.svg "pdbtm vs Globular"
 	# ./bin/visualizeAAs_Compare_all.py $(GLOBCHARGES) $(A3MCHARGES) $(IMAGEDIR)/mem_vs_glob.svg "pdbtm vs Globular"
 

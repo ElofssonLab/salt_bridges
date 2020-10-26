@@ -12,6 +12,7 @@ import argparse
 import sys
 # import random
 # import collections
+plt.rcParams.update({'font.size': 22})
 parser = argparse.ArgumentParser()
 
 # parser.add_argument("glob", type=str, help="In glob charges pickle")

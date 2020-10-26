@@ -9,6 +9,7 @@ import pickle
 import argparse
 # import random
 # import collections
+plt.rcParams.update({'font.size': 14})
 parser = argparse.ArgumentParser()
 
 parser.add_argument("charges", type=str, help="In charge pickle")
@@ -100,6 +101,14 @@ for i in range(8):
                      cmap="coolwarm",
                      center=0, cbar=show_cbar)
     ax.title.set_text("Step " + str(i + 1))
+    for x_tick in ax.get_xticklabels():
+        if x_tick.get_text() in charged:
+            x_tick.set_weight("bold")
+            x_tick.set_fontsize(14)
+    for y_tick in ax.get_yticklabels():
+        if y_tick.get_text() in charged:
+            y_tick.set_weight("bold")
+            y_tick.set_fontsize(14)
 plt.tight_layout()
 plt.subplots_adjust(top=0.93)
 f.savefig(out_image)
