@@ -79,7 +79,7 @@ for i in range(10):
     # ci.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d),
     # math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d)))
 # f, axarr = plt.subplots(3, 3, figsize=(16, 14))
-f, axarr = plt.subplots(2, 4, figsize=(24, 10))
+f, axarr = plt.subplots(2, 4, figsize=(30, 13))
 # axarr[-1, -1].axis('off')
 # axarr[-1, -2].axis('off')
 # plt.suptitle("TMs alpha helices, trimmed, pdb50, len > 15, V2")
