@@ -79,18 +79,18 @@ for i in range(10):
     # ci.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d),
     # math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d)))
 # f, axarr = plt.subplots(3, 3, figsize=(16, 14))
-f, axarr = plt.subplots(2, 4, figsize=(30, 13))
+f, axarr = plt.subplots(2, 4, figsize=(25, 12))
 # axarr[-1, -1].axis('off')
 # axarr[-1, -2].axis('off')
 # plt.suptitle("TMs alpha helices, trimmed, pdb50, len > 15, V2")
 plt.suptitle(args.title)
 for i in range(8):
     # print(i)
-    if i == 3 or i==7:
-        show_cbar=True
-    else:
-        show_cbar=False
-    # show_cbar = True
+    # if i == 3 or i==7:
+    #     show_cbar=True
+    # else:
+    #     show_cbar=False
+    show_cbar = False
     df = pd.DataFrame(logOdds[i],
                       index=[c for c in aas],
                       columns=[c for c in aas])
@@ -109,8 +109,15 @@ for i in range(8):
         if y_tick.get_text() in charged:
             y_tick.set_weight("bold")
             y_tick.set_fontsize(14)
-plt.tight_layout()
-plt.subplots_adjust(top=0.93)
+plt.tight_layout(rect=[0,0,24/25,1])
+# plt.subplots_adjust(top=0.93)
+cb_ax = f.add_axes([24/25, 0.044, 0.01, 0.9])
+sns.heatmap(df,
+            ax=ax,
+            vmin=-2,
+            vmax=2,
+            cmap="coolwarm",
+            center=0, cbar=True, cbar_ax=cb_ax)
 f.savefig(out_image)
 # f.savefig('images/'
 #           + 'logOddsGlobularTrimmed'
