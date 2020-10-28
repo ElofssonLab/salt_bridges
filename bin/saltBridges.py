@@ -6,6 +6,7 @@ import sys
 def parseLine(line):
     num = int(line[6:11])
     atom = line[13:16].strip()
+    alt_loc = line[16].strip()
     residue = line[17:20]
     chain = line[21]
     chainnum = int(line[22:26]) - 1  # Change to 0 based 
@@ -13,7 +14,7 @@ def parseLine(line):
     y = float(line[38:46])
     z = float(line[46:54])
     # print(num, chainnum, x, y, z)
-    return (x, y, z, num, atom, residue, chain, chainnum)
+    return (x, y, z, num, atom, residue, chain, chainnum, alt_loc)
 
 
 def calcEuclidianDist(x1, y1, z1, x2, y2, z2):
@@ -30,13 +31,21 @@ def calcSaltBridges(filename, chain, salt_bridge_cutoff = 4, con_req=2):
     NEG = ['ASP', 'GLU']
     with open(filename, 'r') as pdbFile:
         # chain = 'C'
+        multi_model = False
         for line in pdbFile:
+            #### Only use the first model in case of multiple
+            if line.startswith("MODEL"):
+                if multi_model:
+                    break
+                else:
+                    multi_model = True
             if line[:4] == 'ATOM'\
                and line[17:20] in ['ASP', 'GLU', 'ARG', 'LYS', 'HIS']\
                and line[13:15] in ['OD', 'OE', 'NH', 'NZ', 'NE', 'ND']:
                 if line[21] == chain:
                     currChain.append(parseLine(line))
-                    # parseLine(line)
+                    # print(line)
+                    # print(parseLine(line))
                 else:
                     otherChains.append(parseLine(line))
 

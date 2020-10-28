@@ -209,7 +209,7 @@ for key in sortedProt:
             if (bridge[0][3] == globalPlace
                and bridge[0][2] == chain)\
                or (bridge[0][3] == (globalPlace + i)
-               and bridge[0][2] == chain):
+               and bridge[0][2] == chain) and (bridge[0][4] == bridge[1][4]):
                 # and aaMap[bridge[0][1]] == aa:
                 # print(bridge)
                 # print(str(i))
