@@ -209,7 +209,7 @@ for key in sortedProt:
             if (bridge[0][3] == globalPlace
                and bridge[0][2] == chain)\
                or (bridge[0][3] == (globalPlace + i)
-               and bridge[0][2] == chain) and (bridge[0][4] == bridge[1][4]):
+               and bridge[0][2] == chain):
                 # and aaMap[bridge[0][1]] == aa:
                 # print(bridge)
                 # print(str(i))
@@ -222,11 +222,22 @@ for key in sortedProt:
                       str(memNumber) + ' membrane region)',
                       'dG ' + '{0:.2f}'.format(dG),
                       sep=', ')
+                if len(bridge[0][4]) > 0:
+                    first_alt = "alt. conf {}".format(bridge[0][4])
+                else:
+                    first_alt = ''
+                if len(bridge[1][4]) > 0:
+                    second_alt = "alt. conf {}".format(bridge[1][4])
+                else:
+                    second_alt = ''
+
                 print(bridge[0][0],
+                      first_alt,
                       bridge[0][1],
                       bridge[0][2],
                       bridge[0][3],
                       bridge[1][0],
+                      second_alt,
                       bridge[1][1],
                       bridge[1][2],
                       bridge[1][3],
