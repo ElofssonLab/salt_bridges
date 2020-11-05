@@ -386,6 +386,7 @@ df_opp = pd.DataFrame(opp_hist_data_sanH, columns=["Step"])
 df_opp["Type"] = "Opp"
 df = pd.concat([df_same, df_opp], ignore_index=True)
 df = df[df["Step"] < 9]
+df["Step"] = "i+" + df["Step"].astype(int).astype(str)
 
 nodes = [0, 0.25, 0.5, 0.75, 1]
 colors = ["#FDE725FF", "#440154FF", "#FDE725FF"]
@@ -398,7 +399,7 @@ degree_cmap = mpl.colors.ListedColormap(mpl.cm.get_cmap('viridis_r').colors + mp
 # grid = plt.GridSpec(3,6, wspace=0.4, hspace=0.1)
 sns.set_theme(style="white", context="paper")
 # sns.set(fontsize=14)
-f, axes = plt.subplots(5,1,figsize=(6.75, 12), gridspec_kw={"height_ratios":[64,1,16,16,16]})
+f, axes = plt.subplots(5,1,figsize=(7, 12), gridspec_kw={"height_ratios":[64,1,16,16,16]})
 h = sns.histplot(df, x="Step", color="grey", hue="Type", discrete=True, multiple="stack", shrink=.8, ax=axes[0])
 axes[0].get_legend().remove()
 hatches = {0:"///", 1:"\\\\\\", 2:"|||"}
@@ -416,7 +417,7 @@ axes[1].set_visible(False)
 y_r = [logOdds[i] - ci[i][0] for i in range(len(ci))]
 threshold = 0
 values = np.array(logOdds)
-x = range(1, len(values)+1)
+x = ['i+' + str(x) for x in range(1, len(values)+1)]
 above_threshold = np.maximum(values - threshold, 0)
 below_threshold = np.minimum(values, threshold)
 axes[2].bar(x, logOdds, yerr=y_r, color=['g', 'r', 'g', 'g', 'r', 'r', 'g', 'r'], alpha=0.8, align='center')
@@ -428,7 +429,7 @@ axes[2].axhline(xmax=8, color='black')
 y_r = [logOddsOpp[i] - ciOpp[i][0] for i in range(len(ciOpp))]
 threshold = 0
 values = np.array(logOddsOpp)
-x = range(1, len(values)+1)
+x = ['i+' + str(x) for x in range(1, len(values)+1)]
 above_threshold = np.maximum(values - threshold, 0)
 below_threshold = np.minimum(values, threshold)
 axes[3].bar(x, logOddsOpp, yerr=y_r, color=['g', 'r', 'g', 'g', 'r', 'r', 'g', 'r'], alpha=0.8, align='center')
@@ -440,7 +441,7 @@ axes[3].axhline(xmax=8, color='black')
 y_r = [logOddsSame[i] - ciSame[i][0] for i in range(len(ciSame))]
 threshold = 0
 values = np.array(logOddsSame)
-x = range(1, len(values)+1)
+x = ['i+' + str(x) for x in range(1, len(values)+1)]
 above_threshold = np.maximum(values - threshold, 0)
 below_threshold = np.minimum(values, threshold)
 axes[4].bar(x, logOddsSame, yerr=y_r, color=['g', 'r', 'g', 'g', 'r', 'r', 'g', 'r'], alpha=0.8, align='center')
@@ -453,7 +454,7 @@ axes[2].set_xticks([])
 axes[2].xaxis.set_tick_params(length=0)
 axes[3].xaxis.set_tick_params(length=0)
 axes[3].set_xticks([])
-axes[4].set_xticks([1, 2, 3, 4, 5, 6, 7, 8])
+# axes[4].set_xticks([1, 2, 3, 4, 5, 6, 7, 8])
 
 degree_cmap = mpl.colors.ListedColormap(mpl.cm.get_cmap('viridis_r').colors + mpl.cm.get_cmap('viridis').colors)
 for ax in [axes[2], axes[3], axes[4]]:
@@ -467,22 +468,43 @@ for ax in [axes[2], axes[3], axes[4]]:
 ###########################################
 plt.tight_layout()
 ####################################
-#### Add the color wheel ###########
-c_ax = f.add_axes([0.65, 0.72, 0.25,0.25],projection='polar')
+# #### Add the color wheel ###########
+degrees = np.linspace(0,2*np.pi, 18, endpoint=False).tolist()
+theta = [2*np.pi*((x%360)/360) for x in range(0, 1701, 100)]
+order = [0, 11, 4, 15, 8, 1, 12, 5, 16, 9, 2, 13, 6, 17, 10, 3, 14, 7]
+c_ax = f.add_axes([0.60, 0.68, 0.40,0.40],projection='polar')
 c_ax.set_theta_offset(np.pi/2)
 c_ax.set_theta_direction(-1)
-norm = mpl.colors.Normalize(0.0, 2*np.pi)
-cb = mpl.colorbar.ColorbarBase(c_ax, cmap=degree_cmap,
-                                   norm=norm,
-                                   orientation='horizontal')
-cb.set_ticks(np.linspace(0,2*np.pi, 14, endpoint=False).tolist())
-cb.set_ticklabels(["", " ", "Step 4", " ", "Step 8", "Step 1", " ", "Step 5", " ", " ", "Step 2", " ", "Step 6", " ", " ", "Step 3", " ", "Step 7"])
-cb.ax.plot([0,0],[0,1])
-cb.ax.set_title("First charged residue\n\n")
-cb.ax.xaxis.set_tick_params(pad=16, length=0)
-cb.outline.set_visible(False)                                 
-c_ax.set_rlim([-2,1])
+# norm = mpl.colors.Normalize(0.0, 2*np.pi)
+# cb = mpl.colorbar.ColorbarBase(c_ax, cmap=degree_cmap,
+#                                    norm=norm,
+#                                    orientation='horizontal')
+# cb.set_ticks(np.linspace(0,2*np.pi, 14, endpoint=False).tolist())
+# cb.set_ticklabels(["", " ", "Step 4", " ", "Step 8", "Step 1", " ", "Step 5", " ", " ", "Step 2", " ", "Step 6", " ", " ", "Step 3", " ", "Step 7"])
+# cb.ax.plot([0,0],[0,1])
+# cb.ax.set_title("First charged residue\n\n")
+# cb.ax.xaxis.set_tick_params(pad=16, length=0)
+# cb.outline.set_visible(False)                                 
+# c_ax.set_rlim([-2,1])
 ####################################
+c_ax.plot([x for _,x in sorted(zip(order, degrees))][:9],len(degrees[:9])*[0.9], zorder=1, linestyle='--', color='lightgray')
+first = c_ax.scatter(theta[:9], len(theta[:9])*[0.9], c=theta[:9], s=300, cmap=degree_cmap, zorder=2, alpha=0.5,edgecolor='black')
+second = c_ax.scatter(theta[9:], len(theta[9:])*[0.9], s=300, color="lightgray", zorder=3,edgecolor='black')
+c_ax.xaxis.set_tick_params(pad=16, length=0)
+c_ax.set_xticks(degrees)
+c_ax.get_yaxis().set_visible(False)
+# ax.set_xticklabels(["", "i+11", "i+4", "i+15", "i+8", "i+1", "i+12", "i+5", "i+16",
+#                    "i+9", "i+2", "i+13", "i+6", "i+17", "i+10", "i+3", "i+14", "i+7"])
+c_ax.get_xaxis().set_visible(False)
+c_ax.grid(False)
+c_ax.spines['polar'].set_visible(False)
+c_ax.set_rlim([0,1.1])
+for l,x,y in sorted(zip(order, degrees, len(degrees)*[0.9]))[:9]:
+    if l == 0:
+        label = "i"
+    else:
+        label = "+{}".format(l)
+    c_ax.annotate(label, (x,y), ha="center", va="center",weight='bold')
 #### adding a) and b) text
 plt.text(-0.05, 0.95, "a)", fontsize=16, fontdict={"weight":'bold'}, transform=axes[0].transAxes)
 plt.text(-0.05, 0.10, "b)", fontsize=16, fontdict={"weight":'bold'}, transform=axes[1].transAxes)
