@@ -24,7 +24,7 @@ MEMSRED := $(PROCDIR)/pdbtm_redundant.mems.pickle
 MEMSGLOB := $(PROCDIR)/scop_glob.mems.pickle
 STATS := $(addprefix ${STATDIR}/,pdbtm_stats.txt)
 # LOGODDS := $(addprefix ${IMAGEDIR}/,Topcons_TMs_logodds.svg pdbtm_logodds.svg)
-LISTS := $(addprefix ${STATDIR}/,pdbtm_redundant_1_list.txt pdbtm_redundant_2_list.txt)
+LISTS := $(addprefix ${STATDIR}/,pdbtm_redundant_1_list.txt pdbtm_redundant_1_tolerant_list.txt pdbtm_redundant_2_list.txt)
 PROTS := $(addprefix ${STATDIR}/,pdbtm_same_pairs.txt pdbtm_opp_pairs.txt)
 RCSB := $(addprefix ${STATDIR}/,pdbtm_same_info.txt pdbtm_opp_info.txt)
 GLOBCHARGES := $(PROCDIR)/scop_glob.charges.pickle
@@ -153,6 +153,7 @@ $(A3MMEMS) : $(3LINESPDBTM) $(3LINESGLOB)
 
 $(MEMSRED) : %.mems.pickle: %.3line | $(3LINESRED)
 	./bin/make_mems_from_3line.py $< $@
+	./bin/make_mems_from_3line.py $< $(PROCDIR)/pdbtm_redundant_tolerant.mems.pickle --t True
 
 $(MEMSGLOB) : %.mems.pickle: %.3line | $(3LINESGLOB)
 	./bin/make_mems_from_3line.py $< $@
@@ -169,6 +170,7 @@ $(RCSB) : %_info.txt : %_pairs.txt | $(PROTS)
 
 $(LISTS) : $(MEMSRED) $(3LINESRED)
 	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 1 > $(STATDIR)/pdbtm_redundant_1_list.txt
+	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant_tolerant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 1 > $(STATDIR)/pdbtm_redundant_1_tolerant_list.txt -t True
 	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 2 > $(STATDIR)/pdbtm_redundant_2_list.txt
 
 $(GLOBCHARGES) : $(MEMSGLOB)

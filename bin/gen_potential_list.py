@@ -18,6 +18,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("mems_pickle", type=str, help="Pickle file of membranes")
 parser.add_argument("threeline", type=str, help="3line in file")
 parser.add_argument("-b", "--bridges", type=int, default=2, help="Required connections per bridge")
+parser.add_argument("-t", "--tolerant", type=bool, default=False, help="Use tolerant membranes (also include m, not just M)")
 
 args = parser.parse_args()
 mem_length = 17
@@ -70,12 +71,16 @@ def countMems(topoStr):
     return num
 
 
-def whatMem(topoStr, aaIndex):
+def whatMem(topoStr, aaIndex, tol=False):
+    if tol:
+        mem_letters = 'Mm'
+    else:
+        mem_letters = 'M'
     memNum = 1
     currTopo = topoStr[0]
     for i, topo in enumerate(topoStr):
         if topo != currTopo:
-            if currTopo == 'M':
+            if currTopo in mem_letters:
                 if i >= aaIndex:
                     return memNum
                 memNum += 1
@@ -201,7 +206,7 @@ for key in sortedProt:
             bridges = pickle.load(open(saltpath, 'rb'))
         
         numMem = countMems(TMdata[pureKey][1])
-        memNumber = whatMem(TMdata[pureKey][1], globalPlace)
+        memNumber = whatMem(TMdata[pureKey][1], globalPlace, args.tolerant)
         span = 'multi span' if numMem > 1 else 'single span'
         for bridge in bridges:
             # print("In bridges")

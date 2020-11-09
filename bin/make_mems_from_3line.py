@@ -8,8 +8,14 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument("in_file", type=argparse.FileType('r'), help="3line infile")
 parser.add_argument("out_file", type=str, help="Output file")
+parser.add_argument("-t", "--tolerance", type=bool, default=False, help="Be tolerant for dssp fault?")
 
 args = parser.parse_args()
+
+if args.tolerance:
+    accept_letters = 'MmH'
+else:
+    accept_letters = 'MH'
 
 data = {}
 helicies = {}
@@ -36,7 +42,7 @@ for line in args.in_file:
         helices = []
         for i, c in enumerate(topo):
             if c != curr_letter:
-                if curr_letter in 'MH':  # Also include H to have compatability wityh dssp globular topology
+                if curr_letter in accept_letters:  # Also include H to have compatability wityh dssp globular topology
                     memSeq = seq[start_pos:i]
                     if 'X' not in memSeq and\
                        'U' not in memSeq and\
