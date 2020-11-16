@@ -30,7 +30,7 @@ RCSB := $(addprefix ${STATDIR}/,pdbtm_same_info.txt pdbtm_opp_info.txt)
 GLOBCHARGES := $(PROCDIR)/scop_glob.charges.pickle
 # MEMCHARGES := $(PROCDIR)/pdbtm.clust.charges.pickle
 A3MCHARGES := $(PROCDIR)/pdbtm_a3m.charges.pickle $(PROCDIR)/scop_glob_a3m.charges.pickle
-VISIMAGES := $(addprefix ${IMAGEDIR}/, pdbtm_vis.svg pdbtm_vis.png scop_glob_vis.svg scop_glob_vis.png mem_cluster.svg mem_cluster.png mem_cluster_full.svg mem_cluster_full.png pdbtm_pairs.png pdbtm_pairs.svg)
+VISIMAGES := $(addprefix ${IMAGEDIR}/, pdbtm_vis.svg pdbtm_vis.png scop_glob_vis.svg scop_glob_vis.png mem_cluster.svg mem_cluster.png mem_cluster_full.svg mem_cluster_full.png pdbtm_pairs.png pdbtm_pairs.svg pdbtm_stats.png pdbtm_stats.svg pdbtm_stats_red.png pdbtm_stats_red.svg)
 
 all: $(STATS) $(LISTS) $(RCSB) $(VISIMAGES)
 
@@ -193,6 +193,10 @@ $(VISIMAGES) : $(A3MCHARGES) $(GLOBCHARGES)
 	./bin/visualizeAAs_mem.py $(PROCDIR)/pdbtm_a3m.charges.pickle $(IMAGEDIR)/mem_cluster ""
 	# ./bin/visualizeAAs_Compare.py $(GLOBCHARGES) $(A3MCHARGES) $(IMAGEDIR)/charges_vis.svg "pdbtm vs Globular"
 	# ./bin/visualizeAAs_Compare_all.py $(GLOBCHARGES) $(A3MCHARGES) $(IMAGEDIR)/mem_vs_glob.svg "pdbtm vs Globular"
+	./bin/flow_image.py $(STATDIR)/pdbtm.clust.mems.stats.pickle "PDBTM non-redundant" $(IMAGEDIR)/pdbtm_stats.png
+	./bin/flow_image.py $(STATDIR)/pdbtm.clust.mems.stats.pickle "PDBTM non-redundant" $(IMAGEDIR)/pdbtm_stats.svg 
+	./bin/flow_image.py $(STATDIR)/pdbtm_redundant.mems.stats.pickle "PDBTM redundant" $(IMAGEDIR)/pdbtm_stats_red.png
+	./bin/flow_image.py $(STATDIR)/pdbtm_redundant.mems.stats.pickle "PDBTM redundant" $(IMAGEDIR)/pdbtm_stats_red.svg 
 
 .PHONY: clean deepclean
 clean:
