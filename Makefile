@@ -160,6 +160,7 @@ $(MEMSGLOB) : %.mems.pickle: %.3line | $(3LINESGLOB)
 
 $(STATS) : $(STATDIR)/%_stats.txt : $(PROCDIR)/%.clust.mems.pickle | $(MEMS)
 	./bin/statsCharges.py $< > $@
+	./bin/statsCharges.py $(PROCDIR)/pdbtm_redundant.mems.pickle > $(STATDIR)/pdbtm_redundant_stats.txt
 
 $(RCSB) : %_info.txt : %_pairs.txt | $(PROTS)
 	./bin/rcsb_info.sh $< > $@

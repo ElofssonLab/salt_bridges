@@ -627,6 +627,47 @@ for i in range(1,11):
     print("Segments with {} charged amino acids, trimmed:".format(i).ljust(70),
           seg_charges_sanH_trimmed.count(i),
           '(', seg_charges_trimmed.count(i), ')')
+
+
+#######################
+# Write stats file for reuse with graphics
+#######################
+stats_data = {}
+stats_data["total_prots"] = total_num_proteins
+stats_data["total_segments"] = total_segments
+stats_data["total_prots_17"] = num_prots
+stats_data["total_segments_17"] = number_of_segs
+stats_data["prots_with_charge"] = len(proteins_with_charges_full_sanH)
+stats_data["prots_with_charge_trimmed"] = len(proteins_with_charges_trimmed_sanH)
+stats_data["prots_with_multi_charge"] = len(proteins_with_multi_charges_full_sanH)
+stats_data["prots_with_multi_charge_trimmed"] = len(proteins_with_multi_charges_trimmed_sanH)
+stats_data["seg_with_charge"] = segs_with_charges_full_sanH
+stats_data["seg_with_charge_trimmed"] = segs_with_charges_trimmed_sanH
+stats_data["seg_with_multi_charge"] = len(segs_with_multi_charges_full_sanH)
+stats_data["seg_with_multi_charge_trimmed"] = len(segs_with_multi_charges_trimmed_sanH)
+stats_data["seg_with_charge_in_1"] = seg_charges_sanH.count(1)
+stats_data["seg_with_charge_in_2_trimmed"] = seg_charges.count(1)
+stats_data["seg_with_charge_in_2"] = seg_charges_sanH.count(2)
+stats_data["seg_with_charge_in_3_trimmed"] = seg_charges.count(2)
+stats_data["seg_with_charge_in_3"] = seg_charges_sanH.count(3)
+stats_data["seg_with_charge_in_4_trimmed"] = seg_charges.count(3)
+stats_data["seg_with_charge_in_4"] = seg_charges_sanH.count(4)
+stats_data["seg_with_charge_in_4_trimmed"] = seg_charges.count(4)
+stats_data["seg_with_charge_in_5"] = seg_charges_sanH.count(5)
+stats_data["seg_with_charge_in_5_trimmed"] = seg_charges.count(5)
+stats_data["num_same_pairs_in_1"] = len(same_steps_trimmed_sanH[0])
+stats_data["num_same_pairs_in_2"] = len(same_steps_trimmed_sanH[1])
+stats_data["num_same_pairs_in_3"] = len(same_steps_trimmed_sanH[2])
+stats_data["num_same_pairs_in_4"] = len(same_steps_trimmed_sanH[3])
+stats_data["num_same_pairs_in_5"] = len(same_steps_trimmed_sanH[4])
+stats_data["num_opp_pairs_in_1"] = len(opp_steps_trimmed_sanH[0])
+stats_data["num_opp_pairs_in_2"] = len(opp_steps_trimmed_sanH[1])
+stats_data["num_opp_pairs_in_3"] = len(opp_steps_trimmed_sanH[2])
+stats_data["num_opp_pairs_in_4"] = len(opp_steps_trimmed_sanH[3])
+stats_data["num_opp_pairs_in_5"] = len(opp_steps_trimmed_sanH[4])
+save_file = "stats/" + args.pickle_file.split('/')[-1][:-6] + "_stats.pickle"
+with open(save_file, 'wb') as out_file:
+    pickle.dump(stats_data, out_file)
 # print()
 # print("Number of charges and count:")
 # print(pd.Series(segs_with_multi_charges_full_sanH).value_counts().to_string())
