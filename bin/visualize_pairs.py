@@ -16,6 +16,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.colors import LinearSegmentedColormap
+import scipy
 # from matplotlib.sankey import Sankey
 
 plt.rcParams.update({'font.size': 14})
@@ -329,17 +330,30 @@ for i in range(8):
     c = chargeCount[i][0]*chargeCount[i][1]             # How many baseline pairs for this distance?
     d = aaCount[i]**2       # Number of non-hits for baseline
     odds = (a/b)/(c/d)
-    logOdds.append(math.log(odds))
-    ci.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d), math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d)))
-
+    logOdd = math.log(odds)
+    logOdds.append(logOdd)
+    SE = math.sqrt(1/a+1/b+1/c+1/d)
+    z = abs(logOdd/SE)  ## Two sided
+    pm = math.exp(-0.717*z-0.416*z**2)*20*20*8*2 ## two sided
+    p = (1-scipy.stats.norm.cdf(abs(z)))*2
+    psf = (scipy.stats.norm.sf(abs(z)))*2
+    ci.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d), math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d), p))
+    print("Total {}: logOdds: {} SE: {} p: {:.5f}".format(i+1, logOdd, SE, psf))
     ###### For Opp charges ######
     a = hitcounter[i]                 # Number of opposite pairs, only opposite
     b = len(pairs[i])       # Number of total observed pairs
     c = poschargeCount[i][0]*negchargeCount[i][1] + negchargeCount[i][0]*poschargeCount[i][1]  # Only calculate opposite pairs
     d = aaCount[i]**2       # Number of non-hits for baseline
     odds = (a/b)/(c/d)
-    logOddsOpp.append(math.log(odds))
-    ciOpp.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d), math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d)))
+    logOdd = math.log(odds)
+    logOddsOpp.append(logOdd)
+    SE = math.sqrt(1/a+1/b+1/c+1/d)
+    z = abs(logOdd/SE)  ## Two sided
+    pm = math.exp(-0.717*z-0.416*z**2)*20*20*8*2 ## two sided
+    p = (1-scipy.stats.norm.cdf(abs(z)))*2
+    psf = (scipy.stats.norm.sf(abs(z)))*2
+    ciOpp.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d), math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d), p))
+    print("Opp {}: logOdds: {} SE: {} p: {:.5f}".format(i+1, logOdd, SE, psf))
 
     ###### For same charges ######
     a = samehitcounter[i]                 # Number of same pairs, only same
@@ -352,8 +366,15 @@ for i in range(8):
     if c == 0:
         c = 1
     odds = (a/b)/(c/d)
-    logOddsSame.append(math.log(odds))
-    ciSame.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d), math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d)))
+    logOdd = math.log(odds)
+    logOddsSame.append(logOdd)
+    SE = math.sqrt(1/a+1/b+1/c+1/d)
+    z = abs(logOdd/SE)  ## Two sided
+    pm = math.exp(-0.717*z-0.416*z**2)*20*20*8*2 ## two sided
+    p = (1-scipy.stats.norm.cdf(abs(z)))*2
+    psf = (scipy.stats.norm.sf(abs(z)))*2
+    ciSame.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d), math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d), p))
+    print("Same {}: logOdds: {} SE: {} p: {:.5f}".format(i+1, logOdd, SE, psf))
 ################################################
 ##########
 # Graphs #
