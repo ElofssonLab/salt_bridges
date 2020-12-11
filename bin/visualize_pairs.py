@@ -313,6 +313,7 @@ for key, membranes in helices.items():
 
 num_prots = len(protein_set)
 
+
 ################################################
 ### From logodd_barchart.py, could be refactored better
 totalhits = np.array(hitcounter) + np.array(samehitcounter)
@@ -334,11 +335,11 @@ for i in range(8):
     logOdds.append(logOdd)
     SE = math.sqrt(1/a+1/b+1/c+1/d)
     z = abs(logOdd/SE)  ## Two sided
-    pm = math.exp(-0.717*z-0.416*z**2)*20*20*8*2 ## two sided
-    p = (1-scipy.stats.norm.cdf(abs(z)))*2
-    psf = (scipy.stats.norm.sf(abs(z)))*2
-    ci.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d), math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d), p))
-    print("Total {}: logOdds: {} SE: {} p: {:.5f}".format(i+1, logOdd, SE, psf))
+    # pm = math.exp(-0.717*z-0.416*z**2)*20*20*8*2 ## two sided
+    # p = (1-scipy.stats.norm.cdf(abs(z)))*2
+    psf = (scipy.stats.norm.sf(abs(z)))*2*20*20*8  ## Make simple multiple hypothesis correction
+    ci.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d), math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d), psf))
+    print("Total {}: logOdds: {:.3f} SE: {:.3f} p: {:.5f}".format(i+1, logOdd, SE, psf))
     ###### For Opp charges ######
     a = hitcounter[i]                 # Number of opposite pairs, only opposite
     b = len(pairs[i])       # Number of total observed pairs
@@ -349,11 +350,11 @@ for i in range(8):
     logOddsOpp.append(logOdd)
     SE = math.sqrt(1/a+1/b+1/c+1/d)
     z = abs(logOdd/SE)  ## Two sided
-    pm = math.exp(-0.717*z-0.416*z**2)*20*20*8*2 ## two sided
-    p = (1-scipy.stats.norm.cdf(abs(z)))*2
-    psf = (scipy.stats.norm.sf(abs(z)))*2
-    ciOpp.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d), math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d), p))
-    print("Opp {}: logOdds: {} SE: {} p: {:.5f}".format(i+1, logOdd, SE, psf))
+    # pm = math.exp(-0.717*z-0.416*z**2)*20*20*8*2 ## two sided
+    # p = (1-scipy.stats.norm.cdf(abs(z)))*2
+    psf = (scipy.stats.norm.sf(abs(z)))*2*20*20*8  ## Make simple multiple hypothesis correction
+    ciOpp.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d), math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d), psf))
+    print("Opp {}: logOdds: {:.3f} SE: {:.3f} p: {:.5f}".format(i+1, logOdd, SE, psf))
 
     ###### For same charges ######
     a = samehitcounter[i]                 # Number of same pairs, only same
@@ -370,11 +371,11 @@ for i in range(8):
     logOddsSame.append(logOdd)
     SE = math.sqrt(1/a+1/b+1/c+1/d)
     z = abs(logOdd/SE)  ## Two sided
-    pm = math.exp(-0.717*z-0.416*z**2)*20*20*8*2 ## two sided
-    p = (1-scipy.stats.norm.cdf(abs(z)))*2
-    psf = (scipy.stats.norm.sf(abs(z)))*2
-    ciSame.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d), math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d), p))
-    print("Same {}: logOdds: {} SE: {} p: {:.5f}".format(i+1, logOdd, SE, psf))
+    # pm = math.exp(-0.717*z-0.416*z**2)*20*20*8*2 ## two sided
+    # p = (1-scipy.stats.norm.cdf(abs(z)))*2
+    psf = (scipy.stats.norm.sf(abs(z)))*2*20*20*8  ## Make simple multiple hypothesis correction
+    ciSame.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d), math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d), psf))
+    print("Same {}: logOdds: {:.3f} SE: {:.3f} p: {:.5f}".format(i+1, logOdd, SE, psf))
 ################################################
 ##########
 # Graphs #
