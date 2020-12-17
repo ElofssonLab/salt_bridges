@@ -51,8 +51,9 @@ def calcSaltBridges(filename, chain, salt_bridge_cutoff = 4, con_req=2):
 
     for i, res in enumerate(currChain):
         for secRes in currChain[i + 1:]:
-            if secRes[7] - res[7] > 7:
-                break
+            # Check ALL pairings for salt bridges
+            # if secRes[7] - res[7] > 7:
+            #     break
             # If it is the same residue OR the first and second residues are NOT opposite charged
             # continue to the next
             if res[7] == secRes[7]\

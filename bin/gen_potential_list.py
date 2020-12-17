@@ -208,13 +208,27 @@ for key in sortedProt:
         numMem = countMems(TMdata[pureKey][1])
         memNumber = whatMem(TMdata[pureKey][1], globalPlace, args.tolerant)
         span = 'multi span' if numMem > 1 else 'single span'
+        # if pureKey[:4] == "6RQP":
+        #     print(globalPlace ,chain ,i, aa, secAA ,place, midMem)
         for bridge in bridges:
             # print("In bridges")
-            # print(bridge)
+            # if pureKey[:4] == "6RQP":
+            #     print(bridge)
+            # sys.exit()
+            # if bridge[1][3]-bridge[0][3] == i:
+            if bridge[1][3] - bridge[0][3] > 7:
+                continue
             if (bridge[0][3] == globalPlace
                and bridge[0][2] == chain)\
                or (bridge[0][3] == (globalPlace + i)
                and bridge[0][2] == chain):
+            # if ((bridge[0][3] == globalPlace
+            #    and bridge[0][2] == chain)\
+            #    and (bridge[1][3] == (globalPlace + i)
+            #        and bridge[1][2] == chain)) or ((bridge[0][3] == globalPlace + i
+            #    and bridge[0][2] == chain)\
+            #    and (bridge[1][3] == (globalPlace + 2*i)
+            #        and bridge[1][2] == chain)):
                 # and aaMap[bridge[0][1]] == aa:
                 # print(bridge)
                 # print(str(i))
@@ -247,6 +261,7 @@ for key in sortedProt:
                       bridge[1][2],
                       bridge[1][3],
                       "{0:.2f}".format(bridge[2]) + "Å")
+        # sys.exit()
     # print(bridges)
         if does_have_saltbridge:
             print(TMdata[pureKey][0])
