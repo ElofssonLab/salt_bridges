@@ -18,6 +18,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("mems_pickle", type=str, help="Pickle file of membranes")
 parser.add_argument("threeline", type=str, help="3line in file")
 parser.add_argument("-b", "--bridges", type=int, default=2, help="Required connections per bridge")
+parser.add_argument("-g", "--gap", type=int, default=7, help="Must be within number of residues, (0 = unlimited)")
 parser.add_argument("-t", "--tolerant", type=bool, default=False, help="Use tolerant membranes (also include m, not just M)")
 
 args = parser.parse_args()
@@ -216,7 +217,7 @@ for key in sortedProt:
             #     print(bridge)
             # sys.exit()
             # if bridge[1][3]-bridge[0][3] == i:
-            if bridge[1][3] - bridge[0][3] > 7:
+            if args.gap != 0 and bridge[1][3] - bridge[0][3] > args.gap:
                 continue
             if (bridge[0][3] == globalPlace
                and bridge[0][2] == chain)\
