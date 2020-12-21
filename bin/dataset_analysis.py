@@ -23,7 +23,7 @@ parser.add_argument("-t", "--tolerant", type=bool, default=False, help="Use tole
 args = parser.parse_args()
 mem_length = 17
 
-stats = {'aas':0, 'chr':0, 'pos':0, 'neg':0, 'pospair':0, 'negpair':0, 'chargedpair':0, 'opppair':0}
+stats = {'aas':0, 'chr':0, 'pos':0, 'neg':0, 'pospair':0, 'negpair':0, 'chargedpair':0, 'opppair':0, 'polar':0}
 con_req = args.bridges  # How many saltbridge connections to make a bridge? Default 2
 aaMap = {'ARG': 'R',
          'HIS': 'H',
@@ -55,7 +55,7 @@ chargedplus = 'KRDEH'
 positiveplus = 'RHK'
 helicies = pickle.load(open(args.mems_pickle,
                             'rb'))
-
+charged_pair_res = set()
 
 def countMems(topoStr):
     num = 0
@@ -89,6 +89,7 @@ def whatMem(topoStr, aaIndex, tol=False):
 
 
 aas = 'ACDEFGHIKLMNPQRSTVWY'
+polaraas="DEKRHNPQ"
 proteinsExamples = {}
 proteinSet = set()
 fullproteinSet = set()
@@ -120,9 +121,11 @@ with open(args.threeline, 'r') as TMHandle:
         rowNum += 1
 
 
+mems_with_charge = 0
 for key, membranes in helicies.items():
     totalMems += len(membranes)
     for mem_place, mem in membranes:
+        pair_found = False
 
         fullproteinSet.add(key)
         if len(mem) < mem_length:
@@ -142,6 +145,8 @@ for key, membranes in helicies.items():
 #         if mem in TMdata[key][0]:
         for place, aa in enumerate(midMem):
             stats['aas'] += 1
+            if aa in polaraas:
+                stats['polar'] += 1
             if aa in charged:
                 stats['chr'] += 1
             if aa in positive:
@@ -158,6 +163,7 @@ for key, membranes in helicies.items():
                 secAA = midMem[place + i]
                 if aa in charged and secAA in charged:
                     deltaG = dgCalc.calc_segment_DG(fullMem)
+                    pair_found = True
                     # Add five is midmem
                     globalPlace = mem_place + edge
                     # globalPlace = TMdata[key][0].index(midMem)
@@ -182,16 +188,27 @@ for key, membranes in helicies.items():
                         stats['opppair'] += 1
                     if aa in charged and secAA in charged:
                         stats['chargedpair'] += 1
+                    charged_pair_res.add(key + '_' + str(globalPlace))
+                    charged_pair_res.add(key + '_' + str(globalPlace+i))
                 # aaHits[i - 1][first][second] += 1
                 # # Count both first and second AA for each gap sized i
                 # aaCount[0][i - 1][first] += 1
                 # aaCount[1][i - 1][second] += 1
+        if pair_found == True:
+            mems_with_charge += 1
 print("Number of proteins: ", len(helicies.keys()))
 print("Total membranes: ", totalMems)
 print("Long membranes: ", longMems)
 print("Correct membranes: ", correctMems)
 print("Proteins that contain charged pairs: ", len(proteinSet))
-print("Membrane regions with charged pairs: ", len(proteinsExamples))
+print("Membrane regions with charged pairs: ", mems_with_charge)
+print("Number of AAs in core region: {}".format(stats['aas']))
+print("Number of polar AAs in core region: {} ({:.1%})".format(stats['polar'],stats['polar']/stats['aas']))
+print("Number of charged AAs in core region: {} ({:.1%})".format(stats['chr'],stats['chr']/stats['aas']))
+print("Number of charged pair AAs: {} ({:.1%}) ({:.1%})".format(len(charged_pair_res), len(charged_pair_res)/stats['aas'], len(charged_pair_res)/stats['chr']))
+print("Number of charged pairs: {}".format(stats["chargedpair"]))
+print("Number of opp pairs: {} ({:.1%})".format(stats["opppair"], stats["opppair"]/stats['chargedpair']))
+# print(charged_pair_res)
 
 sortedProt = sorted(proteinsExamples.keys())
 debug = False
@@ -230,95 +247,104 @@ print("Has mems and bridges {}".format(len(has_bridge & fullproteinSet)))
 print("Has long mems and bridges {}".format(len(has_bridge & longproteinSet)))
 print("Has long mems,charge and bridges {}".format(len(has_bridge & proteinSet)))
 print("Has long mems,charge and bridges within 7: {}".format(len(has_bridge_within_7 & proteinSet)))
-# for key in sortedProt:
-#     midMem, place, i, globalPlace, aa, secAA, dG = proteinsExamples[key]
-#     pureKey = key[:5]
-# 
-#     # if pureKey[:4] not in topcons_added_keys:
-#     #     continue
-#     chain = key[4]
-#     filename = pureKey[:4] + '.pdb'
-#     filepath = 'data/pdbFiles/' + pureKey[:4] + '.pdb'
-#     saltpath = 'data/bridgeFiles/' + pureKey[:4] + chain + str(con_req) + 'Bridges.pickle'
-# 
-#     if not os.path.exists(filepath):
-#         try:
-#             urllib.request.urlretrieve(pdbURL + filename, filepath)
-#         except HTTPError as err:
-#             print("{} not exists, skipping...".format(filename), file=sys.stderr)
-#             continue
-#     if not os.path.exists(saltpath):
-#         bridges = saltBridges.calcSaltBridges(filepath, pureKey[4], 4, con_req)
-#         pickle.dump(bridges, open(saltpath, 'wb'))
-#     else:
-#         bridges = pickle.load(open(saltpath, 'rb'))
-#     if len(bridges)>0:
-#         has_bridge += 1
-#     else:
-#         lacks_bridge += 1
-#     does_have_saltbridge = False
+true_saltbridge_prot = set()
+true_saltbridge = 1
+for key in sortedProt:
+    midMem, place, i, globalPlace, aa, secAA, dG = proteinsExamples[key]
+    pureKey = key[:5]
+
+    # if pureKey[:4] not in topcons_added_keys:
+    #     continue
+    chain = key[4]
+    filename = pureKey[:4] + '.pdb'
+    filepath = 'data/pdbFiles/' + pureKey[:4] + '.pdb'
+    saltpath = 'data/bridgeFiles/' + pureKey[:4] + chain + str(con_req) + 'Bridges.pickle'
+
+    if not os.path.exists(filepath):
+        try:
+            urllib.request.urlretrieve(pdbURL + filename, filepath)
+        except HTTPError as err:
+            print("{} not exists, skipping...".format(filename), file=sys.stderr)
+            continue
+    if not os.path.exists(saltpath):
+        bridges = saltBridges.calcSaltBridges(filepath, pureKey[4], 4, con_req)
+        pickle.dump(bridges, open(saltpath, 'wb'))
+    else:
+        bridges = pickle.load(open(saltpath, 'rb'))
+    # if len(bridges)>0:
+    #     has_bridge += 1
+    # else:
+    #     lacks_bridge += 1
+    does_have_saltbridge = False
 # print(has_bridge)
 # print(lacks_bridge)
-    # if (i == 1 or i == 3 or i == 4) and ((aa in positiveplus and secAA in negative) or (aa in negative and secAA in positiveplus)):
-    #     if not os.path.exists(filepath):
-    #         try:
-    #             urllib.request.urlretrieve(pdbURL + filename, filepath)
-    #         except HTTPError as err:
-    #             print("{} not exists, skipping...".format(filename), file=sys.stderr)
-    #             continue
-    #     if not os.path.exists(saltpath):
-    #         bridges = saltBridges.calcSaltBridges(filepath, pureKey[4], 4, con_req)
-    #         pickle.dump(bridges, open(saltpath, 'wb'))
-    #     else:
-    #         bridges = pickle.load(open(saltpath, 'rb'))
-    #     
-    #     numMem = countMems(TMdata[pureKey][1])
-    #     memNumber = whatMem(TMdata[pureKey][1], globalPlace, args.tolerant)
-    #     span = 'multi span' if numMem > 1 else 'single span'
-    #     for bridge in bridges:
-    #         # print("In bridges")
-    #         # print(bridge)
-    #         if (bridge[0][3] == globalPlace
-    #            and bridge[0][2] == chain)\
-    #            or (bridge[0][3] == (globalPlace + i)
-    #            and bridge[0][2] == chain):
-    #             # and aaMap[bridge[0][1]] == aa:
-    #             # print(bridge)
-    #             # print(str(i))
-    #             # if (bridge[1][3] - bridge[0][3]) == i:
-    #             does_have_saltbridge = True
-    #             print(pureKey[:4] + "(" + pureKey[4] + ")",
-    #                   span,
-    #                   aa + secAA + '-pair with gap ' + str(i),
-    #                   'startindex ' + str(globalPlace) + '(' +
-    #                   str(memNumber) + ' membrane region)',
-    #                   'dG ' + '{0:.2f}'.format(dG),
-    #                   sep=', ')
-    #             if len(bridge[0][4]) > 0:
-    #                 first_alt = "alt. conf {}".format(bridge[0][4])
-    #             else:
-    #                 first_alt = ''
-    #             if len(bridge[1][4]) > 0:
-    #                 second_alt = "alt. conf {}".format(bridge[1][4])
-    #             else:
-    #                 second_alt = ''
+    if (i < 8) and ((aa in positiveplus and secAA in negative) or (aa in negative and secAA in positiveplus)):
+        if not os.path.exists(filepath):
+            try:
+                urllib.request.urlretrieve(pdbURL + filename, filepath)
+            except HTTPError as err:
+                print("{} not exists, skipping...".format(filename), file=sys.stderr)
+                continue
+        if not os.path.exists(saltpath):
+            bridges = saltBridges.calcSaltBridges(filepath, pureKey[4], 4, con_req)
+            pickle.dump(bridges, open(saltpath, 'wb'))
+        else:
+            bridges = pickle.load(open(saltpath, 'rb'))
+        
+        numMem = countMems(TMdata[pureKey][1])
+        memNumber = whatMem(TMdata[pureKey][1], globalPlace, args.tolerant)
+        span = 'multi span' if numMem > 1 else 'single span'
+        for bridge in bridges:
+            # print("In bridges")
+            # print(bridge)
+            if (bridge[0][3] == globalPlace
+               and bridge[0][2] == chain)\
+               and (bridge[1][3] == (globalPlace + i)
+               and bridge[1][2] == chain):
+                # and aaMap[bridge[0][1]] == aa:
+                # print(bridge)
+                # print(str(i))
+                # if (bridge[1][3] - bridge[0][3]) == i:
+                true_saltbridge += 1
+                true_saltbridge_prot.add(pureKey[:5])
+                does_have_saltbridge = True
+                # print(pureKey[:4] + "(" + pureKey[4] + ")",
+                #       span,
+                #       aa + secAA + '-pair with gap ' + str(i),
+                #       'startindex ' + str(globalPlace) + '(' +
+                #       str(memNumber) + ' membrane region)',
+                #       'dG ' + '{0:.2f}'.format(dG),
+                #       sep=', ')
+                # if len(bridge[0][4]) > 0:
+                #     first_alt = "alt. conf {}".format(bridge[0][4])
+                # else:
+                #     first_alt = ''
+                # if len(bridge[1][4]) > 0:
+                #     second_alt = "alt. conf {}".format(bridge[1][4])
+                # else:
+                #     second_alt = ''
 
-    #             print(bridge[0][0],
-    #                   first_alt,
-    #                   bridge[0][1],
-    #                   bridge[0][2],
-    #                   bridge[0][3],
-    #                   bridge[1][0],
-    #                   second_alt,
-    #                   bridge[1][1],
-    #                   bridge[1][2],
-    #                   bridge[1][3],
-    #                   "{0:.2f}".format(bridge[2]) + "Å")
-    # # print(bridges)
-    #     if does_have_saltbridge:
-    #         print(TMdata[pureKey][0])
-    #         print(TMdata[pureKey][1])
-#   #   if p[9] > 5:
-#   #       # 4c9g(A), multi span (6 membranes), DK-pair with gap 1,
-#   #       # startindex 108(second membrane region), dG 7.86
-#   #       # print(p)
+                # print(bridge[0][0],
+                #       first_alt,
+                #       bridge[0][1],
+                #       bridge[0][2],
+                #       bridge[0][3],
+                #       bridge[1][0],
+                #       second_alt,
+                #       bridge[1][1],
+                #       bridge[1][2],
+                #       bridge[1][3],
+                #       "{0:.2f}".format(bridge[2]) + "Å")
+    # print(bridges)
+        # if does_have_saltbridge:
+        #     print(TMdata[pureKey][0])
+        #     print(TMdata[pureKey][1])
+      # if p[9] > 5:
+          # 4c9g(A), multi span (6 membranes), DK-pair with gap 1,
+          # startindex 108(second membrane region), dG 7.86
+          # print(p)
+print("Proteins with true salt bridge: {}".format(len(true_saltbridge_prot)))
+print("Number of true salt bridge: {}".format(true_saltbridge))
+print("Number of true salt bridge per charged pair: {:.1%}".format(true_saltbridge/stats["chargedpair"]))
+print("Number of true salt bridge per opp pair: {:.1%}".format(true_saltbridge/stats["opppair"]))
+# print(true_saltbridge_prot)
