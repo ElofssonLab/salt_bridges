@@ -9,7 +9,7 @@ def parseLine(line):
     alt_loc = line[16].strip()
     residue = line[17:20]
     chain = line[21]
-    chainnum = int(line[22:26]) - 1  # Change to 0 based 
+    chainnum = int(line[22:26])  # - 1  # Change to 0 based 
     x = float(line[30:38])
     y = float(line[38:46])
     z = float(line[46:54])
@@ -21,7 +21,7 @@ def calcEuclidianDist(x1, y1, z1, x2, y2, z2):
     return ((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)**0.5
 
 
-def calcSaltBridges(filename, chain, salt_bridge_cutoff = 4, con_req=2):
+def calcSaltBridges(filename, chain, salt_bridge_cutoff = 4, con_req=1):
     raw_bridges = {}
     bridges = []
     otherBridges = []
@@ -77,11 +77,11 @@ def calcSaltBridges(filename, chain, salt_bridge_cutoff = 4, con_req=2):
             # key = res[6] + str(res[7]) + '-' + secRes[6] + str(secRes[7])
             if dist < salt_bridge_cutoff:  # and key not in bridges:
                 # bridges[key] = [res, secRes]
-                bridge = [res[4:], secRes[4:], dist]
+                bridge = [res[7], res[5], secRes[7], secRes[5], res[6], dist]
                 # print(bridge)
                 # sys.exit()
                 # bridges.append(bridge)
-                b_id = str(res[7]) + "->" + str(secRes[7])
+                b_id = str(res[7]) + "-" + str(secRes[7])
                 if b_id in raw_bridges:
                     raw_bridges[b_id].append(bridge)
                 else:
@@ -106,9 +106,11 @@ def calcSaltBridges(filename, chain, salt_bridge_cutoff = 4, con_req=2):
 
     # bridges.extend(otherBridges)
     # print(raw_bridges)
+    ### Do we have enough connections? Default is only one, if more, only use the best (shortest) one
     for b_id, brids in raw_bridges.items():
         if len(brids) >= con_req:
-            bridges.extend(brids)
+            brids.sort(key=lambda x:x[-1])
+            bridges.append(brids[0])
     return bridges
     # for each in bridges:
     # print(each)

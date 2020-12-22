@@ -17,14 +17,14 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument("mems_pickle", type=str, help="Pickle file of membranes")
 parser.add_argument("threeline", type=str, help="3line in file")
-parser.add_argument("-b", "--bridges", type=int, default=2, help="Required connections per bridge")
+parser.add_argument("-b", "--bridges", type=int, default=1, help="Required connections per bridge")
 parser.add_argument("-t", "--tolerant", type=bool, default=False, help="Use tolerant membranes (also include m, not just M)")
 
 args = parser.parse_args()
 mem_length = 17
 
 stats = {'aas':0, 'chr':0, 'pos':0, 'neg':0, 'pospair':0, 'negpair':0, 'chargedpair':0, 'opppair':0, 'polar':0}
-con_req = args.bridges  # How many saltbridge connections to make a bridge? Default 2
+con_req = args.bridges  # How many saltbridge connections to make a bridge? Default 1
 aaMap = {'ARG': 'R',
          'HIS': 'H',
          'LYS': 'K',

@@ -4,11 +4,12 @@ import os
 import xml.etree.ElementTree as etree
 import glob
 import pandas as pd
+import saltBridges
 from Bio.PDB import *
 from Bio.PDB.Polypeptide import three_to_one
 
 if len(sys.argv) != 4:
-    print("Usage: " + __file__ + " <pdb list> <xml of proteins> <out 3lin>")
+    print("Usage: " + __file__ + " <pdb list> <xml of proteins> <out 3lin> <salt bridges>")
     sys.exit()
 
 # input_folder = sys.argv[1]
@@ -16,7 +17,7 @@ list_file = sys.argv[1]
 xml_file = sys.argv[2]
 out_file = sys.argv[3]
 
-debug = False
+debug = True
 struct_dict = {}
 with open(list_file) as list_handle:
     list_handle.readline()  # Header line
@@ -63,13 +64,15 @@ for prot in root.iter(namespace + "pdbtm"):
             continue
         pdb_file = pdblist.retrieve_pdb_file(pdb_id, pdir="data/pdbFiles", file_format="pdb")
         if not os.path.isfile(pdb_file):
+            print("No file {}".format(pdb_file))
             continue
         pdb_struct = parser.get_structure(pdb_id, pdb_file)
-        if not "x-ray diffraction" == pdb_struct.header["structure_method"]:
-            continue
+        # if not "x-ray diffraction" == pdb_struct.header["structure_method"]:
+        #     continue
         try:
             dssp = DSSP(pdb_struct[0], pdb_file)
         except:
+            print("Failed dssp {}".format(pdb_id))
             continue
         # print(dssp.keys()[0])
         pdb_chains = [c.get_id() for c in pdb_struct[0].get_chains()]
@@ -99,6 +102,9 @@ for prot in root.iter(namespace + "pdbtm"):
                 #         break
                 #     j += 1
                 # struct_pdb_end = pp[-1].get_id()[1]
+                bridges = saltBridges.calcSaltBridges(pdb_file, chain, 4)
+                print(bridges)
+                sys.exit()
                 raw_seq = chain.find(namespace + "SEQ").text.replace(' ', '').replace('\n', '')
                 # res_ids = set()
                 # num_ids = set(range(struct_pdb_start, struct_pdb_end + 1))
