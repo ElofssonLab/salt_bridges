@@ -5,20 +5,26 @@ import xml.etree.ElementTree as etree
 import glob
 import pandas as pd
 import saltBridges
+import pickle
 from Bio.PDB import *
 from Bio.PDB.Polypeptide import three_to_one
 
 if len(sys.argv) != 4:
-    print("Usage: " + __file__ + " <pdb list> <xml of proteins> <out 3lin> <salt bridges>")
+    print("Usage: " + __file__ + " <pdb list> <xml of proteins> <out base>")
     sys.exit()
 
 # input_folder = sys.argv[1]
 list_file = sys.argv[1]
 xml_file = sys.argv[2]
-out_file = sys.argv[3]
+out_file = sys.argv[3] + ".3line"
+bridge_file = sys.argv[3] + "_bridges.pickle"
 
 debug = True
 struct_dict = {}
+all_bridge_dict = {}
+mem_bridge_dict = {}
+local_bridge_dict = {}
+
 with open(list_file) as list_handle:
     list_handle.readline()  # Header line
     for line in list_handle:
@@ -64,7 +70,7 @@ for prot in root.iter(namespace + "pdbtm"):
             continue
         pdb_file = pdblist.retrieve_pdb_file(pdb_id, pdir="data/pdbFiles", file_format="pdb")
         if not os.path.isfile(pdb_file):
-            print("No file {}".format(pdb_file))
+            # print("No file {}".format(pdb_file))
             continue
         pdb_struct = parser.get_structure(pdb_id, pdb_file)
         # if not "x-ray diffraction" == pdb_struct.header["structure_method"]:
@@ -82,8 +88,8 @@ for prot in root.iter(namespace + "pdbtm"):
             chain_id = chain.attrib["CHAINID"]
             if not chain_id in pdb_chains:
                 continue
-            if debug:
-                print(chain_id)
+            # if debug:
+            #     print(chain_id)
             # pp_list = ppBuilder.build_peptides(pdb_struct[0][chain_id])
             # if not len(pp_list) > 0:
             #     continue
@@ -91,7 +97,7 @@ for prot in root.iter(namespace + "pdbtm"):
             # pp_iter = iter(pp_list)
             # if debug:
             #     print(pp_list)
-            if int(chain.attrib["NUM_TM"]) > 0 and chain.attrib["TYPE"] == "alpha" and chain.attrib["CHAINID"] in struct_dict[pdb_id]:
+            if int(chain.attrib["NUM_TM"]) > 0 and chain.attrib["TYPE"] == "alpha" and chain_id in struct_dict[pdb_id]:
                 seq = ""
                 topo = ""
                 # pp = next(pp_iter)
@@ -102,9 +108,12 @@ for prot in root.iter(namespace + "pdbtm"):
                 #         break
                 #     j += 1
                 # struct_pdb_end = pp[-1].get_id()[1]
-                bridges = saltBridges.calcSaltBridges(pdb_file, chain, 4)
-                print(bridges)
-                sys.exit()
+                bridges = saltBridges.calcSaltBridges(pdb_file, chain_id, 4)
+                all_bridge_dict[str(pdb_id) + chain_id] = bridges
+                # print(bridges)  
+                # if len(bridges)>0: 
+                #     print(bridges)
+                #     sys.exit()
                 raw_seq = chain.find(namespace + "SEQ").text.replace(' ', '').replace('\n', '')
                 # res_ids = set()
                 # num_ids = set(range(struct_pdb_start, struct_pdb_end + 1))
@@ -114,13 +123,40 @@ for prot in root.iter(namespace + "pdbtm"):
                 # peptide_missing_res = num_ids - res_ids
 
                 save_protein = True
+                # stop = False
                 for region in chain.findall(namespace + "REGION"):
+                    run_bridges = True
                     reg_type = region.attrib["type"]
                     reg_start = int(region.attrib["seq_beg"])
                     reg_end = int(region.attrib["seq_end"])
+                    pdb_start = int(region.attrib["pdb_beg"])
+                    offset = pdb_start-reg_start
+
                     if reg_type == 'H':
                         pdb_start = int(region.attrib["pdb_beg"])
                         pdb_end = int(region.attrib["pdb_end"])
+                        if pdb_end - pdb_start != reg_end -reg_start:
+                            ### Only run bridges if we can sync pdb and seq residues
+                            run_bridges = False
+
+                        ### bridge = [resi1, res1, resi2, res2, chain, dist]
+                        full_chain_id = pdb_id + chain_id
+                        if run_bridges:
+                            for bridge in bridges:
+                                save_bridge = [bridge[0]-offset, bridge[1], bridge[2]-offset, bridge[3], bridge[4], bridge[5]]
+                                if (bridge[0] >= pdb_start and bridge[0] <= pdb_end) or (bridge[2] >= pdb_start and bridge[2] <= pdb_end):
+                                    if full_chain_id in mem_bridge_dict:
+                                        mem_bridge_dict[str(pdb_id) + chain_id].append(save_bridge)
+                                    else:
+                                        mem_bridge_dict[str(pdb_id) + chain_id] = [save_bridge]
+
+                                if (bridge[0] >= pdb_start and bridge[0] <= pdb_end) and (bridge[2] >= pdb_start and bridge[2] <= pdb_end):
+                                    if full_chain_id in local_bridge_dict:
+                                        local_bridge_dict[str(pdb_id) + chain_id].append(save_bridge)
+                                    else:
+                                        local_bridge_dict[str(pdb_id) + chain_id] = [save_bridge]
+                                    # stop = True
+
                         T = 'M'
                         m_len = pdb_end - pdb_start + 1
                         if m_len > 10:
@@ -158,9 +194,21 @@ for prot in root.iter(namespace + "pdbtm"):
                 out_text += ">" + pdb_id + chain_id + '\n'
                 out_text += str(seq) + '\n'  # [first_seq-1:end_seq] + '\n'
                 out_text += topo + '\n'
-                if debug:
-                    print(out_text)
-                    sys.exit()
+                # if stop:
+                #     print(out_text)
+                #     print(pdb_id, chain_id)
+                #     print(mem_bridge_dict[str(pdb_id) + chain_id])
+                #     sa, r1, st, r2, c, d = mem_bridge_dict[str(pdb_id) + chain_id]
+                #     print(seq[sa-1:st])
+                #     print(topo[sa-1:st])
+                #     print(local_bridge_dict[str(pdb_id) + chain_id])
+                #     sa, r1, st, r2, c, d = local_bridge_dict[str(pdb_id) + chain_id]
+                #     print(seq[sa-1:st])
+                #     print(topo[sa-1:st])
+                #     sys.exit()
+                # if debug:
+                #     print(out_text)
+                #     sys.exit()
                     #########################################################
                     #########################################################
                     #########################################################
@@ -353,6 +401,7 @@ for prot in root.iter(namespace + "pdbtm"):
 
 with open(out_file, 'w') as out_handle:
     out_handle.write(out_text)
+pickle.dump({'all':all_bridge_dict, 'mems':mem_bridge_dict, 'local':local_bridge_dict},open(bridge_file,'wb'))
                 # print(">" + prot.attrib["ID"].upper() + chain.attrib["CHAINID"])
                 # print(seq[first_seq-1:end_seq])
                 # print(topo)
