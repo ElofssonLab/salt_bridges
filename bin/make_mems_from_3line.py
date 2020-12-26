@@ -8,7 +8,7 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument("in_file", type=argparse.FileType('r'), help="3line infile")
 parser.add_argument("out_file", type=str, help="Output file")
-parser.add_argument("-t", "--tolerance", type=bool, default=False, help="Be tolerant for dssp fault?")
+parser.add_argument("-t", "--tolerance", type=bool, default=True, help="Be tolerant for dssp fault?")
 
 args = parser.parse_args()
 

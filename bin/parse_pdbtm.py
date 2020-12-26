@@ -10,14 +10,14 @@ from Bio.PDB import *
 from Bio.PDB.Polypeptide import three_to_one
 
 if len(sys.argv) != 4:
-    print("Usage: " + __file__ + " <pdb list> <xml of proteins> <out base>")
+    print("Usage: " + __file__ + " <pdb list> <xml of proteins> <out file>")
     sys.exit()
 
 # input_folder = sys.argv[1]
 list_file = sys.argv[1]
 xml_file = sys.argv[2]
-out_file = sys.argv[3] + ".3line"
-bridge_file = sys.argv[3] + "_bridges.pickle"
+out_file = sys.argv[3]
+bridge_file = sys.argv[3][:-6]+ "_bridges.pickle"
 
 debug = True
 struct_dict = {}
@@ -138,6 +138,7 @@ for prot in root.iter(namespace + "pdbtm"):
                         if pdb_end - pdb_start != reg_end -reg_start:
                             ### Only run bridges if we can sync pdb and seq residues
                             run_bridges = False
+                            print("Skipping bridges for {}{}, {}-{}".format(pdb_id, chain_id, reg_start, reg_end))
 
                         ### bridge = [resi1, res1, resi2, res2, chain, dist]
                         full_chain_id = pdb_id + chain_id
@@ -183,6 +184,7 @@ for prot in root.iter(namespace + "pdbtm"):
                         seq += raw_seq[reg_start-1:reg_end]
                     topo += (reg_end - reg_start + 1)*T
                 if not save_protein:
+                    print("Not saving protein {}".format(full_chain_id))
                     continue
                 if len(str(seq)) != len(topo):
                     print("Seq and topo not matching, {}".format(pdb_id))

@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument("mems_pickle", type=str, help="Pickle file of membranes")
 parser.add_argument("threeline", type=str, help="3line in file")
-parser.add_argument("-b", "--bridges", type=int, default=2, help="Required connections per bridge")
+parser.add_argument("-b", "--bridges", type=int, default=1, help="Required connections per bridge")
 parser.add_argument("-g", "--gap", type=int, default=7, help="Must be within number of residues, (0 = unlimited)")
 parser.add_argument("-t", "--tolerant", type=bool, default=False, help="Use tolerant membranes (also include m, not just M)")
 
@@ -25,7 +25,7 @@ args = parser.parse_args()
 mem_length = 17
 
 stats = {'aas':0, 'chr':0, 'pos':0, 'neg':0, 'pospair':0, 'negpair':0, 'chargedpair':0, 'opppair':0}
-con_req = args.bridges  # How many saltbridge connections to make a bridge? Default 2
+con_req = args.bridges  # How many saltbridge connections to make a bridge? Default 1
 aaMap = {'ARG': 'R',
          'HIS': 'H',
          'LYS': 'K',
@@ -190,7 +190,7 @@ for key in sortedProt:
     #     continue
     chain = key[4]
     filename = pureKey[:4] + '.pdb'
-    filepath = 'data/pdbFiles/' + pureKey[:4] + '.pdb'
+    filepath = 'data/pdbFiles/pdb' + pureKey[:4] + '.ent'
     saltpath = 'data/bridgeFiles/' + pureKey[:4] + chain + str(con_req) + 'Bridges.pickle'
     does_have_saltbridge = False
     if (i == 1 or i == 3 or i == 4) and ((aa in positiveplus and secAA in negative) or (aa in negative and secAA in positiveplus)):

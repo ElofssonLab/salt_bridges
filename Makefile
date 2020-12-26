@@ -32,7 +32,7 @@ GLOBCHARGES := $(PROCDIR)/scop_glob.charges.pickle
 A3MCHARGES := $(PROCDIR)/pdbtm_a3m.charges.pickle $(PROCDIR)/scop_glob_a3m.charges.pickle
 VISIMAGES := $(addprefix ${IMAGEDIR}/, pdbtm_vis.svg pdbtm_vis.png scop_glob_vis.svg scop_glob_vis.png mem_cluster.svg mem_cluster.png mem_cluster_full.svg mem_cluster_full.png pdbtm_pairs.png pdbtm_pairs.svg pdbtm_stats.png pdbtm_stats.svg pdbtm_stats_red.png pdbtm_stats_red.svg)
 
-all: $(STATS) $(LISTS) $(RCSB) $(VISIMAGES)
+all: $(STATS)  $(RCSB) $(VISIMAGES) # $(LISTS)
 
 # $(RAWDIR)/opm_poly.json:
 # 	wget -O $@ https://lomize-group-opm.herokuapp.com/classtypes/1/primary_structures?pageSize=3000
@@ -153,7 +153,7 @@ $(A3MMEMS) : $(3LINESPDBTM) $(3LINESGLOB)
 
 $(MEMSRED) : %.mems.pickle: %.3line | $(3LINESRED)
 	./bin/make_mems_from_3line.py $< $@
-	./bin/make_mems_from_3line.py $< $(PROCDIR)/pdbtm_redundant_tolerant.mems.pickle --t True
+	# ./bin/make_mems_from_3line.py $< $(PROCDIR)/pdbtm_redundant_tolerant.mems.pickle --t True
 
 $(MEMSGLOB) : %.mems.pickle: %.3line | $(3LINESGLOB)
 	./bin/make_mems_from_3line.py $< $@

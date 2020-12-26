@@ -61,6 +61,7 @@ name = ''
 raw_lines = []
 for a3mfile in os.listdir(args.a3m_folder):
     with open(args.a3m_folder + '/' + a3mfile) as faFile:
+        # print(a3mfile)
         name = faFile.readline()[1:].strip()
         # print(name)
         # originalSequence = faFile.readline().strip()
