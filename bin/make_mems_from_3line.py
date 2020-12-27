@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-""" Extract membrane regions from 3line topology file"""
-
 import argparse
 import pickle
 
@@ -23,6 +21,7 @@ membranes = {}
 pid = ''
 seq = ''
 currentLine = 1
+mem_len = 17  # At least 17 in length
 
 for line in args.in_file:
     modu = currentLine % 3
@@ -44,7 +43,7 @@ for line in args.in_file:
             if c != curr_letter:
                 if curr_letter in accept_letters:  # Also include H to have compatability wityh dssp globular topology
                     memSeq = seq[start_pos:i]
-                    if 'X' not in memSeq and\
+                    if len(memSeq) >= mem_len and 'X' not in memSeq and\
                        'U' not in memSeq and\
                        'Z' not in memSeq and\
                        'O' not in memSeq:

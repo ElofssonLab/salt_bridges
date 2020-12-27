@@ -19,7 +19,7 @@ xml_file = sys.argv[2]
 out_file = sys.argv[3]
 bridge_file = sys.argv[3][:-6]+ "_bridges.pickle"
 
-debug = True
+debug = False
 struct_dict = {}
 all_bridge_dict = {}
 mem_bridge_dict = {}
@@ -61,7 +61,7 @@ for prot in root.iter(namespace + "pdbtm"):
 # for prot in root.findall(namespace + "pdbtm"):
     pdb_id = prot.attrib["ID"].upper()
     if pdb_id in struct_dict:
-    # if pdb_id == "5L25":
+    # if pdb_id == "6A2W":
         if debug:
             print("Running {}...".format(pdb_id))
         if prot.attrib["TMP"] != "yes":
@@ -124,12 +124,17 @@ for prot in root.iter(namespace + "pdbtm"):
 
                 save_protein = True
                 # stop = False
+                set_initial_offset = False
+                initial_offset = 0
                 for region in chain.findall(namespace + "REGION"):
                     run_bridges = True
                     reg_type = region.attrib["type"]
                     reg_start = int(region.attrib["seq_beg"])
                     reg_end = int(region.attrib["seq_end"])
                     pdb_start = int(region.attrib["pdb_beg"])
+                    if not set_initial_offset:
+                        initial_offset = int(region.attrib["seq_beg"]) - 1  # Does the seq have offset as well?
+                        set_initial_offset = True
                     offset = pdb_start-reg_start
 
                     if reg_type == 'H':
@@ -144,7 +149,7 @@ for prot in root.iter(namespace + "pdbtm"):
                         full_chain_id = pdb_id + chain_id
                         if run_bridges:
                             for bridge in bridges:
-                                save_bridge = [bridge[0]-offset, bridge[1], bridge[2]-offset, bridge[3], bridge[4], bridge[5]]
+                                save_bridge = [bridge[0]-offset-initial_offset, bridge[1], bridge[2]-offset-initial_offset, bridge[3], bridge[4], bridge[5]]
                                 if (bridge[0] >= pdb_start and bridge[0] <= pdb_end) or (bridge[2] >= pdb_start and bridge[2] <= pdb_end):
                                     if full_chain_id in mem_bridge_dict:
                                         mem_bridge_dict[str(pdb_id) + chain_id].append(save_bridge)

@@ -2,24 +2,24 @@ DATADIR := data
 STATDIR := stats
 IMAGEDIR := images
 RAWDIR := $(DATADIR)/raw
-TOPCONSDIR := $(DATADIR)/topcons
+# TOPCONSDIR := $(DATADIR)/topcons
 # SCAMPIDIR := $(DATADIR)/scampi
 # OPMDIR := $(DATADIR)/OPM
 PDBTMDIR := $(DATADIR)/pdbtm
 PROCDIR := $(DATADIR)/processed
-3LINES := $(addprefix ${PROCDIR}/,Topcons_Globular.3line Topcons_TMs.3line pdbtm.3line)
+3LINES := $(addprefix ${PROCDIR}/, pdbtm.3line)
+3LINESRED := $(addprefix ${PROCDIR}/, pdbtm_redundant.3line)
 # 3LINESSCAMPI := $(addprefix ${SCAMPIDIR}/,Globular.3line TMs.3line)
-3LINESTOPCONS := $(addprefix ${TOPCONSDIR}/,Globular.3line TMs.3line)
-3LINESPDBTM := $(PDBTMDIR)/pdbtm.3line
-3LINESPDBTMRED := $(PDBTMDIR)/pdbtm_redundant.3line
-3LINESRED := $(PROCDIR)/pdbtm_redundant.3line
+# 3LINESTOPCONS := $(addprefix ${TOPCONSDIR}/,Globular.3line TMs.3line)
+3LINESPDBTM := $(addprefix ${PDBTMDIR}/, pdbtm.3line)
+3LINESPDBTMRED:= $(addprefix ${PDBTMDIR}/, pdbtm_redundant.3line)
 3LINESGLOB := $(PROCDIR)/scop_glob.3line
 # 3LINESOPM := $(OPMDIR)/opm.3line
-3LINESCLUST := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.3line Topcons_TMs.clust.3line pdbtm.clust.3line scop_glob.clust.3line)
-FASTAS := $(addprefix ${PROCDIR}/,Topcons_Globular.fa Topcons_TMs.fa pdbtm.fa scop_glob.fa)
-CLUST := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.fa Topcons_TMs.clust.fa pdbtm.clust.fa scop_glob.clust.fa)
-MEMS := $(addprefix ${PROCDIR}/,Topcons_Globular.clust.mems.pickle Topcons_TMs.clust.mems.pickle pdbtm.clust.mems.pickle scop_glob.clust.mems.pickle)
-A3MMEMS := $(PROCDIR)/pdbtm_a3m.mems.pickle $(PROCDIR)/scop_glob_a3m.mems.pickle
+3LINESCLUST := $(addprefix ${PROCDIR}/, pdbtm.clust.3line scop_glob.clust.3line)
+FASTAS := $(addprefix ${PROCDIR}/, pdbtm.fa scop_glob.fa)
+CLUST := $(addprefix ${PROCDIR}/, pdbtm.clust.fa scop_glob.clust.fa)
+MEMS := $(addprefix ${PROCDIR}/, pdbtm.clust.mems.pickle scop_glob.clust.mems.pickle)
+A3MMEMS := $(addprefix ${PROCDIR}/, pdbtm_a3m.mems.pickle scop_glob_a3m.mems.pickle)
 MEMSRED := $(PROCDIR)/pdbtm_redundant.mems.pickle
 MEMSGLOB := $(PROCDIR)/scop_glob.mems.pickle
 STATS := $(addprefix ${STATDIR}/,pdbtm_stats.txt)
@@ -32,8 +32,7 @@ GLOBCHARGES := $(PROCDIR)/scop_glob.charges.pickle
 A3MCHARGES := $(PROCDIR)/pdbtm_a3m.charges.pickle $(PROCDIR)/scop_glob_a3m.charges.pickle
 VISIMAGES := $(addprefix ${IMAGEDIR}/, pdbtm_vis.svg pdbtm_vis.png scop_glob_vis.svg scop_glob_vis.png mem_cluster.svg mem_cluster.png mem_cluster_full.svg mem_cluster_full.png pdbtm_pairs.png pdbtm_pairs.svg pdbtm_stats.png pdbtm_stats.svg pdbtm_stats_red.png pdbtm_stats_red.svg)
 
-all: $(STATS)  $(RCSB) $(VISIMAGES) # $(LISTS)
-
+all:  $(STATS)  $(VISIMAGES) # $(LISTS) $(RCSB)
 # $(RAWDIR)/opm_poly.json:
 # 	wget -O $@ https://lomize-group-opm.herokuapp.com/classtypes/1/primary_structures?pageSize=3000
 # 
@@ -56,9 +55,9 @@ $(3LINESPDBTM) : $(RAWDIR)/pdbtm_non_redundant_alpha_list.txt $(RAWDIR)/pdbtm_al
 $(3LINESPDBTMRED) : $(RAWDIR)/pdbtm_redundant_alpha_list.txt $(RAWDIR)/pdbtm_alpha_entries.xml 
 	mkdir -p $(PDBTMDIR)
 	./bin/parse_pdbtm.py $^ $@
-	cp $@ $(PROCDIR)/pdbtm_redundant.3line
-$(3LINESRED): $(3LINESPDBTMRED)
-	cp $< $@
+	cp $(3LINESPDBTMRED) $(PROCDIR)/
+	cp $(PDBTMDIR)/pdbtm_redundant_bridges.pickle $(PROCDIR)/
+
 
 $(RAWDIR)/scop_globular_alpha.txt:
 	wget -O $(RAWDIR)/scop_raw.txt http://scop.mrc-lmb.cam.ac.uk/files/scop-cla-latest.txt
@@ -69,6 +68,7 @@ $(PROCDIR)/scop_globular_alpha_reduced.txt: $(RAWDIR)/scop_globular_alpha.txt
 	comm -23 $< $(RAWDIR)/pdbtm_redundant_alpha_list.txt > $@
 
 $(3LINESGLOB): $(PROCDIR)/scop_globular_alpha_reduced.txt $(RAWDIR)/ss.txt.gz
+	mkdir -p $(PROCDIR)
 	./bin/make_3line_from_pdb_list.py $< $(RAWDIR)/ss.txt.gz $@
 
 $(RAWDIR)/ss.txt.gz:
@@ -77,8 +77,6 @@ $(RAWDIR)/ss.txt.gz:
 $(RAWDIR)/pdb_chain_uniprot.tsv.gz: 
 	wget -P $(RAWDIR) ftp://ftp.ebi.ac.uk/pub/databases/msd/sifts/flatfiles/tsv/pdb_chain_uniprot.tsv.gz
 
-$(RAWDIR)/TOPCONS.zip:
-	wget -O $(RAWDIR)/TOPCONS.zip http://topcons.net/static/download/TOPCONS2.0_datasets.zip
 
 # $(3LINESOPM): $(RAWDIR)/pdb_chain_uniprot.tsv.gz $(RAWDIR)/opm_bi.json $(RAWDIR)/opm_poly.json
 # 	mkdir -p $(OPMDIR)
@@ -102,40 +100,15 @@ $(RAWDIR)/TOPCONS.zip:
 # 	rm -f $(SCAMPIDIR)/globularlist.txt
 # 	rm -f $(SCAMPIDIR)/globular.3line
 
-$(3LINESTOPCONS): $(RAWDIR)/pdb_chain_uniprot.tsv.gz $(RAWDIR)/ss.txt.gz $(RAWDIR)/TOPCONS.zip
-	mkdir -p $(TOPCONSDIR)
-	unzip -o $(RAWDIR)/TOPCONS.zip -d $(RAWDIR)
-	# Generate up lists of uniprot IDs to map against PDB and ss from RCSB
-	./bin/gen_uniprot_list.sh $(RAWDIR)/TOPCONS2_datasets/Globular.3line > $(TOPCONSDIR)/g1.txt
-	./bin/gen_uniprot_list.sh $(RAWDIR)/TOPCONS2_datasets/Globular+SP.3line > $(TOPCONSDIR)/g2.txt
-	grep -h "" $(TOPCONSDIR)/g1.txt $(TOPCONSDIR)/g2.txt > $(TOPCONSDIR)/globularlist.txt
-	# Actually generate the 3line from the list, use the -t H flag to use H for alpha helix topology
-	./bin/make_3line_from_uniprot_list.py $(TOPCONSDIR)/globularlist.txt $(RAWDIR)/pdb_chain_uniprot.tsv.gz $(RAWDIR)/ss.txt.gz $(TOPCONSDIR)/Globular.3line -t H
-	# Make sure all proteins contain at least one helix
-	./bin/remove_nonTMs_from_3line.py $(TOPCONSDIR)/Globular.3line
-	# Add in PDB ids for the SP+TM.3line, keep the original topology annotation
-	# Merge TM and SPTM together
-	./bin/add_pdbid_to_3line.py $(RAWDIR)/TOPCONS2_datasets/SP+TM.3line $(RAWDIR)/pdb_chain_uniprot.tsv.gz $(TOPCONSDIR)/SPTM.3line
-	grep -h "" $(RAWDIR)/TOPCONS2_datasets/TM.3line $(TOPCONSDIR)/SPTM.3line > $(TOPCONSDIR)/TMs.3line
-	# Clean up
-	rm -rf $(RAWDIR)/TOPCONS2_datasets
-	rm -f $(TOPCONSDIR)/globularlist.txt
-	rm -f $(TOPCONSDIR)/memtemp
-	rm -f $(TOPCONSDIR)/g1.txt
-	rm -f $(TOPCONSDIR)/g2.txt
-	rm -f $(TOPCONSDIR)/SPTM.3line
 
-$(3LINES):  $(3LINESTOPCONS) $(3LINESPDBTM)
-	mkdir -p $(PROCDIR)
-	# cp $(SCAMPIDIR)/TMs.3line $(PROCDIR)/Scampi_TMs.3line
-	# cp $(SCAMPIDIR)/Globular.3line $(PROCDIR)/Scampi_Globular.3line
-	cp $(TOPCONSDIR)/TMs.3line $(PROCDIR)/Topcons_TMs.3line
-	cp $(TOPCONSDIR)/Globular.3line $(PROCDIR)/Topcons_Globular.3line
-	cp $(3LINESPDBTM) $(PROCDIR)/pdbtm.3line
-	# cp $(3LINESPDBTMRED) $(PROCDIR)/pdbtm_redundant.3line
-	# cp $(3LINESOPM) $(PROCDIR)/opm.3line
+$(3LINES): $(3LINESPDBTM)
+	cp $(3LINESPDBTM) $(PROCDIR)/
+	cp $(PDBTMDIR)/pdbtm_bridges.pickle $(PROCDIR)/
 
-$(FASTAS) : %.fa: %.3line | $(3LINES)
+$(3LINESRED): $(3LINESPDBTMRED)
+	cp $< $@
+
+$(FASTAS) : %.fa: %.3line | $(3LINES) $(3LINESGLOB)
 	sed '3~3d' $< > $@
 
 $(CLUST) : %.clust.fa: %.fa | $(FASTAS)
@@ -148,7 +121,7 @@ $(MEMS) : %.clust.mems.pickle: %.clust.3line | $(3LINESCLUST)
 	./bin/make_mems_from_3line.py $< $@
 
 $(A3MMEMS) : $(3LINESPDBTM) $(3LINESGLOB)
-	./bin/make_mems_from_a3m.py $(PDBTMDIR)/pdbtm.3line $(DATADIR)/pdbtm_a3m $(PROCDIR)/pdbtm_a3m.mems.pickle
+	./bin/make_mems_from_a3m.py $(PROCDIR)/pdbtm.3line $(DATADIR)/pdbtm_a3m $(PROCDIR)/pdbtm_a3m.mems.pickle
 	./bin/make_mems_from_a3m.py $(PROCDIR)/scop_glob.clust.3line $(DATADIR)/scop_a3m $(PROCDIR)/scop_glob_a3m.mems.pickle
 
 $(MEMSRED) : %.mems.pickle: %.3line | $(3LINESRED)
@@ -160,22 +133,22 @@ $(MEMSGLOB) : %.mems.pickle: %.3line | $(3LINESGLOB)
 
 $(STATS) : $(STATDIR)/%_stats.txt : $(PROCDIR)/%.clust.mems.pickle | $(MEMS)
 	./bin/statsCharges.py $< > $@
-	./bin/statsCharges.py $(PROCDIR)/pdbtm_redundant.mems.pickle > $(STATDIR)/pdbtm_redundant_stats.txt
+	# ./bin/statsCharges.py $(PROCDIR)/pdbtm_redundant.mems.pickle > $(STATDIR)/pdbtm_redundant_stats.txt
 
-$(RCSB) : %_info.txt : %_pairs.txt | $(PROTS)
-	./bin/rcsb_info.sh $< > $@
+# $(RCSB) : %_info.txt : %_pairs.txt | $(PROTS)
+# 	./bin/rcsb_info.sh $< > $@
 
 # $(LOGODDS) : $(PROCDIR)/Topcons_TMs.clust.mems.pickle $(PROCDIR)/pdbtm.clust.mems.pickle
 # 	./bin/logodd_barchart.py $(PROCDIR)/Topcons_TMs.clust.mems.pickle
 # 	./bin/logodd_barchart.py $(PROCDIR)/pdbtm.clust.mems.pickle
 
-$(LISTS) : $(MEMSRED) $(3LINESRED)
-	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 1 > $(STATDIR)/pdbtm_redundant_1_list.txt
-	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 1 -g 0 > $(STATDIR)/pdbtm_redundant_1_all_list.txt
-	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant_tolerant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 1 > $(STATDIR)/pdbtm_redundant_1_tolerant_list.txt -t True
-	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant_tolerant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 1 -g 0 > $(STATDIR)/pdbtm_redundant_1_tolerant_all_list.txt -t True
-	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 2 > $(STATDIR)/pdbtm_redundant_2_list.txt
-	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 2 -g 0 > $(STATDIR)/pdbtm_redundant_2_all_list.txt
+# $(LISTS) : $(MEMSRED) $(3LINESRED)
+# 	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 1 > $(STATDIR)/pdbtm_redundant_1_list.txt
+# 	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 1 -g 0 > $(STATDIR)/pdbtm_redundant_1_all_list.txt
+# 	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant_tolerant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 1 > $(STATDIR)/pdbtm_redundant_1_tolerant_list.txt -t True
+# 	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant_tolerant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 1 -g 0 > $(STATDIR)/pdbtm_redundant_1_tolerant_all_list.txt -t True
+# 	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 2 > $(STATDIR)/pdbtm_redundant_2_list.txt
+# 	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 2 -g 0 > $(STATDIR)/pdbtm_redundant_2_all_list.txt
 
 $(GLOBCHARGES) : $(MEMSGLOB)
 	./bin/make_charges_from_mems.py $< $@
@@ -203,7 +176,6 @@ $(VISIMAGES) : $(A3MCHARGES) $(GLOBCHARGES)
 
 .PHONY: clean deepclean
 clean:
-	rm -rf $(TOPCONSDIR)
 	rm -rf $(SCAMPIDIR)
 	rm -rf $(PDBTMDIR)
 	rm -rf $(PROCDIR)
@@ -218,6 +190,5 @@ deepclean: clean
 	rm -rf $(RAWDIR)/pdb_chain_uniprot.tsv.gz
 	rm -rf $(RAWDIR)/scop*
 	rm -rf $(RAWDIR)/ss.txt.gz
-	rm -rf $(RAWDIR)/TOPCONS.zip
 	rm -rf $(RAWDIR)/pdbtm_alpha_entries.xml
 	rm -rf $(RAWDIR)/pdbtm_non_redundant_alpha_list.txt

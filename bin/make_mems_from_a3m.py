@@ -28,7 +28,7 @@ positiveplus = 'RHK'
 # with open('../data/red_TM_prop.top') as topFile:
 random.seed(3141)
 k=200
-mem_part_length = 15
+mem_part_length = 17
 helicies = {}
 with open(args.top) as topFile:
     name = ''
@@ -43,7 +43,7 @@ with open(args.top) as topFile:
             start_pos = 0
             for i, c in enumerate(topo):
                 if c != curr_letter:
-                    if curr_letter == 'M':
+                    if curr_letter in 'Mm':  # Make sure to have support for tolerance, M and m
                         helicies[name].append((start_pos, i))
                         # for line in faFile:
                         #     if line[0] == '>':
