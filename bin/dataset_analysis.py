@@ -148,8 +148,8 @@ tot_num_mem_bridges = 0
 tot_num_mem_proteins = 0
 tot_num_local_bridges = 0
 tot_num_local_proteins = 0
-csv_text = ["PID,Pair type,Place in protein(0-based), Place in mem(0-based)," +
-            "Step, AAs,Any saltbridge(1-based),Local saltbridge(1-based)"]
+csv_text = ["PID,Pair type,Core start,Core end, ResN1, ResN2," +
+            "Step, Res1, Res2,Any saltbridge,Local saltbridge"]
 csv_charge_text = ["PID,ResN, Res, ResCoreStart, ResCoreEnd,-7,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,7,saltbridge,localbridge"]
 for k, m in bridges["mems"].items():
     tot_num_mem_proteins += 1
@@ -249,7 +249,10 @@ for key, membranes in helicies.items():
                                 # print(key, paired_res, full_seq, len(full_seq))
                                 charge_mem_bridge_text = matched_res+str(paired_res)
                             if abs(ss_second - ss_first) < 8:
-                                charge_local_bridge_text = matched_res+str(paired_res)
+                                if len(charge_local_bridge_text) > 0:
+                                    charge_local_bridge_text += ';' + matched_res+str(paired_res)
+                                else:
+                                    charge_local_bridge_text = matched_res+str(paired_res)
                                 # stop = True
                 charge_csv_line.append(charge_mem_bridge_text)
                 charge_csv_line.append(charge_local_bridge_text)
@@ -295,14 +298,16 @@ for key, membranes in helicies.items():
                                 if len(mem_bridge)>0:
                                     for mb in mem_bridge:
                                         ss_first = mb[0]
+                                        aa_first = aaMap[mb[1]]
                                         ss_second = mb[2]
+                                        aa_second = aaMap[mb[3]]
                                         if ss_first == (mem_place+5+1+place) or ss_first == (mem_place + 5 + 1 + place + i) or\
                                                 ss_second == (mem_place+5+1+place) or ss_second == (mem_place + 5 + 1 + place + i) :
                                                     has_mem_bridge += 1
                                                     if len(mem_bridges_text) > 0:
-                                                        mem_bridges_text += ";"+str(ss_first)+"-"+str(ss_second)
+                                                        mem_bridges_text += ";"+aa_first+str(ss_first)+"-"+aa_second+str(ss_second)
                                                     else:
-                                                        mem_bridges_text = str(ss_first)+"-"+str(ss_second)
+                                                        mem_bridges_text = aa_first+str(ss_first)+"-"+aa_second+str(ss_second)
                                 if len(local_bridge)>0:
                                     for lb in local_bridge:
                                         ss_first = lb[0]
@@ -323,31 +328,37 @@ for key, membranes in helicies.items():
                                 if len(mem_bridge)>0:
                                     for mb in mem_bridge:
                                         ss_first = mb[0]
+                                        aa_first = aaMap[mb[1]]
                                         ss_second = mb[2]
+                                        aa_second = aaMap[mb[3]]
                                         if ss_first == (mem_place+5+1+place) or ss_first == (mem_place + 5 + 1 + place + i) or\
                                                 ss_second == (mem_place+5+1+place) or ss_second == (mem_place + 5 + 1 + place + i) :
                                                     has_mem_bridge += 1
                                                     if len(mem_bridges_text) > 0:
-                                                        mem_bridges_text += ";"+str(ss_first)+"-"+str(ss_second)
+                                                        mem_bridges_text += ";"+aa_first+str(ss_first)+"-"+aa_second+str(ss_second)
                                                     else:
-                                                        mem_bridges_text = str(ss_first)+"-"+str(ss_second)
+                                                        mem_bridges_text = aa_first+str(ss_first)+"-"+aa_second+str(ss_second)
                                 has_local_bridge = 0
                                 if len(local_bridge)>0:
                                     for lb in local_bridge:
                                         ss_first = lb[0]
+                                        aa_first = aaMap[lb[1]]
                                         ss_second = lb[2]
+                                        aa_second = aaMap[lb[3]]
                                         if ss_first == (mem_place+5+1+place) and ss_second == (mem_place + 5 + 1 + place + i):
                                             has_local_bridge += 1
                                             local_bridge_list.add(key)
-                                            local_bridges_text = str(ss_first)+"-"+str(ss_second)
+                                            local_bridges_text = aa_first + str(ss_first)+"-"+aa_second + str(ss_second)
                                         
                                 # print(key, "OPP", midMem, mem_place + 5, i, has_mem_bridge, has_local_bridge, local_bridge)
                                 # if has_mem_bridge > 1:
                                 #     print(key, mem_bridge)
                                 mem_bridge_count += has_mem_bridge
                                 local_bridge_count += has_local_bridge
-                            csv_text.append(','.join([key, pair_type, str(mem_place + 5), str(place) + '-' + str(place + i),
-                                  str(i), aa + second_aa, mem_bridges_text, local_bridges_text]))
+                            # charge_csv_line = [key, str(aa_place), aa, str(mem_place+1+5),str(mem_place+len(fullMem)-5)]
+                            csv_text.append(','.join([key, pair_type, str(mem_place +1 + 5), str(mem_place+len(fullMem)-5),
+                                                      str(mem_place + 1+ 5 + place), str(mem_place + 1 + 5 + place + i),
+                                                      str(i), aa, second_aa, mem_bridges_text, local_bridges_text]))
 
 
 with open(charges_file, 'wb') as dataPickle:
