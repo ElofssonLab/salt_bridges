@@ -152,7 +152,8 @@ for prot in root.iter(namespace + "pdbtm"):
                                 save_bridge = [bridge[0]-offset-initial_offset, bridge[1], bridge[2]-offset-initial_offset, bridge[3], bridge[4], bridge[5]]
                                 if (bridge[0] >= pdb_start and bridge[0] <= pdb_end) or (bridge[2] >= pdb_start and bridge[2] <= pdb_end):
                                     if full_chain_id in mem_bridge_dict:
-                                        mem_bridge_dict[str(pdb_id) + chain_id].append(save_bridge)
+                                        if save_bridge not in mem_bridge_dict[str(pdb_id) + chain_id]:
+                                            mem_bridge_dict[str(pdb_id) + chain_id].append(save_bridge)
                                     else:
                                         mem_bridge_dict[str(pdb_id) + chain_id] = [save_bridge]
 

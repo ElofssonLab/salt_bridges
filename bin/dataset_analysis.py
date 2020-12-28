@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument("mems_pickle", type=str, help="Pickle file of membranes")
 parser.add_argument("bridge_pickle", type=str, help="Pickle file of bridges")
-# parser.add_argument("threeline", type=str, help="3line in file")
+parser.add_argument("threeline", type=str, help="3line in file")
 
 # parser.add_argument("-b", "--bridges", type=int, default=1, help="Required connections per bridge")
 # parser.add_argument("-t", "--tolerant", type=bool, default=False, help="Use tolerant membranes (also include m, not just M)")
@@ -70,6 +70,7 @@ bridges = pickle.load(open(args.bridge_pickle,
 charges_file = args.mems_pickle.replace("mems", "charges")
 mems_index = args.mems_pickle.index("mems")
 csv_file = args.mems_pickle[:mems_index] + "csv"
+csv_file_charge = args.mems_pickle[:mems_index] + "charge.csv"
 
 # charged_pair_res = set()
 # 
@@ -114,29 +115,29 @@ csv_file = args.mems_pickle[:mems_index] + "csv"
 # longMems = 0
 # correctMems = 0
 # 
-# TMdata = {}
-# with open(args.threeline, 'r') as TMHandle:
-#     pdb_id = ''
-#     rowNum = 0
-#     fa = ''
-#     for line in TMHandle:
-#         if line[0] == '>':
-#             # pid = line[1:].strip().split('|')[1]
-#             if '|' in line:
-#                 pdb_id = line[1:].strip().split('|')[1]
-#             else:
-#                 pdb_id = line[1:].strip()
-#             # pid = line[1:].strip()# .split('|')[2]
-#         elif rowNum % 3 == 1:
-#             fa = line.strip()
-#         elif rowNum % 3 == 2:
-#             if not "MISSING" in pdb_id:
-#                 TMdata[pdb_id] = [fa, line.strip()]
-#         else:
-#             print("You should not be here...")
-#         rowNum += 1
-# 
-# 
+TMdata = {}
+with open(args.threeline, 'r') as TMHandle:
+    pdb_id = ''
+    rowNum = 0
+    fa = ''
+    for line in TMHandle:
+        if line[0] == '>':
+            # pid = line[1:].strip().split('|')[1]
+            if '|' in line:
+                pdb_id = line[1:].strip().split('|')[1]
+            else:
+                pdb_id = line[1:].strip()
+            # pid = line[1:].strip()# .split('|')[2]
+        elif rowNum % 3 == 1:
+            fa = line.strip()
+        elif rowNum % 3 == 2:
+            if not "MISSING" in pdb_id:
+                TMdata[pdb_id] = [fa, line.strip()]
+        else:
+            print("You should not be here...")
+        rowNum += 1
+
+
 proteins_with_mems= set()
 proteins_with_correct_mems = set()
 local_bridge_list = set()
@@ -149,6 +150,7 @@ tot_num_local_bridges = 0
 tot_num_local_proteins = 0
 csv_text = ["PID,Pair type,Place in protein(0-based), Place in mem(0-based)," +
             "Step, AAs,Any saltbridge(1-based),Local saltbridge(1-based)"]
+csv_charge_text = ["PID,ResN, Res, ResCoreStart, ResCoreEnd,-7,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,7,saltbridge,localbridge"]
 for k, m in bridges["mems"].items():
     tot_num_mem_proteins += 1
     tot_num_mem_bridges += len(m) 
@@ -167,6 +169,7 @@ for key, membranes in helicies.items():
         local_bridges = bridges['local'][key]
     if key in bridges['mems']:
         mems_bridges = bridges['mems'][key]
+    full_seq = TMdata[key][0]
     for mem_place, mem in membranes:
         # Only use mems of length 17 or more
         # print(mem_place, mem)
@@ -176,6 +179,11 @@ for key, membranes in helicies.items():
         edge = 5
         midMem = mem[edge:-edge]
         fullMem = mem
+        ext_mem = full_seq[mem_place - 2: mem_place + len(mem) + 2]
+        # print(ext_mem)
+        # print('  ' + fullMem + '  ')
+        # print('       ' + midMem + '       ')
+        # sys.exit()
         # Only use mems with all known amino acids
         if '?' in fullMem:
             continue
@@ -199,6 +207,66 @@ for key, membranes in helicies.items():
                         local_bridge.append(lb)
         # Run through each mem and save the pairs
         for place, aa in enumerate(midMem):
+            # Charge CSV-file
+            if aa in CHARGED:
+                aa_place = mem_place + 1 + 5 + place  # Residue numbering
+                charge_csv_line = [key, str(aa_place), aa, str(mem_place+1+5),str(mem_place+len(fullMem)-5)]
+                # print("       " + aa + "       ")
+                ext_mem = full_seq[mem_place - 2 + place: mem_place + 5 + 7 + 1]
+                # print(ext_mem, len(ext_mem))
+                # Check all pairings -7 to 7 incl.
+                for i in range(-7,8):
+                    if i == 0:
+                        pass
+                    else:
+                        if not i >= len(ext_mem)-7:
+                            paired_aa = ext_mem[i+7]
+                            if paired_aa in CHARGED:
+                                charge_csv_line.append(paired_aa)
+                            else:
+                                charge_csv_line.append("")
+                        else:
+                            charge_csv_line.append("")
+                # Check bridges
+                charge_mem_bridge_text = ''
+                charge_local_bridge_text = ''
+                # stop = False
+                if len(mem_bridge)>0:
+                    for mb in mem_bridge:
+                        ss_first = mb[0]
+                        ss_second = mb[2]
+                        if ss_first == aa_place or ss_second == aa_place:
+                            if ss_first == aa_place:
+                                paired_res = ss_second
+                                matched_res = aaMap[mb[3]]
+                            else:
+                                paired_res = ss_first
+                                matched_res = aaMap[mb[1]]
+
+                            if len(charge_mem_bridge_text) > 0:
+                                charge_mem_bridge_text += ";"+matched_res+str(paired_res)
+                            else:
+                                # print(key, paired_res, full_seq, len(full_seq))
+                                charge_mem_bridge_text = matched_res+str(paired_res)
+                            if abs(ss_second - ss_first) < 8:
+                                charge_local_bridge_text = matched_res+str(paired_res)
+                                # stop = True
+                charge_csv_line.append(charge_mem_bridge_text)
+                charge_csv_line.append(charge_local_bridge_text)
+
+
+                # if len(local_bridge)>0:
+                #     for lb in local_bridge:
+                #         ss_first = lb[0]
+                #         ss_second = lb[2]
+                #         if ss_first == (mem_place+5+1+place) and ss_second == (mem_place + 5 + 1 + place + i):
+                #             has_local_bridge = 1
+                #             local_bridges_text = str(ss_first)+"-"+str(ss_second)
+                # if stop:
+                csv_charge_text.append(','.join(charge_csv_line))
+
+                #     sys.exit()
+            # Pair CSV-file
             # Now count the for each gap
             for i in range(1, 11):
                 if memLen <= place + i:
@@ -286,6 +354,8 @@ with open(charges_file, 'wb') as dataPickle:
     pickle.dump([aaCount, aaPairs, aaHits], dataPickle)
 with open(csv_file, 'w') as csv_handle:
     csv_handle.write('\n'.join(csv_text))
+with open(csv_file_charge, 'w') as csv_handle:
+    csv_handle.write('\n'.join(csv_charge_text))
 print("Proteins with mems: {}".format(len(proteins_with_mems)))
 print("Proteins with correct mems: {}".format(len(proteins_with_correct_mems)))
 print("Number of correct mems: {}".format(correct_mems))
