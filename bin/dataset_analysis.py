@@ -148,9 +148,9 @@ tot_num_mem_bridges = 0
 tot_num_mem_proteins = 0
 tot_num_local_bridges = 0
 tot_num_local_proteins = 0
-csv_text_pairs = ["PID,Pair type,Core start,Core end, ResN1, ResN2," +
-            "Step, Res1, Res2,Any saltbridge,Local saltbridge"]
-csv_text_aas = ["PID,ResN, Res, ResCoreStart, ResCoreEnd,-7,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,7,saltbridge,localbridge"]
+csv_text_pairs = ["PID,Pair type,Core start,Core end,ResN1,ResN2," +
+            "Step,Res1,Res2,Any saltbridge,Local saltbridge"]
+csv_text_aas = ["PID,ResN,Res,ResCoreStart,ResCoreEnd,-7,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,7,saltbridge,localbridge"]
 for k, m in bridges["mems"].items():
     tot_num_mem_proteins += 1
     tot_num_mem_bridges += len(m) 
