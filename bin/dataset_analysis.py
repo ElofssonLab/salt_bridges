@@ -179,7 +179,7 @@ for key, membranes in helicies.items():
         edge = 5
         midMem = mem[edge:-edge]
         fullMem = mem
-        ext_mem = full_seq[mem_place - 2: mem_place + len(mem) + 2]
+        #  ext_mem = full_seq[mem_place - 2: mem_place + len(mem) + 2]
         # print(ext_mem)
         # print('  ' + fullMem + '  ')
         # print('       ' + midMem + '       ')
@@ -212,14 +212,22 @@ for key, membranes in helicies.items():
                 aa_place = mem_place + 1 + 5 + place  # Residue numbering
                 charge_csv_line = [key, str(aa_place), aa, str(mem_place+1+5),str(mem_place+len(fullMem)-5)]
                 # print("       " + aa + "       ")
-                ext_mem = full_seq[mem_place - 2 + place: mem_place + 5 + 7 + 1]
+                #  ext_mem = full_seq[mem_place - 2: mem_place + len(mem) + 2]
+                # ext_mem = full_seq[mem_place - 2 + place: mem_place + len(midMem) + 5]
+                ext_mem = full_seq[aa_place-7-1:aa_place + 7]  # Remember, aa_place is residue numbering
+                # print("       " + aa + "       |")
                 # print(ext_mem, len(ext_mem))
+                # sys.exit()
                 # Check all pairings -7 to 7 incl.
+                # if key == "6Y7FA":
+                #     print(ext_mem)
                 for i in range(-7,8):
                     if i == 0:
                         pass
                     else:
                         if not i >= len(ext_mem)-7:
+                            # if key == "6Y7FA":
+                            #     print(aa_place, i, ext_mem[i+7])
                             paired_aa = ext_mem[i+7]
                             if paired_aa in CHARGED:
                                 charge_csv_line.append(paired_aa)
