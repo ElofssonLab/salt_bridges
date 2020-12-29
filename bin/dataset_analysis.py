@@ -25,8 +25,8 @@ parser.add_argument("threeline", type=str, help="3line in file")
 args = parser.parse_args()
 mem_length = 17
 aas = 'ACDEFGHIKLMNPQRSTVWY'
-CHARGED = "DEKR"
-POS = "KR"
+CHARGED = "DEKRH"
+POS = "KRH"
 NEG = "DE"
 aaHits = np.zeros([10, 20, 20])
 aaPairs = np.zeros(10)
@@ -69,8 +69,8 @@ bridges = pickle.load(open(args.bridge_pickle,
                             'rb'))
 charges_file = args.mems_pickle.replace("mems", "charges")
 mems_index = args.mems_pickle.index("mems")
-csv_file = args.mems_pickle[:mems_index] + "csv"
-csv_file_charge = args.mems_pickle[:mems_index] + "charge.csv"
+csv_file_pairs = args.mems_pickle[:mems_index] + "pairs.csv"
+csv_file_aas = args.mems_pickle[:mems_index] + "aas.csv"
 
 # charged_pair_res = set()
 # 
@@ -148,9 +148,9 @@ tot_num_mem_bridges = 0
 tot_num_mem_proteins = 0
 tot_num_local_bridges = 0
 tot_num_local_proteins = 0
-csv_text = ["PID,Pair type,Core start,Core end, ResN1, ResN2," +
+csv_text_pairs = ["PID,Pair type,Core start,Core end, ResN1, ResN2," +
             "Step, Res1, Res2,Any saltbridge,Local saltbridge"]
-csv_charge_text = ["PID,ResN, Res, ResCoreStart, ResCoreEnd,-7,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,7,saltbridge,localbridge"]
+csv_text_aas = ["PID,ResN, Res, ResCoreStart, ResCoreEnd,-7,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,7,saltbridge,localbridge"]
 for k, m in bridges["mems"].items():
     tot_num_mem_proteins += 1
     tot_num_mem_bridges += len(m) 
@@ -243,19 +243,45 @@ for key, membranes in helicies.items():
                                 paired_res = ss_first
                                 matched_res = aaMap[mb[1]]
 
-                            if len(charge_mem_bridge_text) > 0:
+                            if len(charge_mem_bridge_text) > 0 and abs(ss_second - ss_first) > 7:
                                 charge_mem_bridge_text += ";"+matched_res+str(paired_res)
-                            else:
+                            elif abs(ss_second - ss_first) > 7:
                                 # print(key, paired_res, full_seq, len(full_seq))
                                 charge_mem_bridge_text = matched_res+str(paired_res)
-                            if abs(ss_second - ss_first) < 8:
+                            elif abs(ss_second - ss_first) < 8:
                                 if len(charge_local_bridge_text) > 0:
                                     charge_local_bridge_text += ';' + matched_res+str(paired_res)
                                 else:
                                     charge_local_bridge_text = matched_res+str(paired_res)
+                            else:
+                                print("something wrong", key, mem_bridge)
+                                sys.exit()
                                 # stop = True
                 charge_csv_line.append(charge_mem_bridge_text)
                 charge_csv_line.append(charge_local_bridge_text)
+            else:
+                aa_place = mem_place + 1 + 5 + place  # Residue numbering
+                charge_csv_line = [key, str(aa_place), aa, str(mem_place+1+5),str(mem_place+len(fullMem)-5)]
+                # print("       " + aa + "       ")
+                ext_mem = full_seq[mem_place - 2 + place: mem_place + 5 + 7 + 1]
+                # print(ext_mem, len(ext_mem))
+                # Check all pairings -7 to 7 incl.
+                for i in range(-7,8):
+                    if i == 0:
+                        pass
+                    else:
+                        if not i >= len(ext_mem)-7:
+                            paired_aa = ext_mem[i+7]
+                            if paired_aa in CHARGED:
+                                charge_csv_line.append(paired_aa)
+                            else:
+                                charge_csv_line.append("")
+                        else:
+                            charge_csv_line.append("")
+
+                charge_csv_line.append('')  # mem bridge
+                charge_csv_line.append('')  # local bridge
+
 
 
                 # if len(local_bridge)>0:
@@ -266,7 +292,7 @@ for key, membranes in helicies.items():
                 #             has_local_bridge = 1
                 #             local_bridges_text = str(ss_first)+"-"+str(ss_second)
                 # if stop:
-                csv_charge_text.append(','.join(charge_csv_line))
+            csv_text_aas.append(','.join(charge_csv_line))
 
                 #     sys.exit()
             # Pair CSV-file
@@ -356,17 +382,17 @@ for key, membranes in helicies.items():
                                 mem_bridge_count += has_mem_bridge
                                 local_bridge_count += has_local_bridge
                             # charge_csv_line = [key, str(aa_place), aa, str(mem_place+1+5),str(mem_place+len(fullMem)-5)]
-                            csv_text.append(','.join([key, pair_type, str(mem_place +1 + 5), str(mem_place+len(fullMem)-5),
+                            csv_text_pairs.append(','.join([key, pair_type, str(mem_place +1 + 5), str(mem_place+len(fullMem)-5),
                                                       str(mem_place + 1+ 5 + place), str(mem_place + 1 + 5 + place + i),
                                                       str(i), aa, second_aa, mem_bridges_text, local_bridges_text]))
 
 
 with open(charges_file, 'wb') as dataPickle:
     pickle.dump([aaCount, aaPairs, aaHits], dataPickle)
-with open(csv_file, 'w') as csv_handle:
-    csv_handle.write('\n'.join(csv_text))
-with open(csv_file_charge, 'w') as csv_handle:
-    csv_handle.write('\n'.join(csv_charge_text))
+with open(csv_file_pairs, 'w') as csv_handle:
+    csv_handle.write('\n'.join(csv_text_pairs))
+with open(csv_file_aas, 'w') as csv_handle:
+    csv_handle.write('\n'.join(csv_text_aas))
 print("Proteins with mems: {}".format(len(proteins_with_mems)))
 print("Proteins with correct mems: {}".format(len(proteins_with_correct_mems)))
 print("Number of correct mems: {}".format(correct_mems))
