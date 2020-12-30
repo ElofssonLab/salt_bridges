@@ -24,15 +24,15 @@ MEMSRED := $(PROCDIR)/pdbtm_redundant.mems.pickle
 MEMSGLOB := $(PROCDIR)/scop_glob.mems.pickle
 STATS := $(addprefix ${STATDIR}/,pdbtm_stats.txt)
 # LOGODDS := $(addprefix ${IMAGEDIR}/,Topcons_TMs_logodds.svg pdbtm_logodds.svg)
-LISTS := $(addprefix ${STATDIR}/,pdbtm_redundant_1_list.txt pdbtm_redundant_1_tolerant_list.txt pdbtm_redundant_2_list.txt pdbtm_redundant_1_all_list.txt pdbtm_redundant_1_all_tolerant_list.txt pdbtm_redundant_2_all_list.txt)
+LISTS := $(addprefix ${STATDIR}/,pdbtm_redundant_1_list.txt ) # pdbtm_redundant_1_tolerant_list.txt pdbtm_redundant_2_list.txt pdbtm_redundant_1_all_list.txt pdbtm_redundant_1_all_tolerant_list.txt pdbtm_redundant_2_all_list.txt)
 PROTS := $(addprefix ${STATDIR}/,pdbtm_same_pairs.txt pdbtm_opp_pairs.txt)
 RCSB := $(addprefix ${STATDIR}/,pdbtm_same_info.txt pdbtm_opp_info.txt)
 GLOBCHARGES := $(PROCDIR)/scop_glob.charges.pickle
 # MEMCHARGES := $(PROCDIR)/pdbtm.clust.charges.pickle
 A3MCHARGES := $(PROCDIR)/pdbtm_a3m.charges.pickle $(PROCDIR)/scop_glob_a3m.charges.pickle
-VISIMAGES := $(addprefix ${IMAGEDIR}/, pdbtm_vis.svg pdbtm_vis.png scop_glob_vis.svg scop_glob_vis.png mem_cluster.svg mem_cluster.png mem_cluster_full.svg mem_cluster_full.png pdbtm_pairs.png pdbtm_pairs.svg pdbtm_stats.png pdbtm_stats.svg pdbtm_stats_red.png pdbtm_stats_red.svg)
+VISIMAGES := $(addprefix ${IMAGEDIR}/, pdbtm_vis.svg pdbtm_vis.png scop_glob_vis.svg scop_glob_vis.png mem_cluster.svg mem_cluster.png mem_cluster_full.svg mem_cluster_full.png pdbtm_pairs.png pdbtm_pairs.svg pdbtm_stats.png pdbtm_stats.svg)
 
-all:  $(STATS)  $(VISIMAGES) # $(LISTS) $(RCSB)
+all:  $(STATS)  $(VISIMAGES) $(LISTS) # $(RCSB)
 # $(RAWDIR)/opm_poly.json:
 # 	wget -O $@ https://lomize-group-opm.herokuapp.com/classtypes/1/primary_structures?pageSize=3000
 # 
@@ -142,8 +142,8 @@ $(STATS) : $(STATDIR)/%_stats.txt : $(PROCDIR)/%.clust.mems.pickle | $(MEMS)
 # 	./bin/logodd_barchart.py $(PROCDIR)/Topcons_TMs.clust.mems.pickle
 # 	./bin/logodd_barchart.py $(PROCDIR)/pdbtm.clust.mems.pickle
 
-# $(LISTS) : $(MEMSRED) $(3LINESRED)
-# 	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 1 > $(STATDIR)/pdbtm_redundant_1_list.txt
+$(LISTS) : $(MEMSRED) $(3LINESRED)
+	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 1 > $(STATDIR)/pdbtm_redundant_1_list.txt
 # 	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 1 -g 0 > $(STATDIR)/pdbtm_redundant_1_all_list.txt
 # 	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant_tolerant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 1 > $(STATDIR)/pdbtm_redundant_1_tolerant_list.txt -t True
 # 	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant_tolerant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 1 -g 0 > $(STATDIR)/pdbtm_redundant_1_tolerant_all_list.txt -t True

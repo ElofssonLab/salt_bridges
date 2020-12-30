@@ -19,7 +19,7 @@ parser.add_argument("mems_pickle", type=str, help="Pickle file of membranes")
 parser.add_argument("threeline", type=str, help="3line in file")
 parser.add_argument("-b", "--bridges", type=int, default=1, help="Required connections per bridge")
 parser.add_argument("-g", "--gap", type=int, default=7, help="Must be within number of residues, (0 = unlimited)")
-parser.add_argument("-t", "--tolerant", type=bool, default=False, help="Use tolerant membranes (also include m, not just M)")
+parser.add_argument("-t", "--tolerant", type=bool, default=True, help="Use tolerant membranes (also include m, not just M)")
 
 args = parser.parse_args()
 mem_length = 17
@@ -149,7 +149,7 @@ for key, membranes in helicies.items():
                 if aa in charged and secAA in charged:
                     deltaG = dgCalc.calc_segment_DG(fullMem)
                     # Add five is midmem
-                    globalPlace = mem_place + edge
+                    globalPlace = mem_place + edge + 1  # Residue numbering
                     # globalPlace = TMdata[key][0].index(midMem)
                     # Plus one for the globalPlace and plus 1 for the place
                     # in the membrane, 0 -> 1 offset
@@ -185,7 +185,6 @@ debug = False
 for key in sortedProt:
     midMem, place, i, globalPlace, aa, secAA, dG = proteinsExamples[key]
     pureKey = key[:5]
-
     # if pureKey[:4] not in topcons_added_keys:
     #     continue
     chain = key[4]
@@ -205,7 +204,6 @@ for key in sortedProt:
             pickle.dump(bridges, open(saltpath, 'wb'))
         else:
             bridges = pickle.load(open(saltpath, 'rb'))
-        
         numMem = countMems(TMdata[pureKey][1])
         memNumber = whatMem(TMdata[pureKey][1], globalPlace, args.tolerant)
         span = 'multi span' if numMem > 1 else 'single span'
@@ -217,12 +215,12 @@ for key in sortedProt:
             #     print(bridge)
             # sys.exit()
             # if bridge[1][3]-bridge[0][3] == i:
-            if args.gap != 0 and bridge[1][3] - bridge[0][3] > args.gap:
+            # [164, 'ARG', 166, 'GLU', 'A', 3.0681937683268963]
+            #print(bridge)
+            if args.gap != 0 and bridge[2] - bridge[0] > args.gap:
                 continue
-            if (bridge[0][3] == globalPlace
-               and bridge[0][2] == chain)\
-               or (bridge[0][3] == (globalPlace + i)
-               and bridge[0][2] == chain):
+            if (bridge[0] == globalPlace
+                    and bridge[2] == (globalPlace + i) and bridge[4] == chain):
             # if ((bridge[0][3] == globalPlace
             #    and bridge[0][2] == chain)\
             #    and (bridge[1][3] == (globalPlace + i)
@@ -242,26 +240,20 @@ for key in sortedProt:
                       str(memNumber) + ' membrane region)',
                       'dG ' + '{0:.2f}'.format(dG),
                       sep=', ')
-                if len(bridge[0][4]) > 0:
-                    first_alt = "alt. conf {}".format(bridge[0][4])
-                else:
-                    first_alt = ''
-                if len(bridge[1][4]) > 0:
-                    second_alt = "alt. conf {}".format(bridge[1][4])
-                else:
-                    second_alt = ''
+                # if len(bridge[0][4]) > 0:
+                #     first_alt = "alt. conf {}".format(bridge[0][4])
+                # else:
+                #     first_alt = ''
+                # if len(bridge[1][4]) > 0:
+                #     second_alt = "alt. conf {}".format(bridge[1][4])
+                # else:
+                #     second_alt = ''
 
-                print(bridge[0][0],
-                      first_alt,
-                      bridge[0][1],
-                      bridge[0][2],
-                      bridge[0][3],
-                      bridge[1][0],
-                      second_alt,
-                      bridge[1][1],
-                      bridge[1][2],
-                      bridge[1][3],
-                      "{0:.2f}".format(bridge[2]) + "Å")
+                print(bridge[0],
+                      bridge[1],
+                      bridge[2],
+                      bridge[3],
+                      "{0:.2f}".format(bridge[5]) + "Å")
         # sys.exit()
     # print(bridges)
         if does_have_saltbridge:
