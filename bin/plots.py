@@ -15,12 +15,37 @@ aa_data = pd.read_csv("pdbtm.clust.aas.csv",delimiter=',')
 pair_data = pd.read_csv("pdbtm.clust.pairs.csv",delimiter=',')
 
 num_pairs = pair_data["PID"].count()
-num_pairs_noH = pair_data[(pair_data["Res1"] != 'H') & (pair_data["Res2"] != 'H') & (pair_data["Step"] < 7)]["Local saltbridge"].count()
+num_pairs_noH_local = pair_data[(pair_data["Res1"] != 'H') & (pair_data["Res2"] != 'H') & (pair_data["Step"] < 7) & (pair_data["Pair type"]=="Opp") & (pair_data["Local saltbridge"].notna())]
+# print(num_pairs_noH_local)
+
+pair_gap = []
+num_pair_gap = 0
+for k, row in num_pairs_noH_local.iterrows():
+    for s in row["Local saltbridge"].split(';'):
+        if row["Step"] != 5:
+            pair_gap.append(row["Step"])
+            num_pair_gap += 1
+pair_counter = Counter(pair_gap)
+fig, ax = plt.subplots()
+print(np.sum(np.array(list(pair_counter.values()))/num_pair_gap))
+ax.bar(pair_counter.keys(), np.array(list(pair_counter.values()))/num_pair_gap)
+# ax.hist(gaps, bins=[-4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 4.5], align="mid", rwidth=0.9) 
+ax.set_xticks([0,1,2,3,4])
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.set_xlabel("Salt bridge separation")
+ax.set_ylabel("Fraction of all local salt bridges")
+# plt.show()
+plt.savefig("pair_bridge_gap.png")
+fig.clear()
+# sys.exit()
+# plt.savefig("saltbridge_gap.png")
+# num_pairs_noH_count = pair_data[(pair_data["Res1"] != 'H') & (pair_data["Res2"] != 'H') & (pair_data["Step"] < 7)]["Local saltbridge"].count()
 # num_pairs_noH = pair_data[(pair_data["Res1"] != 'H') & (pair_data["Res2"] != 'H') & (pair_data["Local saltbridge"].notna())].groupby("Step")["PID"].count()
-num_pairs_noH = pair_data[(pair_data["Res1"] != 'H') & (pair_data["Res2"] != 'H') & (pair_data["Local saltbridge"].notna()) & (pair_data["Step"] < 7)]["PID"].count()
+num_pairs_noH_count = pair_data[(pair_data["Res1"] != 'H') & (pair_data["Res2"] != 'H') & (pair_data["Local saltbridge"].notna()) & (pair_data["Step"] < 7)]["PID"].count()
 
 print("Pairs: {}".format(num_pairs))
-print("Local saltbridges: {}".format(num_pairs_noH))
+print("Local saltbridges: {}".format(num_pairs_noH_count))
 num_residues = aa_data['PID'].count()
 print("Number of residues: {}".format(num_residues))
 polar_aa_data = aa_data[aa_data["Res"].isin(list(POLAR))]
@@ -127,24 +152,29 @@ for k, r in opp_charge_sanH_local_134["localbridge"].str.split(";").iteritems():
     has_local.append(k)
 
 gaps = []
+num_local_bridges = 0
 for k in has_local:
     # print(k)
     row = opp_charge_sanH_local_134.loc[k] 
     for l in row["localbridge"].split(';'):
         if l[0] != 'H' and int(l[1:])-row["ResN"] < 7:
-            gaps.append(int(l[1:])-row["ResN"])  
-    
+            gaps.append(int(l[1:])-row["ResN"]) 
+            num_local_bridges += 1
+gap_counts = Counter(gaps)
 # print(gaps)
 # print(Counter(gaps))
 #### Figure for saltbridge gap ####
 fig, ax = plt.subplots()
-ax.hist(gaps, bins=[-4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 4.5], align="mid", rwidth=0.9) 
-ax.set_xticks([-4,-3,-2,-1,0,1,2,3,4])
+print(np.sum(np.array(list(gap_counts.values()))/num_local_bridges))
+ax.bar(gap_counts.keys(), np.array(list(gap_counts.values()))/num_local_bridges)
+# ax.hist(gaps, bins=[-4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 4.5], align="mid", rwidth=0.9) 
+ax.set_xticks([-4,-3,-2,-1, 0,1,2,3,4])
 ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
 ax.set_xlabel("Salt bridge separation")
-ax.set_ylabel("Count")
+ax.set_ylabel("Fraction of all local salt bridges")
 # plt.show()
+# sys.exit()
 plt.savefig("saltbridge_gap.png")
 ################################
 

@@ -171,8 +171,8 @@ $(VISIMAGES) : $(A3MCHARGES) $(GLOBCHARGES)
 	# ./bin/visualizeAAs_Compare_all.py $(GLOBCHARGES) $(A3MCHARGES) $(IMAGEDIR)/mem_vs_glob.svg "pdbtm vs Globular"
 	./bin/flow_image.py $(STATDIR)/pdbtm.clust.mems.stats.pickle "PDBTM non-redundant" $(IMAGEDIR)/pdbtm_stats.png
 	./bin/flow_image.py $(STATDIR)/pdbtm.clust.mems.stats.pickle "PDBTM non-redundant" $(IMAGEDIR)/pdbtm_stats.svg 
-	./bin/flow_image.py $(STATDIR)/pdbtm_redundant.mems.stats.pickle "PDBTM redundant" $(IMAGEDIR)/pdbtm_stats_red.png
-	./bin/flow_image.py $(STATDIR)/pdbtm_redundant.mems.stats.pickle "PDBTM redundant" $(IMAGEDIR)/pdbtm_stats_red.svg 
+	# ./bin/flow_image.py $(STATDIR)/pdbtm_redundant.mems.stats.pickle "PDBTM redundant" $(IMAGEDIR)/pdbtm_stats_red.png
+	# ./bin/flow_image.py $(STATDIR)/pdbtm_redundant.mems.stats.pickle "PDBTM redundant" $(IMAGEDIR)/pdbtm_stats_red.svg 
 
 .PHONY: clean deepclean
 clean:
