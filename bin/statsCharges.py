@@ -589,6 +589,11 @@ print()
 print("Amino acids in trans segments: ".ljust(70), len(seg_aas))
 print("Amino acids in trans segments, trimmed: ".ljust(70),
       len(seg_aas_trimmed))
+charges_res = 0
+for c in charged:
+    charges_res += seg_aas_trimmed.count(c)
+print("Charged amino acids in trans segments, trimmed: ".ljust(70),
+      charges_res)
 print()
 #############################################################
 print()

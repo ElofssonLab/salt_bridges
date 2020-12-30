@@ -339,7 +339,7 @@ for i in range(8):
     # p = (1-scipy.stats.norm.cdf(abs(z)))*2
     psf = (scipy.stats.norm.sf(abs(z)))*2*20*20*8  ## Make simple multiple hypothesis correction
     ci.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d), math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d), psf))
-    print("Total {}: logOdds: {:.3f} SE: {:.3f} p: {:.5f}".format(i+1, logOdd, SE, psf))
+    print("Total {}: logOdds: {:.3f} SE: {:.3f} p: {:.2e}".format(i+1, logOdd, SE, psf))
     ###### For Opp charges ######
     a = hitcounter[i]                 # Number of opposite pairs, only opposite
     b = len(pairs[i])       # Number of total observed pairs
@@ -354,7 +354,7 @@ for i in range(8):
     # p = (1-scipy.stats.norm.cdf(abs(z)))*2
     psf = (scipy.stats.norm.sf(abs(z)))*2*20*20*8  ## Make simple multiple hypothesis correction
     ciOpp.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d), math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d), psf))
-    print("Opp {}: logOdds: {:.3f} SE: {:.3f} p: {:.5f}".format(i+1, logOdd, SE, psf))
+    print("Opp {}: logOdds: {:.3f} SE: {:.3f} p: {:.2e}".format(i+1, logOdd, SE, psf))
 
     ###### For same charges ######
     a = samehitcounter[i]                 # Number of same pairs, only same
@@ -375,7 +375,7 @@ for i in range(8):
     # p = (1-scipy.stats.norm.cdf(abs(z)))*2
     psf = (scipy.stats.norm.sf(abs(z)))*2*20*20*8  ## Make simple multiple hypothesis correction
     ciSame.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d), math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d), psf))
-    print("Same {}: logOdds: {:.3f} SE: {:.3f} p: {:.5f}".format(i+1, logOdd, SE, psf))
+    print("Same {}: logOdds: {:.3f} SE: {:.3f} p: {:.2e}".format(i+1, logOdd, SE, psf))
 ################################################
 ##########
 # Graphs #
