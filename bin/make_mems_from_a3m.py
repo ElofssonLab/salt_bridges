@@ -65,6 +65,8 @@ for a3mfile in os.listdir(args.a3m_folder):
         name = faFile.readline()[1:].strip()
         # print(name)
         # originalSequence = faFile.readline().strip()
+        if not name in helicies:
+            continue
         helixNumbers = helicies[name]
         # print(helixNumbers)
         raw_lines = []

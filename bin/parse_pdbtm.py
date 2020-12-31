@@ -73,8 +73,10 @@ for prot in root.iter(namespace + "pdbtm"):
             # print("No file {}".format(pdb_file))
             continue
         pdb_struct = parser.get_structure(pdb_id, pdb_file)
-        # if not "x-ray diffraction" == pdb_struct.header["structure_method"]:
-        #     continue
+        struct_type = pdb_struct.header["structure_method"]
+        # Only use well established methods
+        if not struct_type in ["x-ray diffraction", "electron microscopy","solution nmr"]:
+            continue
         try:
             dssp = DSSP(pdb_struct[0], pdb_file)
         except:
