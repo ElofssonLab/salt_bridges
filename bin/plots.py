@@ -2,17 +2,24 @@
 import pandas as pd
 import numpy as np
 import sys
+import argparse
 import matplotlib.pyplot as plt
 from collections import Counter
 
+parser = argparse.ArgumentParser()
+
+parser.add_argument("aa_csv", type=str, help="AA csv file")
+parser.add_argument("pair_csv", type=str, help="Pairs csv file")
+
+args = parser.parse_args()
 CHARGEDwithH = "DEKRH"
 CHARGED = "DEKR"
 POLAR = "DEKRHNPQ"
 POS = "KR"
 NEG = "DE"
 
-aa_data = pd.read_csv("pdbtm.clust.aas.csv",delimiter=',')
-pair_data = pd.read_csv("pdbtm.clust.pairs.csv",delimiter=',')
+aa_data = pd.read_csv(args.aa_csv, delimiter=',')
+pair_data = pd.read_csv(args.pair_csv, delimiter=',')
 
 num_pairs = pair_data["PID"].count()
 num_pairs_noH_local = pair_data[(pair_data["Res1"] != 'H') & (pair_data["Res2"] != 'H') & (pair_data["Step"] < 7) & (pair_data["Pair type"]=="Opp") & (pair_data["Local saltbridge"].notna())]
@@ -36,7 +43,7 @@ ax.spines['right'].set_visible(False)
 ax.set_xlabel("Salt bridge separation")
 ax.set_ylabel("Fraction of all local salt bridges")
 # plt.show()
-plt.savefig("pair_bridge_gap.png")
+plt.savefig("images/pair_bridge_gap.png")
 fig.clear()
 # sys.exit()
 # plt.savefig("saltbridge_gap.png")
@@ -68,7 +75,7 @@ ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
 ax.set_xlabel("Place in core mem")
 ax.set_ylabel("Relative bridge gap")
-plt.savefig("bridge_scatter.png")
+plt.savefig("images/bridge_scatter.png")
 # plt.show()
 fig.clear()
 cols = ["-7","-6","-5","-4","-3","-2","-1","1","2","3","4","5","6","7"]
@@ -103,7 +110,7 @@ ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
 ax.set_xlabel("Pairing distances")
 ax.set_ylabel("Count")
-plt.savefig("charged_aa_pairings.png")
+plt.savefig("images/charged_aa_pairings.png")
 fig.clear()
 # plt.show()
 print("Number of polarresidues: {} ({:.1%})".format(polar_aa_data['PID'].count(), polar_aa_data['PID'].count()/num_residues))
@@ -175,7 +182,7 @@ ax.set_xlabel("Salt bridge separation")
 ax.set_ylabel("Fraction of all local salt bridges")
 # plt.show()
 # sys.exit()
-plt.savefig("saltbridge_gap.png")
+plt.savefig("images/saltbridge_gap.png")
 ################################
 
 print("Number of charged residues with opp 3 and 4: {}".format(opp_charge34["PID"].count()))

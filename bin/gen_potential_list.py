@@ -6,7 +6,7 @@
 import pickle
 import dgCalc
 import saltBridges
-import parser
+# import parser
 import os.path
 import argparse
 import urllib.request
