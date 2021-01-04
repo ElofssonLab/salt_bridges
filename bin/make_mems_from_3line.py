@@ -21,7 +21,7 @@ membranes = {}
 pid = ''
 seq = ''
 currentLine = 1
-mem_len = 17  # At least 17 in length
+# mem_len = 17  # At least 17 in length ## Extract all membranes, do check for >= 17 later
 
 for line in args.in_file:
     modu = currentLine % 3
@@ -43,7 +43,7 @@ for line in args.in_file:
             if c != curr_letter:
                 if curr_letter in accept_letters:  # Also include H to have compatability wityh dssp globular topology
                     memSeq = seq[start_pos:i]
-                    if len(memSeq) >= mem_len and 'X' not in memSeq and\
+                    if 'X' not in memSeq and\
                        'U' not in memSeq and\
                        'Z' not in memSeq and\
                        'O' not in memSeq:

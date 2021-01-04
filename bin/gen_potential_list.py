@@ -16,10 +16,12 @@ import sys
 parser = argparse.ArgumentParser()
 
 parser.add_argument("mems_pickle", type=str, help="Pickle file of membranes")
+parser.add_argument("bridge_file", type=str, help="Bridge file")
 parser.add_argument("threeline", type=str, help="3line in file")
 parser.add_argument("-b", "--bridges", type=int, default=1, help="Required connections per bridge")
 parser.add_argument("-g", "--gap", type=int, default=7, help="Must be within number of residues, (0 = unlimited)")
 parser.add_argument("-t", "--tolerant", type=bool, default=True, help="Use tolerant membranes (also include m, not just M)")
+parser.add_argument("-s", "--stats", type=bool, default=False, help="Only calculate stats, do not generate list")
 
 args = parser.parse_args()
 mem_length = 17
@@ -92,7 +94,9 @@ def whatMem(topoStr, aaIndex, tol=False):
 aas = 'ACDEFGHIKLMNPQRSTVWY'
 proteinsExamples = {}
 proteinSet = set()
+membraneSet = set()
 totalMems = 0
+totalLongMems = 0
 TMdata = {}
 with open(args.threeline, 'r') as TMHandle:
     pdb_id = ''
@@ -121,6 +125,7 @@ for key, membranes in helicies.items():
         if len(mem) < mem_length:
             # print("Short mem")
             continue
+        totalLongMems += 1  # If membrane is longer than or equal 17
         # Uncomment next line for only mid mem
         edge = 5
         midMem = mem[edge:-edge]
@@ -147,6 +152,9 @@ for key, membranes in helicies.items():
                 # second = aas.index(midMem[place + i])
                 secAA = midMem[place + i]
                 if aa in charged and secAA in charged:
+                    membraneSet.add(key + "-" + str(mem_place))
+                    # print(membraneSet)
+                    # sys.exit()
                     deltaG = dgCalc.calc_segment_DG(fullMem)
                     # Add five is midmem
                     globalPlace = mem_place + edge + 1  # Residue numbering
@@ -178,8 +186,12 @@ for key, membranes in helicies.items():
                 # aaCount[1][i - 1][second] += 1
 print("Number of proteins: ", len(helicies.keys()))
 print("Total membranes: ", totalMems)
+print("Total membranes > 17: ", totalLongMems)
 print("Proteins that contain charged pairs: ", len(proteinSet))
-print("Membrane regions with charged pairs: ", len(proteinsExamples))
+print("Membrane regions with charged pairs: ", len(membraneSet))  # Number of helices with charged pairs
+print("Total number of charged pairs: ", len(proteinsExamples))  # Number of total pairs
+if args.stats:
+    sys.exit()
 sortedProt = sorted(proteinsExamples.keys())
 debug = False
 for key in sortedProt:

@@ -28,7 +28,7 @@ positiveplus = 'RHK'
 # with open('../data/red_TM_prop.top') as topFile:
 random.seed(3141)
 k=200
-mem_part_length = 17
+# mem_part_length = 17  # Check the length of mems later (to be able to count them all)
 helicies = {}
 with open(args.top) as topFile:
     name = ''
@@ -92,7 +92,7 @@ for a3mfile in os.listdir(args.a3m_folder):
                     memPart = line[start + insertions:end + insertions]
                     if memPart.count('-') == 0 and\
                        sum(1 for c in memPart if c.islower()) == 0 and\
-                       'X' not in memPart and len(memPart) >= mem_part_length:
+                       'X' not in memPart: #  and len(memPart) >= mem_part_length:
                         # membranes[name].append(memPart)
                         mems.append([start, memPart])
                     # print(start+insertions, end+insertions)

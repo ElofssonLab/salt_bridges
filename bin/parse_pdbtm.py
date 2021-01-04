@@ -19,6 +19,8 @@ xml_file = sys.argv[2]
 out_file = sys.argv[3]
 bridge_file = sys.argv[3][:-6]+ "_bridges.pickle"
 
+gap_offset = 5
+
 debug = False
 struct_dict = {}
 all_bridge_dict = {}
@@ -159,12 +161,13 @@ for prot in root.iter(namespace + "pdbtm"):
                                     else:
                                         mem_bridge_dict[str(pdb_id) + chain_id] = [save_bridge]
 
-                                if (bridge[0] >= pdb_start and bridge[0] <= pdb_end) and (bridge[2] >= pdb_start and bridge[2] <= pdb_end):
-                                    if full_chain_id in local_bridge_dict:
-                                        local_bridge_dict[str(pdb_id) + chain_id].append(save_bridge)
-                                    else:
-                                        local_bridge_dict[str(pdb_id) + chain_id] = [save_bridge]
-                                    # stop = True
+                                if pdb_end - pdb_start >= 17:  # Only use core parts if saving local bridges
+                                    if (bridge[0] >= pdb_start+gap_offset and bridge[0] <= pdb_end-gap_offset) and (bridge[2] >= pdb_start+gap_offset and bridge[2] <= pdb_end-gap_offset):
+                                        if full_chain_id in local_bridge_dict:
+                                            local_bridge_dict[str(pdb_id) + chain_id].append(save_bridge)
+                                        else:
+                                            local_bridge_dict[str(pdb_id) + chain_id] = [save_bridge]
+                                        # stop = True
 
                         T = 'M'
                         m_len = pdb_end - pdb_start + 1

@@ -3,13 +3,16 @@ import sys
 
 # salt_bridge_cutoff = 4  # distance in Ångström to consider a salt bridge
 
-def parseLine(line):
+def parseLine(line, resi=0):
     num = int(line[6:11])
     atom = line[13:16].strip()
     alt_loc = line[16].strip()
     residue = line[17:20]
     chain = line[21]
-    chainnum = int(line[22:26])  # - 1  # Change to 0 based 
+    if resi == 0:
+        chainnum = int(line[22:26])  # - 1  # Change to 0 based 
+    else:
+        chainnum = resi
     x = float(line[30:38])
     y = float(line[38:46])
     z = float(line[46:54])
@@ -21,7 +24,7 @@ def calcEuclidianDist(x1, y1, z1, x2, y2, z2):
     return ((x2 - x1)**2 + (y2 - y1)**2 + (z2 - z1)**2)**0.5
 
 
-def calcSaltBridges(filename, chain, salt_bridge_cutoff = 4, con_req=1):
+def calcSaltBridges(filename, chain, salt_bridge_cutoff = 4, con_req=1,renumber=False):
     raw_bridges = {}
     bridges = []
     otherBridges = []
@@ -29,6 +32,8 @@ def calcSaltBridges(filename, chain, salt_bridge_cutoff = 4, con_req=1):
     otherChains = []
     POS = ['ARG', 'LYS', 'HIS']
     NEG = ['ASP', 'GLU']
+    manual_numbering = 0
+    curr_old_resi = ''
     with open(filename, 'r') as pdbFile:
         # chain = 'C'
         multi_model = False
@@ -39,11 +44,25 @@ def calcSaltBridges(filename, chain, salt_bridge_cutoff = 4, con_req=1):
                     break
                 else:
                     multi_model = True
+            if renumber and line.startswith("ATOM") and chain == line[21]:
+                # If we have not initiated yet
+                # print(line)
+                if manual_numbering == 0:
+                    manual_numbering = 1
+                    curr_old_resi = line[22:26]
+                # If we hit a new residue, advance the counter 
+                # print(curr_old_resi, line[22:26])
+
+                if curr_old_resi != line[22:26]:
+                    curr_old_resi = line[22:26]
+                    manual_numbering += 1
             if line[:4] == 'ATOM'\
                and line[17:20] in ['ASP', 'GLU', 'ARG', 'LYS', 'HIS']\
                and line[13:15] in ['OD', 'OE', 'NH', 'NZ', 'NE', 'ND']:
                 if line[21] == chain:
-                    currChain.append(parseLine(line))
+                    parsed_line =parseLine(line,manual_numbering) 
+                    currChain.append(parsed_line)
+
                     # print(line)
                     # print(parseLine(line))
                 else:
