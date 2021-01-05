@@ -141,6 +141,8 @@ with open(args.threeline, 'r') as TMHandle:
 proteins_with_mems= set()
 proteins_with_correct_mems = set()
 local_bridge_list = set()
+any_saltbridge_prot = set()
+true_local_saltbridge_prot = set()
 correct_mems = 0
 mem_bridge_count = 0
 local_bridge_count = 0
@@ -198,12 +200,15 @@ for key, membranes in helicies.items():
             ss_second = mb[2]
             if ss_first > (mem_place+5) and ss_first <= (mem_place + fullmemLen-5) or\
                     ss_second > (mem_place+5) and ss_second <= (mem_place + fullmemLen-5):
+                        any_saltbridge_prot.add(key)  # Make sure to add for any protein
                         mem_bridge.append(mb)
         for lb in local_bridges:
             ss_first = lb[0]
             ss_second = lb[2]
             if ss_first > (mem_place+5) and ss_first <= (mem_place + fullmemLen - 5) and\
                     ss_second > (mem_place+5) and ss_second <= (mem_place + fullmemLen - 5):
+                        any_saltbridge_prot.add(key)  # Make sure to add for any protein
+                        true_local_saltbridge_prot.add(key)  # Proteins with local salt bridge
                         local_bridge.append(lb)
         # Run through each mem and save the pairs
         for place, aa in enumerate(midMem):
@@ -342,20 +347,23 @@ for key, membranes in helicies.items():
                                                         mem_bridges_text += ";"+aa_first+str(ss_first)+"-"+aa_second+str(ss_second)
                                                     else:
                                                         mem_bridges_text = aa_first+str(ss_first)+"-"+aa_second+str(ss_second)
-                                if len(local_bridge)>0:
-                                    for lb in local_bridge:
-                                        ss_first = lb[0]
-                                        ss_second = lb[2]
-                                        if ss_first == (mem_place+5+1+place) and ss_second == (mem_place + 5 + 1 + place + i):
-                                            has_local_bridge = 1
-                                            local_bridges_text = str(ss_first)+"-"+str(ss_second)
-                                        
-                                # print(key, "SAME", i, has_mem_bridge, has_local_bridge)
-                                if has_local_bridge:
-                                    # Should be impossible to have a local bridge between same charges
-                                    print("SAME local saltbridge?", local_bridge)
                                 mem_bridge_count += has_mem_bridge
-                                local_bridge_count += has_local_bridge
+                                # if len(local_bridge)>0:
+                                #     for lb in local_bridge:
+                                #         ss_first = lb[0]
+                                #         ss_second = lb[2]
+                                #         if ss_first == (mem_place+5+1+place) and ss_second == (mem_place + 5 + 1 + place + i):
+                                #             has_local_bridge = 1
+                                #             local_bridges_text = str(ss_first)+"-"+str(ss_second)
+                                #         
+                                # # print(key, "SAME", i, has_mem_bridge, has_local_bridge)
+                                # if has_local_bridge:
+                                #     # Should be impossible to have a local bridge between same charges
+                                #     print("SAME local saltbridge?", local_bridges_text)
+                                #     print(aa, second_aa)
+                                #     print(ss_first, ss_second)
+                                #     print(aa_first, aa_second)
+                                # local_bridge_count += has_local_bridge
                             else:
                                 # Opp charge
                                 pair_type = "Opp"
@@ -403,6 +411,8 @@ with open(csv_file_aas, 'w') as csv_handle:
     csv_handle.write('\n'.join(csv_text_aas))
 print("Proteins with mems: {}".format(len(proteins_with_mems)))
 print("Proteins with correct mems: {}".format(len(proteins_with_correct_mems)))
+print("Proteins with any salt bridge: {}".format(len(any_saltbridge_prot)))
+print("Proteins with local salt bridge: {}".format(len(true_local_saltbridge_prot)))
 print("Number of correct mems: {}".format(correct_mems))
 print("Mem bridges: {}".format(mem_bridge_count))
 print("Local bridges: {}".format(local_bridge_count))
