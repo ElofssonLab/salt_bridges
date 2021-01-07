@@ -175,8 +175,8 @@ $(VISIMAGES) : $(A3MCHARGES) $(GLOBCHARGES)
 	./bin/visualizeAAs_mem.py $(PROCDIR)/pdbtm_a3m.charges.pickle $(IMAGEDIR)/mem_cluster ""
 	# ./bin/visualizeAAs_Compare.py $(GLOBCHARGES) $(A3MCHARGES) $(IMAGEDIR)/charges_vis.svg "pdbtm vs Globular"
 	# ./bin/visualizeAAs_Compare_all.py $(GLOBCHARGES) $(A3MCHARGES) $(IMAGEDIR)/mem_vs_glob.svg "pdbtm vs Globular"
-	./bin/flow_image.py $(STATDIR)/pdbtm.clust.mems.stats.pickle "PDBTM non-redundant" $(IMAGEDIR)/pdbtm_stats.png
-	./bin/flow_image.py $(STATDIR)/pdbtm.clust.mems.stats.pickle "PDBTM non-redundant" $(IMAGEDIR)/pdbtm_stats.svg 
+	./bin/flow_image.py $(PROCDIR)/pdbtm.clust.mems.stats.pickle "PDBTM non-redundant" $(IMAGEDIR)/pdbtm_stats.png
+	./bin/flow_image.py $(PROCDIR)/pdbtm.clust.mems.stats.pickle "PDBTM non-redundant" $(IMAGEDIR)/pdbtm_stats.svg 
 	# ./bin/flow_image.py $(STATDIR)/pdbtm_redundant.mems.stats.pickle "PDBTM redundant" $(IMAGEDIR)/pdbtm_stats_red.png
 	# ./bin/flow_image.py $(STATDIR)/pdbtm_redundant.mems.stats.pickle "PDBTM redundant" $(IMAGEDIR)/pdbtm_stats_red.svg 
 

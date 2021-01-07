@@ -670,9 +670,9 @@ stats_data["num_opp_pairs_in_2"] = len(opp_steps_trimmed_sanH[1])
 stats_data["num_opp_pairs_in_3"] = len(opp_steps_trimmed_sanH[2])
 stats_data["num_opp_pairs_in_4"] = len(opp_steps_trimmed_sanH[3])
 stats_data["num_opp_pairs_in_5"] = len(opp_steps_trimmed_sanH[4])
-# save_file = "stats/" + args.pickle_file.split('/')[-1][:-6] + "stats.pickle"
-# with open(save_file, 'wb') as out_file:
-#     pickle.dump(stats_data, out_file)
+save_file = "data/processed/" + args.pickle_file.split('/')[-1][:-6] + "stats.pickle"
+with open(save_file, 'wb') as out_file:
+    pickle.dump(stats_data, out_file)
 # print()
 # print("Number of charges and count:")
 # print(pd.Series(segs_with_multi_charges_full_sanH).value_counts().to_string())
