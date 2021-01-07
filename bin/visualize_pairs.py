@@ -537,8 +537,9 @@ for l,x,y in sorted(zip(order, degrees, len(degrees)*[0.9]))[:9]:
         label = "+{}".format(l)
     c_ax.annotate(label, (x,y), ha="center", va="center",weight='bold')
 #### adding a) and b) text
-plt.text(-0.05, 0.95, "a)", fontsize=16, fontdict={"weight":'bold'}, transform=axes[0].transAxes)
+plt.text(-0.05, 1.00, "a)", fontsize=16, fontdict={"weight":'bold'}, transform=axes[0].transAxes)
 plt.text(-0.05, 0.10, "b)", fontsize=16, fontdict={"weight":'bold'}, transform=axes[1].transAxes)
+plt.subplots_adjust(top=0.95)
 # plt.savefig("test.png")
 for ext in [".png", ".svg"]:
     plt.savefig('images/' + name + ext)
