@@ -7,6 +7,8 @@ import math
 import seaborn as sns
 import pickle
 import argparse
+import scipy
+import sys
 # import random
 # import collections
 plt.rcParams.update({'font.size': 14})
@@ -37,7 +39,8 @@ out_image = args.out
 aaCount, aaPairs, aaHits = pickle.load(open(in_pickle, 'rb'))
     # open('data/chargeDataGlobularFromPDBRed50TrimmedLen15v2.pickle',
     #      'rb'))
-
+log_odds_file = args.out + ".txt"
+log_odds_text_list = ["Separation\tFirst\tSecond\tlogOdds\terror\tp"]
 logOdds = np.zeros([10, 20, 20])
 ci = []
 # print([aas.index(c) for c in chargedplus])
@@ -45,7 +48,9 @@ aaIndex = [aas.index(c) for c in positiveplus]
 # print(sum(aaHits[0][chargesPlusIndex][chargesPlusIndex]))
 # for ind, aa in enumerate(aasOri):
 #    print(aa, aaCount[ind])
-for i in range(10):
+
+mask = np.zeros([10, 20, 20])
+for i in range(8):
     for first in range(20):
         for second in range(20):
             a = aaHits[i][first][second]
@@ -59,9 +64,6 @@ for i in range(10):
             d = aaPairs[i]**2  # - c  # same as above, not odds
             # print(a, b, c, d)
             odds = (a / b) / (c / d)
-#     # print("Odds ratio for step {}: {:.2f}".format(i+1, (odds)))
-    # print("Log odds ratio for step {}: {:.2f}".format(i+1, math.log(odds)))
-    # logOdds.append(math.log(odds))
             if odds == 0.0:
                 logOddsValue = -math.inf
                 print("Odds 0 at step: ", i + 1)
@@ -72,53 +74,97 @@ for i in range(10):
                 logOddsValue = math.log(odds)
             logOdds[i][aas.index(aasOri[first])][aas.index(aasOri[second])]\
                 = logOddsValue
+
+            SE = math.sqrt(1/a+1/b+1/c+1/d)
+            z = abs(logOddsValue/SE)  ## Two sided
+            # pm = math.exp(-0.717*z-0.416*z**2)*20*20*8*2 ## two sided
+            # p = (1-scipy.stats.norm.cdf(abs(z)))*2
+            psf = (scipy.stats.norm.sf(abs(z)))*2*20*20*8  ## Make simple multiple hypothesis correction
+
+            # if i == 0:
+            mask[i][aas.index(aasOri[first])][aas.index(aasOri[second])]= 1 if psf > 0.05 else 0
+            # print("{}-{} {}: logOdds: {:.3f} SE: {:.3f} p: {:.2e}".format(aasOri[first], aasOri[second],i+1, logOddsValue, SE, psf))
+            log_odds_text_list.append("{}\t{}\t{}\t{:.3f}\t{:.3f}\t{:.2e}".format(i+1, aasOri[first], aasOri[second],logOddsValue, SE, psf))
+            ci.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d), math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d), psf))
+            # if psf < 0.05:
+            #     print("{}-{} {}: logOdds: {:.3f} SE: {:.3f} p: {:.2e}".format(aas[first], aas[second],i+1, logOddsValue, SE, psf))
+#     # print("Odds ratio for step {}: {:.2f}".format(i+1, (odds)))
+    # print("Log odds ratio for step {}: {:.2f}".format(i+1, math.log(odds)))
+    # logOdds.append(math.log(odds))
     # print("Upper 95% CI: {:.2f}".format((math.log(odds)
     # +1.96*math.sqrt(1/a+1/b+1/c+1/d))))
     # print("Lower 95% CI: {:.2f}".format((math.log(odds)
     # -1.96*math.sqrt(1/a+1/b+1/c+1/d))))
     # ci.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d),
     # math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d)))
+# print(statsData[7][18][13])
 # f, axarr = plt.subplots(3, 3, figsize=(16, 14))
-f, axarr = plt.subplots(2, 4, figsize=(25, 12))
+prefix_dot = out_image.rfind('.')
+out_log_odds = out_image[:prefix_dot] + "_logOdds.txt"
+
+with open(out_log_odds, 'w') as log_out_handle:
+    log_out_handle.write('\n'.join(log_odds_text_list))
+
+for o in range(2):
+    f, axarr = plt.subplots(2, 4, figsize=(25, 12))
 # axarr[-1, -1].axis('off')
 # axarr[-1, -2].axis('off')
 # plt.suptitle("TMs alpha helices, trimmed, pdb50, len > 15, V2")
-plt.suptitle(args.title)
-for i in range(8):
-    # print(i)
-    # if i == 3 or i==7:
-    #     show_cbar=True
-    # else:
-    #     show_cbar=False
-    show_cbar = False
-    df = pd.DataFrame(logOdds[i],
-                      index=[c for c in aas],
-                      columns=[c for c in aas])
-    ax = sns.heatmap(df,
-                     ax=axarr[i // 4, i % 4],
-                     vmin=-2,
-                     vmax=2,
-                     cmap="coolwarm",
-                     center=0, cbar=show_cbar)
-    ax.title.set_text("Step " + str(i + 1))
-    for x_tick in ax.get_xticklabels():
-        if x_tick.get_text() in charged:
-            x_tick.set_weight("bold")
-            x_tick.set_fontsize(14)
-    for y_tick in ax.get_yticklabels():
-        if y_tick.get_text() in charged:
-            y_tick.set_weight("bold")
-            y_tick.set_fontsize(14)
-plt.tight_layout(rect=[0,0,24/25,1])
+    plt.suptitle(args.title)
+    if o:
+        out_image = out_image[:prefix_dot] + "_mask" + out_image[prefix_dot]
+    for i in range(8):
+        # print(i)
+        # if i == 3 or i==7:
+        #     show_cbar=True
+        # else:
+        #     show_cbar=False
+        show_cbar = False
+        df = pd.DataFrame(logOdds[i],
+                          index=[c for c in aas],
+                          columns=[c for c in aas])
+        if o:
+            ax = sns.heatmap(df,
+                             ax=axarr[i // 4, i % 4],
+                             vmin=-2,
+                             vmax=2,
+                             cmap="coolwarm",
+                             center=0, cbar=show_cbar,mask=mask[i])
+        else:
+            ax = sns.heatmap(df,
+                             ax=axarr[i // 4, i % 4],
+                             vmin=-2,
+                             vmax=2,
+                             cmap="coolwarm",
+                             center=0, cbar=show_cbar,)
+        ax.title.set_text("Step " + str(i + 1))
+        for x_tick in ax.get_xticklabels():
+            if x_tick.get_text() in charged:
+                x_tick.set_weight("bold")
+                x_tick.set_fontsize(14)
+        for y_tick in ax.get_yticklabels():
+            if y_tick.get_text() in charged:
+                y_tick.set_weight("bold")
+                y_tick.set_fontsize(14)
+    plt.tight_layout(rect=[0,0,24/25,1])
 # plt.subplots_adjust(top=0.93)
-cb_ax = f.add_axes([24/25, 0.044, 0.01, 0.9])
-sns.heatmap(df,
-            ax=ax,
-            vmin=-2,
-            vmax=2,
-            cmap="coolwarm",
-            center=0, cbar=True, cbar_ax=cb_ax)
-f.savefig(out_image)
+    cb_ax = f.add_axes([24/25, 0.044, 0.01, 0.9])
+    if o:
+        sns.heatmap(df,
+                    ax=ax,
+                    vmin=-2,
+                    vmax=2,
+                    cmap="coolwarm",
+                    center=0, cbar=True, mask=mask[i], cbar_ax=cb_ax)
+    else:
+        sns.heatmap(df,
+                    ax=ax,
+                    vmin=-2,
+                    vmax=2,
+                    cmap="coolwarm",
+                    center=0, cbar=True, cbar_ax=cb_ax)
+    f.savefig(out_image)
+    plt.clf()
 # f.savefig('images/'
 #           + 'logOddsGlobularTrimmed'
 #           + 'HeatmapGroupOrderFromPDBRed50Len15v2.svg')
