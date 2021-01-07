@@ -324,6 +324,10 @@ logOddsSame = []
 ci = []
 ciOpp = []
 ciSame = []
+log_odds_file = 'stats/' + name +"_logOdds.txt"
+log_odds_tot_list = ["Separation\tType\tlogOdds\terror\tp"]
+log_odds_opp_list = []
+log_odds_same_list = []
 for i in range(8):
     ###### For All charges ######
     a = totalhits[i]                # Number of pairs, there is a charge
@@ -339,7 +343,8 @@ for i in range(8):
     # p = (1-scipy.stats.norm.cdf(abs(z)))*2
     psf = (scipy.stats.norm.sf(abs(z)))*2*20*20*8  ## Make simple multiple hypothesis correction
     ci.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d), math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d), psf))
-    print("Total {}: logOdds: {:.3f} SE: {:.3f} p: {:.2e}".format(i+1, logOdd, SE, psf))
+    # print("Total {}: logOdds: {:.3f} SE: {:.3f} p: {:.2e}".format(i+1, logOdd, SE, psf))
+    log_odds_tot_list.append("{}\t{}\t{:.3f}\t{:.3f}\t{:.2e}".format(i+1, "Tot", logOdd, SE, psf))
     ###### For Opp charges ######
     a = hitcounter[i]                 # Number of opposite pairs, only opposite
     b = len(pairs[i])       # Number of total observed pairs
@@ -354,7 +359,8 @@ for i in range(8):
     # p = (1-scipy.stats.norm.cdf(abs(z)))*2
     psf = (scipy.stats.norm.sf(abs(z)))*2*20*20*8  ## Make simple multiple hypothesis correction
     ciOpp.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d), math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d), psf))
-    print("Opp {}: logOdds: {:.3f} SE: {:.3f} p: {:.2e}".format(i+1, logOdd, SE, psf))
+    log_odds_opp_list.append("{}\t{}\t{:.3f}\t{:.3f}\t{:.2e}".format(i+1, "Opp", logOdd, SE, psf))
+    # print("Opp {}: logOdds: {:.3f} SE: {:.3f} p: {:.2e}".format(i+1, logOdd, SE, psf))
 
     ###### For same charges ######
     a = samehitcounter[i]                 # Number of same pairs, only same
@@ -375,8 +381,11 @@ for i in range(8):
     # p = (1-scipy.stats.norm.cdf(abs(z)))*2
     psf = (scipy.stats.norm.sf(abs(z)))*2*20*20*8  ## Make simple multiple hypothesis correction
     ciSame.append((math.log(odds)+1.96*math.sqrt(1/a+1/b+1/c+1/d), math.log(odds)-1.96*math.sqrt(1/a+1/b+1/c+1/d), psf))
-    print("Same {}: logOdds: {:.3f} SE: {:.3f} p: {:.2e}".format(i+1, logOdd, SE, psf))
+    log_odds_same_list.append("{}\t{}\t{:.3f}\t{:.3f}\t{:.2e}".format(i+1, "Same", logOdd, SE, psf))
+    # print("Same {}: logOdds: {:.3f} SE: {:.3f} p: {:.2e}".format(i+1, logOdd, SE, psf))
 ################################################
+with open(log_odds_file, 'w') as log_out_handle:
+    log_out_handle.write('\n'.join(log_odds_tot_list + log_odds_opp_list + log_odds_same_list))
 ##########
 # Graphs #
 ##########

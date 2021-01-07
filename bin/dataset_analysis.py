@@ -23,6 +23,10 @@ parser.add_argument("threeline", type=str, help="3line in file")
 # parser.add_argument("-t", "--tolerant", type=bool, default=False, help="Use tolerant membranes (also include m, not just M)")
 
 args = parser.parse_args()
+
+data_out_stats = "stats/" + args.threeline.split('/')[-1].split('.')[0] + "_dataset_stats.txt"
+# print(data_out_stats)
+# sys.exit()
 mem_length = 17
 aas = 'ACDEFGHIKLMNPQRSTVWY'
 CHARGED = "DEKRH"
@@ -137,7 +141,7 @@ with open(args.threeline, 'r') as TMHandle:
             print("You should not be here...")
         rowNum += 1
 
-
+stats_text = []
 proteins_with_mems= set()
 proteins_with_correct_mems = set()
 local_bridge_list = set()
@@ -159,10 +163,14 @@ for k, m in bridges["mems"].items():
 for k, m in bridges["local"].items():
     tot_num_local_proteins += 1
     tot_num_local_bridges += len(m) 
-print("Membrane bridges: ", tot_num_mem_bridges)
-print("Membrane proteins: ", tot_num_mem_proteins)
-print("Local bridges: ", tot_num_local_bridges)
-print("Local proteins: ", tot_num_local_proteins)
+stats_text.append("Membrane bridges: {}".format(tot_num_mem_bridges))
+stats_text.append("Membrane proteins: {}".format(tot_num_mem_proteins))
+stats_text.append("Local bridges: {}".format(tot_num_local_bridges))
+stats_text.append("Local proteins: {}".format(tot_num_local_proteins))
+# print("Membrane bridges: ", tot_num_mem_bridges)
+# print("Membrane proteins: ", tot_num_mem_proteins)
+# print("Local bridges: ", tot_num_local_bridges)
+# print("Local proteins: ", tot_num_local_proteins)
 for key, membranes in helicies.items():
     local_bridges = []
     mems_bridges = []
@@ -409,13 +417,14 @@ with open(csv_file_pairs, 'w') as csv_handle:
     csv_handle.write('\n'.join(csv_text_pairs))
 with open(csv_file_aas, 'w') as csv_handle:
     csv_handle.write('\n'.join(csv_text_aas))
-print("Proteins with mems: {}".format(len(proteins_with_mems)))
-print("Proteins with correct mems: {}".format(len(proteins_with_correct_mems)))
-print("Proteins with any salt bridge: {}".format(len(any_saltbridge_prot)))
-print("Proteins with local salt bridge: {}".format(len(true_local_saltbridge_prot)))
-print("Number of correct mems: {}".format(correct_mems))
-print("Mem bridges: {}".format(mem_bridge_count))
-print("Local bridges: {}".format(local_bridge_count))
+stats_text.append("Local proteins: {}".format(tot_num_local_proteins))
+stats_text.append("Proteins with mems: {}".format(len(proteins_with_mems)))
+stats_text.append("Proteins with correct mems: {}".format(len(proteins_with_correct_mems)))
+stats_text.append("Proteins with any salt bridge: {}".format(len(any_saltbridge_prot)))
+stats_text.append("Proteins with local salt bridge: {}".format(len(true_local_saltbridge_prot)))
+stats_text.append("Number of correct mems: {}".format(correct_mems))
+stats_text.append("Mem bridges: {}".format(mem_bridge_count))
+stats_text.append("Local bridges: {}".format(local_bridge_count))
 # #         if mem in TMdata[key][0]:
 #         for place, aa in enumerate(midMem):
 #             stats['aas'] += 1

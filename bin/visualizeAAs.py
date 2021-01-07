@@ -39,7 +39,6 @@ out_image = args.out
 aaCount, aaPairs, aaHits = pickle.load(open(in_pickle, 'rb'))
     # open('data/chargeDataGlobularFromPDBRed50TrimmedLen15v2.pickle',
     #      'rb'))
-log_odds_file = args.out + ".txt"
 log_odds_text_list = ["Separation\tFirst\tSecond\tlogOdds\terror\tp"]
 logOdds = np.zeros([10, 20, 20])
 ci = []
@@ -100,7 +99,7 @@ for i in range(8):
 # print(statsData[7][18][13])
 # f, axarr = plt.subplots(3, 3, figsize=(16, 14))
 prefix_dot = out_image.rfind('.')
-out_log_odds = out_image[:prefix_dot] + "_logOdds.txt"
+out_log_odds = out_image[:prefix_dot].replace("images", "stats") + "_logOdds.txt"
 
 with open(out_log_odds, 'w') as log_out_handle:
     log_out_handle.write('\n'.join(log_odds_text_list))

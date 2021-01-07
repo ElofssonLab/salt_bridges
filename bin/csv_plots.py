@@ -21,6 +21,8 @@ NEG = "DE"
 aa_data = pd.read_csv(args.aa_csv, delimiter=',')
 pair_data = pd.read_csv(args.pair_csv, delimiter=',')
 prefix = args.aa_csv.split('/')[-1].split('.')[0]
+stats_data = []
+stats_file = "stats/" + prefix + "_csv_stats.txt"
 # print(prefix)
 # sys.exit()
 num_pairs = pair_data["PID"].count()
@@ -36,7 +38,7 @@ for k, row in num_pairs_noH_local.iterrows():
             num_pair_gap += 1
 pair_counter = Counter(pair_gap)
 fig, ax = plt.subplots()
-print(np.sum(np.array(list(pair_counter.values()))/num_pair_gap))
+# print(np.sum(np.array(list(pair_counter.values()))/num_pair_gap))
 ax.bar(pair_counter.keys(), np.array(list(pair_counter.values()))/num_pair_gap)
 # ax.hist(gaps, bins=[-4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 4.5], align="mid", rwidth=0.9) 
 ax.set_xticks([0,1,2,3,4])
@@ -53,10 +55,10 @@ fig.clear()
 # num_pairs_noH = pair_data[(pair_data["Res1"] != 'H') & (pair_data["Res2"] != 'H') & (pair_data["Local saltbridge"].notna())].groupby("Step")["PID"].count()
 num_pairs_noH_count = pair_data[(pair_data["Res1"] != 'H') & (pair_data["Res2"] != 'H') & (pair_data["Local saltbridge"].notna()) & (pair_data["Step"] < 7)]["PID"].count()
 
-print("Pairs: {}".format(num_pairs))
-print("Local saltbridges: {}".format(num_pairs_noH_count))
+stats_data.append("Pairs: {}".format(num_pairs))
+stats_data.append("Local saltbridges: {}".format(num_pairs_noH_count))
 num_residues = aa_data['PID'].count()
-print("Number of residues: {}".format(num_residues))
+stats_data.append("Number of residues: {}".format(num_residues))
 polar_aa_data = aa_data[aa_data["Res"].isin(list(POLAR))]
 charged_aa_data = aa_data[aa_data["Res"].isin(list(CHARGED))]
 
@@ -115,8 +117,8 @@ ax.set_ylabel("Count")
 plt.savefig("images/{}_charged_aa_pairings.png".format(prefix))
 fig.clear()
 # plt.show()
-print("Number of polarresidues: {} ({:.1%})".format(polar_aa_data['PID'].count(), polar_aa_data['PID'].count()/num_residues))
-print("Number of charged residues: {} ({:.1%})".format(charged_aa_data['PID'].count(),charged_aa_data['PID'].count()/num_residues))
+stats_data.append("Number of polarresidues: {} ({:.1%})".format(polar_aa_data['PID'].count(), polar_aa_data['PID'].count()/num_residues))
+stats_data.append("Number of charged residues: {} ({:.1%})".format(charged_aa_data['PID'].count(),charged_aa_data['PID'].count()/num_residues))
 
 same_charge34 = charged_aa_data[(charged_aa_data["Res"].isin(list(POS)) &
                             (charged_aa_data["-3"].isin(list(POS)) | (charged_aa_data["-4"].isin(list(POS))) |
@@ -174,7 +176,7 @@ gap_counts = Counter(gaps)
 # print(Counter(gaps))
 #### Figure for saltbridge gap ####
 fig, ax = plt.subplots()
-print(np.sum(np.array(list(gap_counts.values()))/num_local_bridges))
+# print(np.sum(np.array(list(gap_counts.values()))/num_local_bridges))
 ax.bar(gap_counts.keys(), np.array(list(gap_counts.values()))/num_local_bridges)
 # ax.hist(gaps, bins=[-4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 4.5], align="mid", rwidth=0.9) 
 ax.set_xticks([-4,-3,-2,-1, 0,1,2,3,4])
@@ -187,15 +189,17 @@ ax.set_ylabel("Fraction of all local salt bridges")
 plt.savefig("images/{}_saltbridge_gap.png".format(prefix))
 ################################
 
-print("Number of charged residues with opp 3 and 4: {}".format(opp_charge34["PID"].count()))
-print("Number of charged residues with same 3 and 4: {}".format(same_charge34["PID"].count()))
-print("Number of charged residues in pair(1,3,4): {} ({:.1%})".format(same_charge134["PID"].count()+opp_charge134["PID"].count(),(same_charge134["PID"].count()+opp_charge134["PID"].count())/num_residues))
-print("Number of charged residues with opp 1, 3 and 4: {} ({:.1%})".format(opp_charge134["PID"].count(),opp_charge134["PID"].count()/num_residues))
-print("Number of charged residues with same 1, 3 and 4: {} ({:.1%})".format(same_charge134["PID"].count(),same_charge134["PID"].count()/num_residues))
-print("34 with saltbridges: {}".format(opp_charge_sanH["PID"].count()))
-print("34 with local saltbridges: {}".format(opp_charge_sanH_local["PID"].count()))
-print("134 with saltbridges: {}".format(opp_charge_sanH_134["PID"].count()))
-print("134 with local saltbridges: {}".format(opp_charge_sanH_local_134["PID"].count()))
+stats_data.append("Number of charged residues with opp 3 and 4: {}".format(opp_charge34["PID"].count()))
+stats_data.append("Number of charged residues with same 3 and 4: {}".format(same_charge34["PID"].count()))
+stats_data.append("Number of charged residues in pair(1,3,4): {} ({:.1%})".format(same_charge134["PID"].count()+opp_charge134["PID"].count(),(same_charge134["PID"].count()+opp_charge134["PID"].count())/num_residues))
+stats_data.append("Number of charged residues with opp 1, 3 and 4: {} ({:.1%})".format(opp_charge134["PID"].count(),opp_charge134["PID"].count()/num_residues))
+stats_data.append("Number of charged residues with same 1, 3 and 4: {} ({:.1%})".format(same_charge134["PID"].count(),same_charge134["PID"].count()/num_residues))
+stats_data.append("34 with saltbridges: {}".format(opp_charge_sanH["PID"].count()))
+stats_data.append("34 with local saltbridges: {}".format(opp_charge_sanH_local["PID"].count()))
+stats_data.append("134 with saltbridges: {}".format(opp_charge_sanH_134["PID"].count()))
+stats_data.append("134 with local saltbridges: {}".format(opp_charge_sanH_local_134["PID"].count()))
+with open(stats_file, 'w') as stats_handle:
+    stats_handle.write('\n'.join(stats_data))
 # print(pair_data[(pair_data["Res1"] != 'H') & (pair_data["Res2"] != 'H') & (pair_data["Local saltbridge"].notna())])
 # print(opp_charge_sanH_local_134.groupby("PID")["PID"].count())
 # print(charged_aa_data[charged_aa_data["PID"] == "6Y7FA"])
