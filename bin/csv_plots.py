@@ -3,9 +3,10 @@ import pandas as pd
 import numpy as np
 import sys
 import argparse
+from matplotlib import cm
 import matplotlib.pyplot as plt
 from collections import Counter
-
+viridis = cm.get_cmap('viridis', 12)
 parser = argparse.ArgumentParser()
 
 parser.add_argument("aa_csv", type=str, help="AA csv file")
@@ -23,11 +24,41 @@ pair_data = pd.read_csv(args.pair_csv, delimiter=',')
 prefix = args.aa_csv.split('/')[-1].split('.')[0]
 stats_data = []
 stats_file = "stats/" + prefix + "_csv_stats.txt"
-# print(prefix)
+# for k in [5466, 21567, 21572,10109]:
+#     print(aa_data.loc[k])
 # sys.exit()
 num_pairs = pair_data["PID"].count()
 num_pairs_noH_local = pair_data[(pair_data["Res1"] != 'H') & (pair_data["Res2"] != 'H') & (pair_data["Step"] < 7) & (pair_data["Pair type"]=="Opp") & (pair_data["Local saltbridge"].notna())]
 # print(num_pairs_noH_local)
+
+pair_data_opp = pair_data[(pair_data["Pair type"] == "Opp") & ((pair_data["Res1"] != 'H') & (pair_data["Res2"] != 'H'))]    
+pair_data_opp_num = Counter(pair_data_opp["Step"])
+pair_data_opp_local = pair_data_opp[pair_data_opp["Local saltbridge"].notna()]
+pair_data_opp_local_num = Counter(pair_data_opp_local["Step"])
+# print(pair_data_opp_num)
+# print(pair_data_opp_local_num)
+
+index = [1, 3, 4]
+frac_data = []
+for s in index:
+    frac_data.append(pair_data_opp_local_num[s]/pair_data_opp_num[s])
+    # print(pair_data_opp_local_num[s],pair_data_opp_num[s])
+# sys.exit()
+
+#########################
+fig, ax = plt.subplots(figsize=(15,10))
+# print(np.sum(np.array(list(gap_counts.values()))/num_local_bridges))
+ax.bar(index, frac_data, color=viridis.colors)
+# ax.hist(gaps, bins=[-4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 4.5], align="mid", rwidth=0.9) 
+ax.set_xticks([1,2,3,4])
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.set_xlabel("Salt bridge separation")
+ax.set_ylabel("Fraction of oppositely charged pairs")
+# plt.show()
+# sys.exit()
+plt.savefig("images/{}_local_saltbridge_frac_gap.png".format(prefix))
+
 
 pair_gap = []
 num_pair_gap = 0
@@ -37,9 +68,10 @@ for k, row in num_pairs_noH_local.iterrows():
             pair_gap.append(row["Step"])
             num_pair_gap += 1
 pair_counter = Counter(pair_gap)
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(15,10))
 # print(np.sum(np.array(list(pair_counter.values()))/num_pair_gap))
-ax.bar(pair_counter.keys(), np.array(list(pair_counter.values()))/num_pair_gap)
+ax.bar(pair_counter.keys(), np.array(list(pair_counter.values()))/num_pair_gap, color=viridis.colors)
+
 # ax.hist(gaps, bins=[-4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 4.5], align="mid", rwidth=0.9) 
 ax.set_xticks([0,1,2,3,4])
 ax.spines['top'].set_visible(False)
@@ -72,7 +104,7 @@ for k, row in localbridge_data.iterrows():
         saltbridge_place.append(local_place)
         saltbridge_gap.append(int(s[1:])-row["ResN"])
 
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(15,10))
 ax.scatter(saltbridge_place,saltbridge_gap)
 ax.set_xticks([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17])
 ax.spines['top'].set_visible(False)
@@ -103,13 +135,61 @@ charged_aa_data_sanH_opp[cols] = charged_aa_data_sanH.apply(opp,axis=1)
 charged_aa_data_sanH_same[cols] = charged_aa_data_sanH.apply(same,axis=1)
 opp_series = charged_aa_data_sanH_opp[cols].count()
 same_series = charged_aa_data_sanH_same[cols].count()
+#######################
+charged_aa_data_sanH_opp_local = charged_aa_data_sanH_opp[charged_aa_data_sanH_opp["localbridge"].notna()]
+# print(charged_aa_data_sanH_opp_local)
+has_local = []
+for k, r in charged_aa_data_sanH_opp_local["localbridge"].str.split(";").iteritems():
+    has_local.append(k)
+# print(len(has_local))
+
+gaps = []
+num_local_bridges = 0
+for k in has_local:
+    # print(k)
+    row = charged_aa_data_sanH_opp_local.loc[k] 
+    for l in row["localbridge"].split(';'):
+        if l[0] != 'H' and int(l[1:])-row["ResN"] < 7:
+            gaps.append(int(l[1:])-row["ResN"]) 
+            # if int(l[1:])-row["ResN"] in [2,-2]:
+            #     print(k)
+            num_local_bridges += 1
+gap_counts = Counter(gaps)
+# print(gap_counts)
+#####################
+# print(opp_series)
+# for s in [-4, -3, -1, 1, 3, 4]:
+#     print(gap_counts[s])
+#     print(opp_series.loc[str(s)])
+# print(charged_aa_data_sanH)
+# print(charged_aa_data_sanH_opp)
 # charged_aa_data_sanH_opp = charged_aa_data_sanH.apply(lambda x: x if x.name in cols and ((charged_aa_data_sanH.loc[x.index]["Res"].values[0] in POS and x in NEG) (charged_aa_data_sanH.loc[x.index]["Res"].values[0] in NEG and x in POS)) else np.nan)
 # print(charged_aa_data_sanH_opp)
+index = [-4, -3, -1, 1, 3, 4]
+frac_data = []
+for s in index:
+    frac_data.append(gap_counts[s]/opp_series.loc[str(s)])
+
+#########################
+fig, ax = plt.subplots(figsize=(15,10))
+# print(np.sum(np.array(list(gap_counts.values()))/num_local_bridges))
+ax.bar(index, frac_data, color=viridis.colors)
+# ax.hist(gaps, bins=[-4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 4.5], align="mid", rwidth=0.9) 
+ax.set_xticks([-4,-3,-2,-1, 0,1,2,3,4])
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.set_xlabel("Salt bridge separation")
+ax.set_ylabel("Fraction of oppositely charged pairs")
+# plt.show()
+# sys.exit()
+plt.savefig("images/{}_saltbridge_frac_gap.png".format(prefix))
+##########################
+
 index = [-7,-6,-5,-4,-3,-2,-1,1,2,3,4,5,6,7]
 df = pd.DataFrame({"Same":same_series.tolist(), "Opp":opp_series.tolist()}, index=index)
 
-fig, ax = plt.subplots()
-df.plot.bar(ax=ax)
+fig, ax = plt.subplots(figsize=(15,10))
+df.plot.bar(ax=ax, color=viridis.colors)
 ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
 ax.set_xlabel("Pairing distances")
@@ -171,13 +251,29 @@ for k in has_local:
         if l[0] != 'H' and int(l[1:])-row["ResN"] < 7:
             gaps.append(int(l[1:])-row["ResN"]) 
             num_local_bridges += 1
+
+
+
+has_local = []
+for k, r in opp_charge_sanH_local_134["localbridge"].str.split(";").iteritems():
+    has_local.append(k)
+
+gaps = []
+num_local_bridges = 0
+for k in has_local:
+    # print(k)
+    row = opp_charge_sanH_local_134.loc[k] 
+    for l in row["localbridge"].split(';'):
+        if l[0] != 'H' and int(l[1:])-row["ResN"] < 7:
+            gaps.append(int(l[1:])-row["ResN"]) 
+            num_local_bridges += 1
 gap_counts = Counter(gaps)
 # print(gaps)
 # print(Counter(gaps))
 #### Figure for saltbridge gap ####
-fig, ax = plt.subplots()
+fig, ax = plt.subplots(figsize=(15,10))
 # print(np.sum(np.array(list(gap_counts.values()))/num_local_bridges))
-ax.bar(gap_counts.keys(), np.array(list(gap_counts.values()))/num_local_bridges)
+ax.bar(gap_counts.keys(), np.array(list(gap_counts.values()))/num_local_bridges, color=viridis.colors)
 # ax.hist(gaps, bins=[-4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 4.5], align="mid", rwidth=0.9) 
 ax.set_xticks([-4,-3,-2,-1, 0,1,2,3,4])
 ax.spines['top'].set_visible(False)
