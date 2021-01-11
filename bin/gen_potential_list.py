@@ -60,21 +60,25 @@ helicies = pickle.load(open(args.mems_pickle,
                             'rb'))
 
 
-def countMems(topoStr):
+def countMems(topoStr, tol=True):
+    if tol:
+        mem_letters = 'Mm'
+    else:
+        mem_letters = 'M'
     num = 0
     currTopo = topoStr[0]
     # print(currTopo)
     for i, topo in enumerate(topoStr):
         # print(currTopo, topo)
         if topo != currTopo:
-            if currTopo == 'M':
+            if currTopo in mem_letters:
                 # print("In loop")
                 num += 1
             currTopo = topo
     return num
 
 
-def whatMem(topoStr, aaIndex, tol=False):
+def whatMem(topoStr, aaIndex, tol=True):
     if tol:
         mem_letters = 'Mm'
     else:
@@ -134,6 +138,10 @@ for key, membranes in helicies.items():
             continue
         # midMem = mem
         memLen = len(midMem)
+        #### If not tolerant, exclude membranes with 'm', indicating DSSP is not fully correct
+        if not args.tolerant:
+            if 'm' in midMem:
+                continue
 #         if mem in TMdata[key][0]:
         for place, aa in enumerate(midMem):
             stats['aas'] += 1
@@ -217,7 +225,7 @@ for key in sortedProt:
         else:
             bridges = pickle.load(open(saltpath, 'rb'))
         numMem = countMems(TMdata[pureKey][1])
-        memNumber = whatMem(TMdata[pureKey][1], globalPlace, args.tolerant)
+        memNumber = whatMem(TMdata[pureKey][1], globalPlace)
         span = 'multi span' if numMem > 1 else 'single span'
         # if pureKey[:4] == "6RQP":
         #     print(globalPlace ,chain ,i, aa, secAA ,place, midMem)
