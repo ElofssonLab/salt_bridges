@@ -7,6 +7,7 @@ from matplotlib import cm
 import matplotlib.pyplot as plt
 from collections import Counter
 viridis = cm.get_cmap('viridis', 12)
+plt.rcParams.update({'font.size': 14})
 parser = argparse.ArgumentParser()
 
 parser.add_argument("aa_csv", type=str, help="AA csv file")
