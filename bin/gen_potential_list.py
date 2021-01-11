@@ -20,12 +20,12 @@ parser.add_argument("bridge_file", type=str, help="Bridge file")
 parser.add_argument("threeline", type=str, help="3line in file")
 parser.add_argument("-b", "--bridges", type=int, default=1, help="Required connections per bridge")
 parser.add_argument("-g", "--gap", type=int, default=7, help="Must be within number of residues, (0 = unlimited)")
-parser.add_argument("-t", "--tolerant", type=bool, default=True, help="Use tolerant membranes (also include m, not just M)")
+parser.add_argument("-t", "--tolerant", type=str, default="True", help="Use tolerant membranes (also include m, not just M)")
 parser.add_argument("-s", "--stats", type=bool, default=False, help="Only calculate stats, do not generate list")
 
 args = parser.parse_args()
 mem_length = 17
-
+debug = False
 stats = {'aas':0, 'chr':0, 'pos':0, 'neg':0, 'pospair':0, 'negpair':0, 'chargedpair':0, 'opppair':0}
 con_req = args.bridges  # How many saltbridge connections to make a bridge? Default 1
 aaMap = {'ARG': 'R',
@@ -123,9 +123,10 @@ with open(args.threeline, 'r') as TMHandle:
             print("You should not be here...")
         rowNum += 1
 for key, membranes in helicies.items():
+    if key == "1SU4A":
+        debug = True
     totalMems += len(membranes)
     for mem_place, mem in membranes:
-
         if len(mem) < mem_length:
             # print("Short mem")
             continue
@@ -139,8 +140,12 @@ for key, membranes in helicies.items():
         # midMem = mem
         memLen = len(midMem)
         #### If not tolerant, exclude membranes with 'm', indicating DSSP is not fully correct
-        if not args.tolerant:
-            if 'm' in midMem:
+        if args.tolerant == "False":
+            topo = TMdata[key][1]
+            t_start = mem_place
+            t_end = t_start + len(mem)
+            topo = topo[t_start:t_end][edge:-edge]
+            if 'm' in topo:
                 continue
 #         if mem in TMdata[key][0]:
         for place, aa in enumerate(midMem):
