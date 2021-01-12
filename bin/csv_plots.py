@@ -39,7 +39,7 @@ pair_data_opp_local_num = Counter(pair_data_opp_local["Step"])
 # print(pair_data_opp_num)
 # print(pair_data_opp_local_num)
 
-index = [1, 3, 4]
+index = [1, 2, 3, 4, 5]
 frac_data = []
 for s in index:
     frac_data.append(pair_data_opp_local_num[s]/pair_data_opp_num[s])
@@ -51,7 +51,7 @@ fig, ax = plt.subplots(figsize=(15,10))
 # print(np.sum(np.array(list(gap_counts.values()))/num_local_bridges))
 ax.bar(index, frac_data, color=viridis.colors)
 # ax.hist(gaps, bins=[-4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 4.5], align="mid", rwidth=0.9) 
-ax.set_xticks([1,2,3,4])
+ax.set_xticks([1,2,3,4,5])
 ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
 ax.set_xlabel("Salt bridge separation")
@@ -65,16 +65,16 @@ pair_gap = []
 num_pair_gap = 0
 for k, row in num_pairs_noH_local.iterrows():
     for s in row["Local saltbridge"].split(';'):
-        if row["Step"] != 5:
-            pair_gap.append(row["Step"])
-            num_pair_gap += 1
+        # if row["Step"] != 5:
+        pair_gap.append(row["Step"])
+        num_pair_gap += 1
 pair_counter = Counter(pair_gap)
 fig, ax = plt.subplots(figsize=(15,10))
 # print(np.sum(np.array(list(pair_counter.values()))/num_pair_gap))
 ax.bar(pair_counter.keys(), np.array(list(pair_counter.values()))/num_pair_gap, color=viridis.colors)
 
 # ax.hist(gaps, bins=[-4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 4.5], align="mid", rwidth=0.9) 
-ax.set_xticks([0,1,2,3,4])
+ax.set_xticks([1,2,3,4,5])
 ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
 ax.set_xlabel("Salt bridge separation")
@@ -166,7 +166,7 @@ gap_counts = Counter(gaps)
 # print(charged_aa_data_sanH_opp)
 # charged_aa_data_sanH_opp = charged_aa_data_sanH.apply(lambda x: x if x.name in cols and ((charged_aa_data_sanH.loc[x.index]["Res"].values[0] in POS and x in NEG) (charged_aa_data_sanH.loc[x.index]["Res"].values[0] in NEG and x in POS)) else np.nan)
 # print(charged_aa_data_sanH_opp)
-index = [-4, -3, -1, 1, 3, 4]
+index = [-4, -3, -2,-1, 1, 2,3, 4]
 frac_data = []
 for s in index:
     frac_data.append(gap_counts[s]/opp_series.loc[str(s)])
