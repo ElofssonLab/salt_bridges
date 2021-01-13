@@ -137,6 +137,7 @@ $(STATS) : $(STATDIR)/%_stats.txt : $(PROCDIR)/%.clust.mems.pickle | $(MEMS)
 	./bin/dataset_analysis.py $(PROCDIR)/scop_glob.clust.mems.pickle $(PROCDIR)/scop_glob.clust.mems_bridges.pickle $(PROCDIR)/scop_glob.clust.3line
 	./bin/csv_plots.py $(PROCDIR)/pdbtm.clust.aas.csv $(PROCDIR)/pdbtm.clust.pairs.csv
 	./bin/csv_plots.py $(PROCDIR)/scop_glob.clust.aas.csv $(PROCDIR)/scop_glob.clust.pairs.csv
+	./bin/manual_pairs.py $(PROCDIR)/pdbtm.clust.pairs.csv $(PROCDIR)/pdbtm.clust.mems.pickle $(PROCDIR)/pdbtm_bridges.pickle > $(STATDIR)/manual_pairs_info.txt
 	# ./bin/statsCharges.py $(PROCDIR)/pdbtm_redundant.mems.pickle > $(STATDIR)/pdbtm_redundant_stats.txt
 
 # $(RCSB) : %_info.txt : %_pairs.txt | $(PROTS)
