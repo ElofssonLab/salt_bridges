@@ -427,7 +427,7 @@ df_opp["Type"] = "Opp"
 df = pd.concat([df_same, df_opp], ignore_index=True)
 df = df[df["Step"] < 9]
 df["Step"] = "i+" + df["Step"].astype(int).astype(str)
-
+barWidth = 0.35
 nodes = [0, 0.25, 0.5, 0.75, 1]
 colors = ["#FDE725FF", "#440154FF", "#FDE725FF"]
 # Regular red and green
@@ -439,7 +439,7 @@ degree_cmap = mpl.colors.ListedColormap(mpl.cm.get_cmap('viridis_r').colors + mp
 # grid = plt.GridSpec(3,6, wspace=0.4, hspace=0.1)
 sns.set_theme(style="white", context="paper")
 # sns.set(fontsize=14)
-f, axes = plt.subplots(6,1,figsize=(7, 12), gridspec_kw={"height_ratios":[64,1,16,16,1,16]})
+f, axes = plt.subplots(5,1,figsize=(7, 12), gridspec_kw={"height_ratios":[150,1,72,1,72]})
 h = sns.histplot(df, x="Step", color="grey", hue="Type", discrete=True, multiple="stack", shrink=.8, ax=axes[0])
 axes[0].get_legend().remove()
 hatches = {0:"///", 1:"\\\\\\", 2:"|||"}
@@ -449,13 +449,17 @@ for i in range(2):
         axes[0].patches[j+i*8].set_facecolor(degree_cmap(color_index/360))
         axes[0].patches[j+i*8].set_hatch(hatches[i])
 sns.despine(bottom=True, left=True)
-axes[0].axhline(xmax=8, color='black')
+axes[0].axhline(xmax=1, xmin=-0.5, color='black')
+axes[0].axvline(x=-0.5,ymax=1, color='black')
+axes[0].grid(axis='y')
+axes[0].yaxis.labelpad = 5
+
 ##### Here we start the second graph
 ################################################ 
 # f, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10, 10)) # , sharex=True)
 ###### Totalt ######
 axes[1].set_visible(False)
-axes[4].set_visible(False)
+axes[3].set_visible(False)
 # y_r = [logOdds[i] - ci[i][0] for i in range(len(ci))]
 # threshold = 0
 # values = np.array(logOdds)
@@ -468,67 +472,107 @@ axes[4].set_visible(False)
 # axes[2].axhline(xmax=8, color='black')
 
 ###### Opp ######
-y_r = [logOddsOpp[i] - ciOpp[i][0] for i in range(len(ciOpp))]
+y_r_opp = [logOddsOpp[i] - ciOpp[i][0] for i in range(len(ciOpp))]
+y_r_same = [logOddsSame[i] - ciSame[i][0] for i in range(len(ciSame))]
 threshold = 0
-values = np.array(logOddsOpp)
-x = ['i+' + str(x) for x in range(1, len(values)+1)]
-above_threshold = np.maximum(values - threshold, 0)
-below_threshold = np.minimum(values, threshold)
-axes[2].bar(x, logOddsOpp, yerr=y_r, color=['g', 'r', 'g', 'g', 'r', 'r', 'g', 'r'], alpha=0.8, align='center')
-axes[2].set_ylabel('Opposite charges')
-axes[2].set_yticks([-1,-0.5, 0, 0.5, 1, 1.5, 2])
-axes[2].axhline(xmax=8, color='black')
+values_opp = np.array(logOddsOpp)
+values_same = np.array(logOddsSame)
+x_label = ['i+' + str(x) for x in range(1, len(values_opp)+1)]
+x = np.arange(len(values_opp))
+opp_above_threshold = np.maximum(values_opp - threshold, 0)
+opp_below_threshold = np.minimum(values_opp, threshold)
+same_above_threshold = np.maximum(values_same - threshold, 0)
+same_below_threshold = np.minimum(values_same, threshold)
+opp_bar = axes[2].bar(x-barWidth/2, logOddsOpp, yerr=y_r_opp, width=barWidth, color=['g', 'r', 'g', 'g', 'r', 'r', 'g', 'r'], alpha=0.8, align='center', label='Opp charge')
+same_bar = axes[2].bar(x+barWidth/2, logOddsSame, yerr=y_r_same, width=barWidth, color=['g', 'r', 'g', 'g', 'r', 'r', 'g', 'r'], alpha=0.8, align='center', label='Same charge')
+axes[2].set_ylabel('Log odds ratio', labelpad=5)
+# axes[2].set_yticks([-1,-0.5, 0, 0.5, 1, 1.5, 2])
+# axes[2].set_yticks([0, 0.5, 1, 1.5, 2])
+axes[2].set_yticks([0, 0.25, 0.5, 0.75, 1])
+axes[2].axhline(xmax=8, xmin=-0.5, color='black')
+axes[2].axvline(x=-0.5,ymax=1, ymin=0, color='black')
+axes[2].grid(axis='y')
+axes[2].set_xticks(x)
+axes[2].set_xticklabels(x_label)
+axes[2].set_xlabel('Step')
 
 ###### Same ######
-y_r = [logOddsSame[i] - ciSame[i][0] for i in range(len(ciSame))]
-threshold = 0
-values = np.array(logOddsSame)
-x = ['i+' + str(x) for x in range(1, len(values)+1)]
-above_threshold = np.maximum(values - threshold, 0)
-below_threshold = np.minimum(values, threshold)
-axes[3].bar(x, logOddsSame, yerr=y_r, color=['g', 'r', 'g', 'g', 'r', 'r', 'g', 'r'], alpha=0.8, align='center')
-axes[3].set_ylabel('Same charges')
-axes[3].set_yticks([-1,-0.5, 0, 0.5, 1, 1.5, 2])
-axes[3].set_xlabel('Step')
-axes[3].axhline(xmax=8, color='black')
+# y_r = [logOddsSame[i] - ciSame[i][0] for i in range(len(ciSame))]
+# threshold = 0
+# values = np.array(logOddsSame)
+# x = ['i+' + str(x) for x in range(1, len(values)+1)]
+# above_threshold = np.maximum(values - threshold, 0)
+# below_threshold = np.minimum(values, threshold)
+# axes[3].bar(x, logOddsSame, yerr=y_r, color=['g', 'r', 'g', 'g', 'r', 'r', 'g', 'r'], alpha=0.8, align='center')
+# axes[3].set_ylabel('Log odds ratio')
+# # axes[3].set_yticks([-1,-0.5, 0, 0.5, 1, 1.5, 2])
+# # axes[3].set_yticks([0, 0.5, 1, 1.5, 2])
+# axes[3].set_yticks([0, 0.5, 1])
+# axes[3].set_xlabel('Step')
+# axes[3].axhline(xmax=8, xmin=-0.5, color='black')
+# axes[3].axvline(x=-0.5,ymax=1, ymin=0, color='black')
+# axes[3].grid(axis='y')
 
-axes[2].set_xticks([])
-axes[2].xaxis.set_tick_params(length=0)
+# axes[2].set_xticks([])
+# axes[2].xaxis.set_tick_params(length=0)
 # axes[3].xaxis.set_tick_params(length=0)
 # axes[3].set_xticks([])
 # axes[5].set_xticks([1, 2, 3, 4, 5, 6, 7, 8])
 
 index = [1, 2, 3, 4, 5, 6, 7, 8]
+x = ['i+' + str(x) for x in range(1, 9)]
 frac_data = []
 for s in index:
     frac_data.append(pair_data_opp_local_num[s]/pair_data_opp_num[s])
 ##### Salt bridges ######## 
 # print(np.sum(np.array(list(gap_counts.values()))/num_local_bridges))
-axes[5].bar(index, frac_data, alpha=0.8)
+axes[4].bar(x, frac_data, alpha=0.8)
 # ax.hist(gaps, bins=[-4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 4.5], align="mid", rwidth=0.9) 
-axes[5].set_xticks([1,2,3,4,5,6,7,8])
-axes[5].spines['top'].set_visible(False)
-axes[5].spines['right'].set_visible(False)
-axes[5].axhline(xmax=8, color='black')
-axes[5].set_xlabel("Salt bridge separation")
-axes[5].set_ylabel("Frac. of opp. charged pairs")
+# axes[5].set_xticks([1,2,3,4,5,6,7,8])
+axes[4].spines['top'].set_visible(False)
+axes[4].spines['right'].set_visible(False)
+axes[4].axhline(xmax=8, xmin=-0.5, color='black')
+axes[4].axvline(x=-0.5,ymax=1, color='black')
+axes[4].grid(axis='y')
+axes[4].set_xlabel("Step")
+axes[4].set_ylabel("Frac. of opp. charged pairs", labelpad=5)
 
 degree_cmap = mpl.colors.ListedColormap(mpl.cm.get_cmap('viridis_r').colors + mpl.cm.get_cmap('viridis').colors)
-for ax in [axes[2], axes[3]]:
-    ax.spines['right'].set_visible(False)
-    ax.spines['top'].set_visible(False)
-    ax.spines['left'].set_visible(False)
-    ax.spines['bottom'].set_visible(False)
-    for i in range(8):
-        color_index = (i*100 + 100) % 360
-        ax.patches[i].set_facecolor(degree_cmap(color_index/360))
-axes[5].spines['right'].set_visible(False)
-axes[5].spines['top'].set_visible(False)
-axes[5].spines['left'].set_visible(False)
-axes[5].spines['bottom'].set_visible(False)
-for i in range(5):
+# for ax in [axes[2],axes[4]]:
+
+axes[2].spines['right'].set_visible(False)
+axes[2].spines['top'].set_visible(False)
+axes[2].spines['left'].set_visible(False)
+axes[2].spines['bottom'].set_visible(False)
+for i in range(8):
     color_index = (i*100 + 100) % 360
-    axes[5].patches[i].set_facecolor(degree_cmap(color_index/360))
+    axes[2].patches[i].set_facecolor(degree_cmap(color_index/360))
+    axes[2].patches[i].set_hatch("///")
+    axes[2].patches[i+8].set_facecolor(degree_cmap(color_index/360))
+    axes[2].patches[i+8].set_hatch("\\\\\\")
+
+axes[2].legend((opp_bar, same_bar),("Opp charge", "Same charge"), loc='upper right', bbox_to_anchor=(1, 1.1))
+# hatches = {0:"///", 1:"\\\\\\", 2:"|||"}
+# for i in range(2):
+#     for j in range(8):
+#         color_index = (j*100 + 100) % 360
+#         axes[0].patches[j+i*8].set_facecolor(degree_cmap(color_index/360))
+#         axes[0].patches[j+i*8].set_hatch(hatches[i])
+
+axes[4].spines['right'].set_visible(False)
+axes[4].spines['top'].set_visible(False)
+axes[4].spines['left'].set_visible(False)
+axes[4].spines['bottom'].set_visible(False)
+for i in range(8):
+    color_index = (i*100 + 100) % 360
+    axes[4].patches[i].set_facecolor(degree_cmap(color_index/360))
+# axes[5].spines['right'].set_visible(False)
+# axes[5].spines['top'].set_visible(False)
+# axes[5].spines['left'].set_visible(False)
+# axes[5].spines['bottom'].set_visible(False)
+# for i in range(5):
+#     color_index = (i*100 + 100) % 360
+#     axes[5].patches[i].set_facecolor(degree_cmap(color_index/360))
 ###########################################
 plt.tight_layout()
 ####################################
@@ -571,8 +615,8 @@ for l,x,y in sorted(zip(order, degrees, len(degrees)*[0.9]))[:9]:
     c_ax.annotate(label, (x,y), ha="center", va="center",weight='bold')
 #### adding a), b) and c) text
 plt.text(-0.05, 1.00, "a)", fontsize=16, fontdict={"weight":'bold'}, transform=axes[0].transAxes)
-plt.text(-0.05, 0.10, "b)", fontsize=16, fontdict={"weight":'bold'}, transform=axes[1].transAxes)
-plt.text(-0.05, 0.10, "c)", fontsize=16, fontdict={"weight":'bold'}, transform=axes[4].transAxes)
+plt.text(-0.05, 1.10, "b)", fontsize=16, fontdict={"weight":'bold'}, transform=axes[2].transAxes)
+plt.text(-0.05, 1.10, "c)", fontsize=16, fontdict={"weight":'bold'}, transform=axes[4].transAxes)
 plt.subplots_adjust(top=0.95)
 # plt.savefig("test.png")
 for ext in [".png", ".svg"]:
