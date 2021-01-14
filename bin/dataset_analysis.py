@@ -425,6 +425,8 @@ stats_text.append("Proteins with local salt bridge: {}".format(len(true_local_sa
 stats_text.append("Number of correct mems: {}".format(correct_mems))
 stats_text.append("Mem bridges: {}".format(mem_bridge_count))
 stats_text.append("Local bridges: {}".format(local_bridge_count))
+with open(data_out_stats, 'w') as stats_handle:
+    stats_handle.write('\n'.join(stats_text))
 # #         if mem in TMdata[key][0]:
 #         for place, aa in enumerate(midMem):
 #             stats['aas'] += 1

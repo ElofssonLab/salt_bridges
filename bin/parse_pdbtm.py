@@ -63,7 +63,8 @@ for prot in root.iter(namespace + "pdbtm"):
 # for prot in root.findall(namespace + "pdbtm"):
     pdb_id = prot.attrib["ID"].upper()
     if pdb_id in struct_dict:
-    # if pdb_id == "6A2W":
+        # if pdb_id != "5A1S":
+        #     continue
         if debug:
             print("Running {}...".format(pdb_id))
         if prot.attrib["TMP"] != "yes":
@@ -90,6 +91,7 @@ for prot in root.iter(namespace + "pdbtm"):
         for chain in prot.findall(namespace + "CHAIN"):
             # num_mems = 0
             chain_id = chain.attrib["CHAINID"]
+            full_chain_id = pdb_id + chain_id
             if not chain_id in pdb_chains:
                 continue
             # if debug:
@@ -130,6 +132,8 @@ for prot in root.iter(namespace + "pdbtm"):
                 # stop = False
                 set_initial_offset = False
                 initial_offset = 0
+                h_end = 0
+                got_initial = False
                 for region in chain.findall(namespace + "REGION"):
                     run_bridges = True
                     reg_type = region.attrib["type"]
@@ -141,16 +145,28 @@ for prot in root.iter(namespace + "pdbtm"):
                         set_initial_offset = True
                     offset = pdb_start-reg_start
 
+                    if not got_initial:
+                        h_end = reg_start - 1
+                        # print(h_end)
+                        got_initial = True
+
                     if reg_type == 'H':
                         pdb_start = int(region.attrib["pdb_beg"])
                         pdb_end = int(region.attrib["pdb_end"])
+
+                        T = 'i'
+                        # print("{} i's {} {}".format(full_chain_id, h_end, reg_start-1))
+                        # print(raw_seq[h_end:reg_start-1])
+                        seq += raw_seq[h_end:reg_start-1]
+                        topo += (reg_start - h_end - 1)*T
+                        # h_end = reg_end
+
                         if pdb_end - pdb_start != reg_end -reg_start:
                             ### Only run bridges if we can sync pdb and seq residues
                             run_bridges = False
                             print("Skipping bridges for {}{}, {}-{}".format(pdb_id, chain_id, reg_start, reg_end))
 
                         ### bridge = [resi1, res1, resi2, res2, chain, dist]
-                        full_chain_id = pdb_id + chain_id
                         if run_bridges:
                             for bridge in bridges:
                                 save_bridge = [bridge[0]-offset-initial_offset, bridge[1], bridge[2]-offset-initial_offset, bridge[3], bridge[4], bridge[5]]
@@ -189,16 +205,26 @@ for prot in root.iter(namespace + "pdbtm"):
                                     save_protein = False
                                     break
                             # print(pdb_id, ss_string)
+                        h_end = reg_end
+                        # print("{} Mem {} {}".format(full_chain_id, reg_start-1, reg_end))
+                        # print(raw_seq[reg_start-1:reg_end])
                         seq += raw_seq[reg_start-1:reg_end]
-                    else:
-                        T = 'i'
-                        seq += raw_seq[reg_start-1:reg_end]
-                    topo += (reg_end - reg_start + 1)*T
+                        topo += (reg_end - reg_start + 1)*T
+                    # elif h_end == 0:
+                    #     T = 'i'
+                    #     print("{} Initial {} {}".format(full_chain_id, reg_start-1, reg_end))
+                    #     seq += raw_seq[reg_start-1:reg_end]
+                    #     topo += (reg_end - reg_start + 1)*T
+                T = 'i'
+                # print("{} Final {} {}".format(full_chain_id, h_end, reg_end))
+                # print(raw_seq[h_end:reg_end])
+                seq += raw_seq[h_end:reg_end]
+                topo += (reg_end - h_end)*T
                 if not save_protein:
                     print("Not saving protein {}".format(full_chain_id))
                     continue
                 if len(str(seq)) != len(topo):
-                    print("Seq and topo not matching, {}".format(pdb_id))
+                    print("Seq and topo not matching, {}".format(full_chain_id))
                     print(str(seq))
                     print(topo)
                     # sys.exit()

@@ -33,11 +33,17 @@ pair_data_bridge_count = pair_data_bridge_types.value_counts(subset=["Step", "R_
 
 charges = {}
 bridges = {}
+pairs = ["DK", "KD", "ER", "RE", "RK", "KR", "EK", "KE", "DR", "RD"]
 
 print("Charges")
 for row in pair_data_sanH_chr_count.iteritems():
     charges[str(row[0][0]) + "-" + row[0][1]] = row[1]
-    if row[0][0] in [1,3,4,6] and row[0][1] in ["DK", "EK", "RR"]:
+    if row[0][0] in [1,3,4,6] and row[0][1] in pairs:  # + ["RR"]:  #["DK", "EK", "RR"]:
+        print(row)
+print("Charges RR")
+for row in pair_data_sanH_chr_count.iteritems():
+    charges[str(row[0][0]) + "-" + row[0][1]] = row[1]
+    if row[0][1] == "RR":  # + ["RR"]:  #["DK", "EK", "RR"]:
         print(row)
 print("Charges with H")
 for row in pair_data_chr_count.iteritems():
@@ -47,17 +53,19 @@ for row in pair_data_chr_count.iteritems():
 print("Bridges")
 for row in pair_data_sanH_bridge_count.iteritems():
     bridges[str(row[0][0]) + "-" + row[0][1]] = row[1]
-    if row[0][0] in [1,3,4] and row[0][1] in ["DK", "EK", "RR"]:
+    if row[0][0] in [1,3,4]:  # and row[0][1] in ["DK", "EK", "RR"]:
         print(row)
 # # print(pair_data_chr_count["Step"])
 # print(charges)
 # print(bridges)
 
 print("Fractions")
-for i in ["3", "4"]:
-    for p in ["DK", "EK"]:
-        frac = bridges[i + "-" + p] / charges[i + "-" + p]
-        print(i, p, "{:.2%}".format(frac))
+for i in ["1", "3", "4"]:
+    for p in pairs:
+    # for p in ["DK", "EK"]:
+        if i + "-" + p in bridges:
+            frac = bridges[i + "-" + p] / charges[i + "-" + p]
+            print(i, p, "{:.2%}".format(frac))
 
 RR_mids = []
 RR_bridges = []
@@ -73,8 +81,14 @@ for key, membranes in mems.items():
         local_bridges = pickle_bridges['local'][key]
     if key in pickle_bridges['mems']:
         mems_bridges = pickle_bridges['mems'][key]
+    # if len(local_bridges) > 0:
+    #     print(key)
+    #     print(local_bridges)
+    #     print(membranes)
+    # continue
             
     for mem_place, mem in membranes:
+
         if len(mem) < 17:
             continue
         edge = 5

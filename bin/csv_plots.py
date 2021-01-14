@@ -238,7 +238,8 @@ opp_charge_sanH_local_134 = opp_charge134[(opp_charge134["localbridge"].notna())
 opp_charge_sanH_134 = opp_charge_sanH_134[opp_charge_sanH_134["saltbridge"].str.count('H') <= opp_charge_sanH_134["saltbridge"].str.count(';')]
 opp_charge_sanH_local_134 = opp_charge_sanH_local_134[opp_charge_sanH_local_134["localbridge"].str.count('H') <= opp_charge_sanH_local_134["localbridge"].str.count(';')]
 ### Local Saltbridge separation 
-
+# print(opp_charge_sanH_local_134)
+# sys.exit()
 has_local = []
 for k, r in opp_charge_sanH_local_134["localbridge"].str.split(";").iteritems():
     has_local.append(k)
