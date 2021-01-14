@@ -614,7 +614,7 @@ for l,x,y in sorted(zip(order, degrees, len(degrees)*[0.9]))[:9]:
         label = "+{}".format(l)
     c_ax.annotate(label, (x,y), ha="center", va="center",weight='bold')
 #### adding a), b) and c) text
-plt.text(-0.05, 1.00, "a)", fontsize=16, fontdict={"weight":'bold'}, transform=axes[0].transAxes)
+plt.text(-0.05, 1.05, "a)", fontsize=16, fontdict={"weight":'bold'}, transform=axes[0].transAxes)
 plt.text(-0.05, 1.10, "b)", fontsize=16, fontdict={"weight":'bold'}, transform=axes[2].transAxes)
 plt.text(-0.05, 1.10, "c)", fontsize=16, fontdict={"weight":'bold'}, transform=axes[4].transAxes)
 plt.subplots_adjust(top=0.95)
