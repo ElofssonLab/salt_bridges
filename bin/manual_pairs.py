@@ -53,7 +53,7 @@ for row in pair_data_chr_count.iteritems():
 print("Bridges")
 for row in pair_data_sanH_bridge_count.iteritems():
     bridges[str(row[0][0]) + "-" + row[0][1]] = row[1]
-    if row[0][0] in [1,3,4]:  # and row[0][1] in ["DK", "EK", "RR"]:
+    if row[0][0] in [1,2,3,4,5]:  # and row[0][1] in ["DK", "EK", "RR"]:
         print(row)
 # # print(pair_data_chr_count["Step"])
 # print(charges)
