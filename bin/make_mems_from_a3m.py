@@ -13,11 +13,13 @@ import random
 
 parser = argparse.ArgumentParser()
 
-parser.add_argument("top", type=str, help="Topological file")
+parser.add_argument("threeline", type=str, help="3line file")
 parser.add_argument("a3m_folder", type=str, help="A3m file folder")
 parser.add_argument("out_file", type=str, help="Out file")
 
 args = parser.parse_args()
+# stats_out = "stats/" + args.a3m_folder.split('/')[-1] + "_num_pids.txt"
+all_mems_pickle = args.out_file.replace(".pickle", "_all_a3m.pickle")
 data = {}
 positive = 'KR'
 negative = 'DE'
@@ -30,15 +32,17 @@ random.seed(3141)
 k=200
 # mem_part_length = 17  # Check the length of mems later (to be able to count them all)
 helicies = {}
-with open(args.top) as topFile:
+with open(args.threeline) as threeFile:
     name = ''
-    for line in topFile:
+    j = 0
+    for line in threeFile:
         if line[0] == '>':
             name = line[1:].strip()
+            # print(name,i, i%3)
             helicies[name] = []
-        else:
+        elif j % 3 == 2:
             topo = line.strip()
-
+            # print(topo)
             curr_letter = topo[0]
             start_pos = 0
             for i, c in enumerate(topo):
@@ -53,43 +57,57 @@ with open(args.top) as topFile:
                         #     print(line)
                     start_pos = i
                     curr_letter = c
-# print(data)
+        else:
+            pass  # Sequence
+        j += 1
 
 
 membranes = {}
+a3m_membranes = {}
 name = ''
 raw_lines = []
+num_pids = 0
+num_files = 0
 for a3mfile in os.listdir(args.a3m_folder):
     with open(args.a3m_folder + '/' + a3mfile) as faFile:
         # print(a3mfile)
+        num_files += 1
         name = faFile.readline()[1:].strip()
         # print(name)
         # originalSequence = faFile.readline().strip()
+        # print(originalSequence)
         if not name in helicies:
             continue
         helixNumbers = helicies[name]
         # print(helixNumbers)
         raw_lines = []
         currentLine = 1
+        pid = name
         for line in faFile:
             # print(line)
-            if line[0] != '>':
+            if line.startswith('>'):
+                pid = line[1:].strip()
+            elif line[0] != '>':
                 mems = []
                 currentLine += 1
                 # print(line.strip())
                 for start, end in helixNumbers:
                     # print(start, end)
-                    prefix = line[:start]
-                    insertions = sum([1 for c in prefix if c.islower()])
-                    # print(insertions)
-                    while True:
-                        # start += insertions
-                        prefix = line[:start + insertions]
-                        insertionsExt = sum(1 for c in prefix if c.islower())
-                        if insertions == insertionsExt:
-                            break
-                        insertions = insertionsExt
-                    memPart = line[start + insertions:end + insertions]
+                    # prefix = line[:start]
+                    # insertions = sum([1 for c in prefix if c.islower()])
+                    # if insertions > 0:
+                    #     print(name)
+                    # # print(insertions)
+                    # while True:
+                    #     # start += insertions
+                    #     prefix = line[:start + insertions]
+                    #     insertionsExt = sum(1 for c in prefix if c.islower())
+                    #     if insertions == insertionsExt:
+                    #         break
+                    #     insertions = insertionsExt
+                    # memPart = line[start + insertions:end + insertions]
+                    #### Insertion handling not needed as done by a3mtotrimmed.py
+                    memPart = line[start:end]
                     if memPart.count('-') == 0 and\
                        sum(1 for c in memPart if c.islower()) == 0 and\
                        'X' not in memPart: #  and len(memPart) >= mem_part_length:
@@ -101,19 +119,44 @@ for a3mfile in os.listdir(args.a3m_folder):
                 # print(len(mems))
                 # sys.exit()
                 if len(mems) > 0:
-                    raw_lines.extend(mems)
+                    raw_lines.append([pid, mems])
             # if currentLine > 100:
             #     break
+    # Save the base sequence and then fill up
     if len(raw_lines) > k:
-        membranes[name] = random.choices(raw_lines, k=k)
+        pid, m = raw_lines[0]
+        all_mems = m
+        for mem in random.choices(raw_lines[1:], k=k):
+            pid, m = mem
+            a3m_membranes[pid] = m
+            all_mems.extend(m)
+        membranes[name] = all_mems
+        num_pids += k
     elif len(raw_lines) > 0:
-        membranes[name] = raw_lines
+        all_mems = []
+        for mem in raw_lines:
+            pid, m = mem
+            a3m_membranes[pid] = m
+            all_mems.extend(m)
+            # all_mems.extend(mem)
+        membranes[name] = all_mems
+        num_pids += len(raw_lines)
+    # print(membranes)
+    # print(len(membranes['4PHZA']))
+    # print(num_pids)
+    # sys.exit()
 
-# print(membranes)
-
+# print(num_pids)
+# print(num_files)
+# print(len(a3m_membranes))
+# sys.exit()
 # print(len(membranes))
 with open(args.out_file, 'wb') as saveFile:
     pickle.dump(membranes, saveFile)
+with open(all_mems_pickle, 'wb') as saveFile:
+    pickle.dump(a3m_membranes, saveFile)
+# with open(stats_out, 'w') as statFile:
+#     statFile.write("Number of proteins: {}".format(str(num_pids) + '\n'))
 # with open('membraneUniref.pickle','rb') as loadFile:
     # membranes = pickle.load(loadFile)
 # print(len(membranes))

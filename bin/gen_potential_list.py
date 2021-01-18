@@ -16,12 +16,13 @@ import sys
 parser = argparse.ArgumentParser()
 
 parser.add_argument("mems_pickle", type=str, help="Pickle file of membranes")
-parser.add_argument("bridge_file", type=str, help="Bridge file")
+# parser.add_argument("bridge_file", type=str, help="Bridge file")
 parser.add_argument("threeline", type=str, help="3line in file")
 parser.add_argument("-b", "--bridges", type=int, default=1, help="Required connections per bridge")
 parser.add_argument("-g", "--gap", type=int, default=7, help="Must be within number of residues, (0 = unlimited)")
 parser.add_argument("-t", "--tolerant", type=str, default="True", help="Use tolerant membranes (also include m, not just M)")
 parser.add_argument("-s", "--stats", type=bool, default=False, help="Only calculate stats, do not generate list")
+parser.add_argument("-a3m", "--a3m", type=bool, default=False, help="Special steps for a3m, skip bridges")
 
 args = parser.parse_args()
 mem_length = 17
@@ -123,10 +124,11 @@ with open(args.threeline, 'r') as TMHandle:
             print("You should not be here...")
         rowNum += 1
 for key, membranes in helicies.items():
-    if key == "1SU4A":
-        debug = True
+    # if key == "1SU4A":
+    #     debug = True
     totalMems += len(membranes)
     for mem_place, mem in membranes:
+        mem = mem.strip()
         if len(mem) < mem_length:
             # print("Short mem")
             continue
@@ -203,7 +205,7 @@ print("Total membranes > 17: ", totalLongMems)
 print("Proteins that contain charged pairs: ", len(proteinSet))
 print("Membrane regions with charged pairs: ", len(membraneSet))  # Number of helices with charged pairs
 print("Total number of charged pairs: ", len(proteinsExamples))  # Number of total pairs
-if args.stats:
+if args.stats or args.a3m:
     sys.exit()
 sortedProt = sorted(proteinsExamples.keys())
 debug = False

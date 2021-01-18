@@ -24,7 +24,7 @@ parser.add_argument("threeline", type=str, help="3line in file")
 
 args = parser.parse_args()
 
-data_out_stats = "stats/" + args.threeline.split('/')[-1].split('.')[0] + "_dataset_stats.txt"
+data_out_stats = "stats/" + args.mems_pickle.split('/')[-1].split('.')[0] + "_dataset_stats.txt"
 # print(data_out_stats)
 # sys.exit()
 mem_length = 17
@@ -115,7 +115,8 @@ csv_file_aas = args.mems_pickle[:mems_index] + "aas.csv"
 # proteinSet = set()
 # fullproteinSet = set()
 # longproteinSet = set()
-# totalMems = 0
+totalLongMems = 0
+totalMems = 0
 # longMems = 0
 # correctMems = 0
 # 
@@ -147,6 +148,7 @@ proteins_with_correct_mems = set()
 local_bridge_list = set()
 any_saltbridge_prot = set()
 true_local_saltbridge_prot = set()
+tot_mems = 0
 correct_mems = 0
 mem_bridge_count = 0
 local_bridge_count = 0
@@ -180,12 +182,14 @@ for key, membranes in helicies.items():
     if key in bridges['mems']:
         mems_bridges = bridges['mems'][key]
     full_seq = TMdata[key][0]
+    totalMems += len(membranes)
     for mem_place, mem in membranes:
         # Only use mems of length 17 or more
         # print(mem_place, mem)
         if len(mem) < mem_length:
             continue
         # Cut the 5 caps off on each side
+        totalLongMems += 1  # If membrane is longer than or equal 17
         edge = 5
         midMem = mem[edge:-edge]
         fullMem = mem
@@ -422,7 +426,9 @@ stats_text.append("Proteins with mems: {}".format(len(proteins_with_mems)))
 stats_text.append("Proteins with correct mems: {}".format(len(proteins_with_correct_mems)))
 stats_text.append("Proteins with any salt bridge: {}".format(len(any_saltbridge_prot)))
 stats_text.append("Proteins with local salt bridge: {}".format(len(true_local_saltbridge_prot)))
+stats_text.append("Number of all mems: {}".format(totalMems))
 stats_text.append("Number of correct mems: {}".format(correct_mems))
+stats_text.append("Number of long mems: {}".format(totalLongMems))
 stats_text.append("Mem bridges: {}".format(mem_bridge_count))
 stats_text.append("Local bridges: {}".format(local_bridge_count))
 with open(data_out_stats, 'w') as stats_handle:

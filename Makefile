@@ -148,10 +148,12 @@ $(STATS) : $(STATDIR)/%_stats.txt : $(PROCDIR)/%.clust.mems.pickle | $(MEMS)
 # 	./bin/logodd_barchart.py $(PROCDIR)/pdbtm.clust.mems.pickle
 
 $(LISTS) : $(MEMSRED) $(3LINESRED)
-	./bin/gen_potential_list.py $(PROCDIR)/pdbtm.clust.mems.pickle $(PROCDIR)/pdbtm_bridge.pickle $(PROCDIR)/pdbtm.clust.3line -b 1 > $(STATDIR)/pdbtm_clust_1_list.txt
-	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant.mems.pickle $(PROCDIR)/pdbtm_redundant_bridge.pickle $(PROCDIR)/pdbtm_redundant.3line -b 1 > $(STATDIR)/pdbtm_redundant_1_list.txt
-	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant.mems.pickle $(PROCDIR)/pdbtm_redundant_bridge.pickle $(PROCDIR)/pdbtm_redundant.3line -b 1 -t False > $(STATDIR)/pdbtm_redundant_strict_1_list.txt
-	./bin/gen_potential_list.py $(PROCDIR)/scop_glob.clust.mems.pickle $(PROCDIR)/scop_glov.clus.mems_bridge.pickle $(PROCDIR)/scop_glob.clust.3line -b 1 -s True > $(STATDIR)/scop_clust_1_list.txt
+	./bin/gen_potential_list.py $(PROCDIR)/pdbtm.clust.mems.pickle $(PROCDIR)/pdbtm.clust.3line -b 1 > $(STATDIR)/pdbtm_clust_1_list.txt
+	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_a3m.mems.pickle $(PROCDIR)/pdbtm.3line -b 1 -s True -a3m True > $(STATDIR)/pdbtm_a3m_1_list.txt
+	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 1 > $(STATDIR)/pdbtm_redundant_1_list.txt
+	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 1 -t False > $(STATDIR)/pdbtm_redundant_strict_1_list.txt
+	./bin/gen_potential_list.py $(PROCDIR)/scop_glob.clust.mems.pickle $(PROCDIR)/scop_glob.clust.3line -b 1 -s True > $(STATDIR)/scop_clust_1_list.txt
+	./bin/gen_potential_list.py $(PROCDIR)/scop_glob_a3m.mems.pickle $(PROCDIR)/scop_glob.clust.3line -b 1 -s True -a3m True> $(STATDIR)/scop_a3m_1_list.txt
 # 	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 1 -g 0 > $(STATDIR)/pdbtm_redundant_1_all_list.txt
 # 	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant_tolerant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 1 > $(STATDIR)/pdbtm_redundant_1_tolerant_list.txt -t True
 # 	./bin/gen_potential_list.py $(PROCDIR)/pdbtm_redundant_tolerant.mems.pickle $(PROCDIR)/pdbtm_redundant.3line -b 1 -g 0 > $(STATDIR)/pdbtm_redundant_1_tolerant_all_list.txt -t True
