@@ -435,7 +435,8 @@ colors = ["#FDE725FF", "#440154FF", "#FDE725FF"]
 # degree_cmap = LinearSegmentedColormap.from_list("", list(zip(nodes, colors)))
 # degree_cmap = LinearSegmentedColormap.from_list("", list(zip(nodes, colors)))
 degree_cmap = mpl.colors.ListedColormap(mpl.cm.get_cmap('viridis_r').colors + mpl.cm.get_cmap('viridis').colors)
-# print(cmap)
+# print(degree_cmap.colors)
+# print(len(degree_cmap.colors))
 # grid = plt.GridSpec(3,6, wspace=0.4, hspace=0.1)
 sns.set_theme(style="white", context="paper")
 # sns.set(fontsize=14)
@@ -443,10 +444,13 @@ f, axes = plt.subplots(5,1,figsize=(7, 12), gridspec_kw={"height_ratios":[150,1,
 h = sns.histplot(df, x="Step", color="grey", hue="Type", discrete=True, multiple="stack", shrink=.8, ax=axes[0])
 axes[0].get_legend().remove()
 hatches = {0:"///", 1:"\\\\\\", 2:"|||"}
+# Distinct colors 0-8
+distinct_colors = ["#FFFFFF", "#773712", "#B3B3B3", "#EE7F31", "#FBE44D", "#B3B3B3", "#B3B3B3", "#B3B3B3", "#B3B3B3", "#B3B3B3"]
 for i in range(2):
     for j in range(8):
         color_index = (j*100 + 100) % 360
-        axes[0].patches[j+i*8].set_facecolor(degree_cmap(color_index/360))
+        # axes[0].patches[j+i*8].set_facecolor(degree_cmap(color_index/360))
+        axes[0].patches[j+i*8].set_facecolor(distinct_colors[j+1])
         axes[0].patches[j+i*8].set_hatch(hatches[i])
 sns.despine(bottom=True, left=True)
 axes[0].axhline(xmax=1, xmin=-0.5, color='black')
@@ -546,9 +550,12 @@ axes[2].spines['left'].set_visible(False)
 axes[2].spines['bottom'].set_visible(False)
 for i in range(8):
     color_index = (i*100 + 100) % 360
-    axes[2].patches[i].set_facecolor(degree_cmap(color_index/360))
+    # axes[2].patches[i].set_facecolor(degree_cmap(color_index/360))
+    # axes[0].patches[j+i*8].set_facecolor(distinct_colors[j+1])
+    axes[2].patches[i].set_facecolor(distinct_colors[i+1])
     axes[2].patches[i].set_hatch("///")
-    axes[2].patches[i+8].set_facecolor(degree_cmap(color_index/360))
+    # axes[2].patches[i+8].set_facecolor(degree_cmap(color_index/360))
+    axes[2].patches[i+8].set_facecolor(distinct_colors[i+1])
     axes[2].patches[i+8].set_hatch("\\\\\\")
 
 axes[2].legend((opp_bar, same_bar),("Opp charge", "Same charge"), loc='upper right', bbox_to_anchor=(1, 1.1))
@@ -565,7 +572,9 @@ axes[4].spines['left'].set_visible(False)
 axes[4].spines['bottom'].set_visible(False)
 for i in range(8):
     color_index = (i*100 + 100) % 360
-    axes[4].patches[i].set_facecolor(degree_cmap(color_index/360))
+    # axes[2].patches[i+8].set_facecolor(distinct_colors[i+1])
+    # axes[4].patches[i].set_facecolor(degree_cmap(color_index/360))
+    axes[4].patches[i].set_facecolor(distinct_colors[i+1])
 # axes[5].spines['right'].set_visible(False)
 # axes[5].spines['top'].set_visible(False)
 # axes[5].spines['left'].set_visible(False)
@@ -596,8 +605,9 @@ c_ax.set_theta_direction(-1)
 # c_ax.set_rlim([-2,1])
 ####################################
 c_ax.plot([x for _,x in sorted(zip(order, degrees))][:9],len(degrees[:9])*[0.9], zorder=1, linestyle='--', color='lightgray')
-first = c_ax.scatter(theta[:9], len(theta[:9])*[0.9], c=theta[:9], s=300, cmap=degree_cmap, zorder=2, alpha=0.5,edgecolor='black')
-second = c_ax.scatter(theta[9:], len(theta[9:])*[0.9], s=300, color="lightgray", zorder=3,edgecolor='black')
+# first = c_ax.scatter(theta[:9], len(theta[:9])*[0.9], c=theta[:9], s=300, cmap=degree_cmap, zorder=2, alpha=0.5,edgecolor='black')
+first = c_ax.scatter(theta[:9], len(theta[:9])*[0.9], s=300, c=distinct_colors[:9], zorder=2, alpha=0.7,edgecolor='black')
+second = c_ax.scatter(theta[9:], len(theta[9:])*[0.9], s=300, color="white", zorder=3, edgecolor='black', linestyle="dotted")
 c_ax.xaxis.set_tick_params(pad=16, length=0)
 c_ax.set_xticks(degrees)
 c_ax.get_yaxis().set_visible(False)
