@@ -20,8 +20,8 @@ POLAR = "DEKRHNPQ"
 POS = "KR"
 NEG = "DE"
 
-aa_data = pd.read_csv(args.aa_csv, delimiter=',')
-pair_data = pd.read_csv(args.pair_csv, delimiter=',')
+aa_data = pd.read_csv(args.aa_csv, delimiter=',', dtype={"localbridge":str,"saltbridge":str}, low_memory=False)
+pair_data = pd.read_csv(args.pair_csv, delimiter=',', dtype={"Any saltbridge":str, "Local saltbridge":str}, low_memory=False)
 prefix = args.aa_csv.split('/')[-1].split('.')[0]
 stats_data = []
 stats_file = "stats/" + prefix + "_csv_stats.txt"

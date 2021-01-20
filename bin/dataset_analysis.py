@@ -18,6 +18,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("mems_pickle", type=str, help="Pickle file of membranes")
 parser.add_argument("bridge_pickle", type=str, help="Pickle file of bridges")
 parser.add_argument("threeline", type=str, help="3line in file")
+parser.add_argument("-a3m", "--a3m", type=bool, default=False, help="Is a3m?")
 
 # parser.add_argument("-b", "--bridges", type=int, default=1, help="Required connections per bridge")
 # parser.add_argument("-t", "--tolerant", type=bool, default=False, help="Use tolerant membranes (also include m, not just M)")
@@ -177,10 +178,11 @@ for key, membranes in helicies.items():
     local_bridges = []
     mems_bridges = []
     proteins_with_mems.add(key)
-    if key in bridges['local']:
-        local_bridges = bridges['local'][key]
-    if key in bridges['mems']:
-        mems_bridges = bridges['mems'][key]
+    if not args.a3m:
+        if key in bridges['local']:
+            local_bridges = bridges['local'][key]
+        if key in bridges['mems']:
+            mems_bridges = bridges['mems'][key]
     full_seq = TMdata[key][0]
     totalMems += len(membranes)
     for mem_place, mem in membranes:
