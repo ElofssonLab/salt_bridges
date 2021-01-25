@@ -426,7 +426,7 @@ df_opp = pd.DataFrame(opp_hist_data_sanH, columns=["Step"])
 df_opp["Type"] = "Opp"
 df = pd.concat([df_same, df_opp], ignore_index=True)
 df = df[df["Step"] < 9]
-df["Step"] = "i+" + df["Step"].astype(int).astype(str)
+df["Step"] = r"$i$+" + df["Step"].astype(int).astype(str)
 barWidth = 0.35
 nodes = [0, 0.25, 0.5, 0.75, 1]
 colors = ["#FDE725FF", "#440154FF", "#FDE725FF"]
@@ -445,7 +445,8 @@ h = sns.histplot(df, x="Step", color="grey", hue="Type", discrete=True, multiple
 axes[2].get_legend().remove()
 hatches = {0:"///", 1:"\\\\\\", 2:"|||"}
 # Distinct colors 0-8
-distinct_colors = ["#FFFFFF", "#773712", "#B3B3B3", "#EE7F31", "#FBE44D", "#B3B3B3", "#B3B3B3", "#B3B3B3", "#B3B3B3", "#B3B3B3"]
+distinct_colors = ["#FFFFFF", "#773712", "#B3B3B3", "#EE7F31", "#FBE44D", "#B3B3B3", "#B3B3B3", "#D5C4AB", "#B3B3B3", "#B3B3B3"]
+wheel_colors = ["#FFFFFF", "#773712", "#B3B3B3", "#EE7F31", "#FBE44D", "#B3B3B3", "#B3B3B3", "#D5C4AB", "#FFFFFF", "#B3B3B3"]
 for i in range(2):
     for j in range(8):
         color_index = (j*100 + 100) % 360
@@ -456,6 +457,7 @@ sns.despine(bottom=True, left=True)
 axes[2].axhline(xmax=1, xmin=-0.5, color='black')
 axes[2].axvline(x=-0.5,ymax=1, color='black')
 axes[2].grid(axis='y')
+axes[2].set_xlabel(r'Relative to $i$ residue')
 axes[2].yaxis.labelpad = 5
 
 ##### Here we start the second graph
@@ -483,7 +485,7 @@ y_r_same = [logOddsSame[i] - ciSame[i][0] for i in range(len(ciSame))]
 threshold = 0
 values_opp = np.array(logOddsOpp)
 values_same = np.array(logOddsSame)
-x_label = ['i+' + str(x) for x in range(1, len(values_opp)+1)]
+x_label = [r'$i$+' + str(x) for x in range(1, len(values_opp)+1)]
 x = np.arange(len(values_opp))
 opp_above_threshold = np.maximum(values_opp - threshold, 0)
 opp_below_threshold = np.minimum(values_opp, threshold)
@@ -500,7 +502,7 @@ axes[4].axvline(x=-0.5,ymax=1, ymin=0, color='black')
 axes[4].grid(axis='y')
 axes[4].set_xticks(x)
 axes[4].set_xticklabels(x_label)
-axes[4].set_xlabel('Step')
+axes[4].set_xlabel(r'Relative to $i$ residue')
 
 ###### Same ######
 # y_r = [logOddsSame[i] - ciSame[i][0] for i in range(len(ciSame))]
@@ -526,7 +528,7 @@ axes[4].set_xlabel('Step')
 # axes[5].set_xticks([1, 2, 3, 4, 5, 6, 7, 8])
 
 index = [1, 2, 3, 4, 5, 6, 7, 8]
-x = ['i+' + str(x) for x in range(1, 9)]
+x = [r'$i$+' + str(x) for x in range(1, 9)]
 frac_data = []
 for s in index:
     frac_data.append(pair_data_opp_local_num[s]/pair_data_opp_num[s])
@@ -540,7 +542,7 @@ axes[6].spines['right'].set_visible(False)
 axes[6].axhline(xmax=8, xmin=-0.5, color='black')
 axes[6].axvline(x=-0.5,ymax=1, color='black')
 axes[6].grid(axis='y')
-axes[6].set_xlabel("Step")
+axes[6].set_xlabel(r'Relative to $i$ residue')
 axes[6].set_ylabel("Frac. of opp. charged pairs", labelpad=5)
 
 degree_cmap = mpl.colors.ListedColormap(mpl.cm.get_cmap('viridis_r').colors + mpl.cm.get_cmap('viridis').colors)
@@ -608,7 +610,7 @@ c_ax.set_theta_direction(-1)
 ####################################
 c_ax.plot([x for _,x in sorted(zip(order, degrees))][:9],len(degrees[:9])*[0.9], zorder=1, linestyle='--', color='lightgray')
 # first = c_ax.scatter(theta[:9], len(theta[:9])*[0.9], c=theta[:9], s=300, cmap=degree_cmap, zorder=2, alpha=0.5,edgecolor='black')
-first = c_ax.scatter(theta[:9], len(theta[:9])*[0.9], s=300, c=distinct_colors[:9], zorder=2, alpha=0.7,edgecolor='black')
+first = c_ax.scatter(theta[:9], len(theta[:9])*[0.9], s=300, c=wheel_colors[:9], zorder=2, alpha=0.7,edgecolor='black')
 second = c_ax.scatter(theta[9:], len(theta[9:])*[0.9], s=300, color="white", zorder=3, edgecolor='black', linestyle="dotted")
 c_ax.xaxis.set_tick_params(pad=16, length=0)
 c_ax.set_xticks(degrees)
@@ -622,9 +624,10 @@ c_ax.set_rlim([0,1.1])
 for l,x,y in sorted(zip(order, degrees, len(degrees)*[0.9]))[:9]:
     if l == 0:
         label = "i"
+        c_ax.annotate(label, (x,y), ha="center", va="center",weight='bold', style='italic')
     else:
         label = "+{}".format(l)
-    c_ax.annotate(label, (x,y), ha="center", va="center",weight='bold')
+        c_ax.annotate(label, (x,y), ha="center", va="center",weight='bold')
 #### adding a), b) and c) text
 plt.text(-0.05, 1.05, "a)", fontsize=16, fontdict={"weight":'bold'}, transform=axes[2].transAxes)
 plt.text(-0.05, 1.10, "b)", fontsize=16, fontdict={"weight":'bold'}, transform=axes[4].transAxes)
