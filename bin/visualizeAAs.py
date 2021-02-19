@@ -99,19 +99,24 @@ for i in range(8):
 # print(statsData[7][18][13])
 # f, axarr = plt.subplots(3, 3, figsize=(16, 14))
 prefix_dot = out_image.rfind('.')
+prefix = out_image[prefix_dot:]
+out_image = out_image[:prefix_dot]
+print(out_image, prefix)
 out_log_odds = out_image[:prefix_dot].replace("images", "stats") + "_logOdds.txt"
 
 with open(out_log_odds, 'w') as log_out_handle:
     log_out_handle.write('\n'.join(log_odds_text_list))
 
-for o in range(2):
+for o in [False, True]:
     f, axarr = plt.subplots(2, 4, figsize=(25, 12))
 # axarr[-1, -1].axis('off')
 # axarr[-1, -2].axis('off')
 # plt.suptitle("TMs alpha helices, trimmed, pdb50, len > 15, V2")
     plt.suptitle(args.title)
     if o:
-        out_image = out_image[:prefix_dot] + "_mask" + out_image[prefix_dot]
+        out_image_file = out_image + "_mask" + prefix
+    else:
+        out_image_file = out_image + prefix
     for i in range(8):
         # print(i)
         # if i == 3 or i==7:
@@ -136,7 +141,7 @@ for o in range(2):
                              vmax=2,
                              cmap="coolwarm",
                              center=0, cbar=show_cbar,)
-        ax.title.set_text("Step " + str(i + 1))
+        ax.title.set_text("$\it{i, i+}$" + str(i + 1))
         for x_tick in ax.get_xticklabels():
             if x_tick.get_text() in charged:
                 x_tick.set_weight("bold")
@@ -162,7 +167,11 @@ for o in range(2):
                     vmax=2,
                     cmap="coolwarm",
                     center=0, cbar=True, cbar_ax=cb_ax)
-    f.savefig(out_image)
+    if prefix == '.pdf':
+        f.savefig(out_image_file, bbox_inches='tight')
+    else:
+        f.savefig(out_image_file)
+
     plt.clf()
 # f.savefig('images/'
 #           + 'logOddsGlobularTrimmed'

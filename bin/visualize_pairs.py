@@ -562,6 +562,7 @@ for i in range(8):
     axes[4].patches[i+8].set_facecolor(distinct_colors[i+1])
     axes[4].patches[i+8].set_hatch("\\\\\\")
 
+axes[2].legend((opp_bar, same_bar),("Opp charge", "Same charge"), loc='upper right', bbox_to_anchor=(1, 1))
 axes[4].legend((opp_bar, same_bar),("Opp charge", "Same charge"), loc='upper right', bbox_to_anchor=(1, 1.1))
 # hatches = {0:"///", 1:"\\\\\\", 2:"|||"}
 # for i in range(2):
@@ -629,10 +630,12 @@ for l,x,y in sorted(zip(order, degrees, len(degrees)*[0.9]))[:9]:
         label = "+{}".format(l)
         c_ax.annotate(label, (x,y), ha="center", va="center",weight='bold')
 #### adding a), b) and c) text
-plt.text(-0.05, 1.05, "a)", fontsize=16, fontdict={"weight":'bold'}, transform=axes[2].transAxes)
-plt.text(-0.05, 1.10, "b)", fontsize=16, fontdict={"weight":'bold'}, transform=axes[4].transAxes)
-plt.text(-0.05, 1.10, "c)", fontsize=16, fontdict={"weight":'bold'}, transform=axes[6].transAxes)
+plt.text(-0.05, 1.05, "a)", fontsize=16, transform=axes[2].transAxes)
+plt.text(-0.05, 1.10, "b)", fontsize=16, transform=axes[4].transAxes)
+plt.text(-0.05, 1.10, "c)", fontsize=16, transform=axes[6].transAxes)
 plt.subplots_adjust(top=0.95)
 # plt.savefig("test.png")
 for ext in [".png", ".svg"]:
     plt.savefig('images/' + name + ext)
+
+plt.savefig('images/' + name + '.pdf', bbox_inches='tight')

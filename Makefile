@@ -33,6 +33,7 @@ A3MCHARGES := $(PROCDIR)/pdbtm_a3m.charges.pickle $(PROCDIR)/scop_glob_a3m.charg
 VISIMAGES := $(addprefix ${IMAGEDIR}/, pdbtm_vis.svg pdbtm_vis.png scop_glob_vis.svg scop_glob_vis.png mem_cluster.svg mem_cluster.png mem_cluster_full.svg mem_cluster_full.png pdbtm_pairs.png pdbtm_pairs.svg pdbtm_stats.png pdbtm_stats.svg)
 
 all:  $(STATS)  $(VISIMAGES) $(LISTS) # $(RCSB)
+images:  $(VISIMAGES) # $(RCSB)
 # $(RAWDIR)/opm_poly.json:
 # 	wget -O $@ https://lomize-group-opm.herokuapp.com/classtypes/1/primary_structures?pageSize=3000
 # 
@@ -176,8 +177,10 @@ $(A3MCHARGES) : %.charges.pickle : %.mems.pickle | $(A3MMEMS)
 $(VISIMAGES) : $(A3MCHARGES) $(GLOBCHARGES)
 	./bin/visualizeAAs.py $(PROCDIR)/pdbtm_a3m.charges.pickle $(IMAGEDIR)/pdbtm_vis.svg ""
 	./bin/visualizeAAs.py $(PROCDIR)/pdbtm_a3m.charges.pickle $(IMAGEDIR)/pdbtm_vis.png ""
+	./bin/visualizeAAs.py $(PROCDIR)/pdbtm_a3m.charges.pickle $(IMAGEDIR)/pdbtm_vis.pdf ""
 	./bin/visualizeAAs.py $(PROCDIR)/scop_glob_a3m.charges.pickle $(IMAGEDIR)/scop_glob_vis.svg ""
 	./bin/visualizeAAs.py $(PROCDIR)/scop_glob_a3m.charges.pickle $(IMAGEDIR)/scop_glob_vis.png ""
+	./bin/visualizeAAs.py $(PROCDIR)/scop_glob_a3m.charges.pickle $(IMAGEDIR)/scop_glob_vis.pdf ""
 	./bin/visualize_pairs.py $(PROCDIR)/pdbtm.clust.mems.pickle $(PROCDIR)/pdbtm.clust.pairs.csv
 	# ./bin/visualizeAAs.py $(A3MCHARGES) $(IMAGEDIR)/pdbtm_vis.svg "Charges"
 	./bin/visualizeAAs_mem.py $(PROCDIR)/pdbtm_a3m.charges.pickle $(IMAGEDIR)/mem_cluster ""
