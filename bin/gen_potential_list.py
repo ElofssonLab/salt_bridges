@@ -15,8 +15,8 @@ import sys
 
 parser = argparse.ArgumentParser()
 
+parser.add_argument("bridge_file", type=str, help="Bridge file")
 parser.add_argument("mems_pickle", type=str, help="Pickle file of membranes")
-# parser.add_argument("bridge_file", type=str, help="Bridge file")
 parser.add_argument("threeline", type=str, help="3line in file")
 parser.add_argument("-b", "--bridges", type=int, default=1, help="Required connections per bridge")
 parser.add_argument("-g", "--gap", type=int, default=7, help="Must be within number of residues, (0 = unlimited)")
@@ -60,6 +60,7 @@ positiveplus = 'RHK'
 helicies = pickle.load(open(args.mems_pickle,
                             'rb'))
 
+local_bridges = pickle.load(open(args.bridge_file, 'rb'))['local']
 
 def countMems(topoStr, tol=True):
     if tol:
@@ -226,7 +227,9 @@ for key in sortedProt:
             except HTTPError as err:
                 print("{} not exists, skipping...".format(filename), file=sys.stderr)
                 continue
-        if not os.path.exists(saltpath):
+        if pureKey in local_bridges.keys():
+            bridges = local_bridges[pureKey]
+        elif not os.path.exists(saltpath):
             bridges = saltBridges.calcSaltBridges(filepath, pureKey[4], 4, con_req)
             pickle.dump(bridges, open(saltpath, 'wb'))
         else:
