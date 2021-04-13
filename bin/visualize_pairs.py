@@ -440,10 +440,14 @@ degree_cmap = mpl.colors.ListedColormap(mpl.cm.get_cmap('viridis_r').colors + mp
 # grid = plt.GridSpec(3,6, wspace=0.4, hspace=0.1)
 sns.set_theme(style="white", context="paper")
 # sns.set(fontsize=14)
+#print(df.groupby(["Type","Step"])["Step"].count())
 f, axes = plt.subplots(7,1,figsize=(7, 12), gridspec_kw={"height_ratios":[72,1,72,1,72,1,72]})
-h = sns.histplot(df, x="Step", color="grey", hue="Type", discrete=True, multiple="stack", shrink=.8, ax=axes[2])
+# h = sns.histplot(df, x="Step", color="grey", hue="Type", discrete=True, multiple="dodge", shrink=.8, ax=axes[2])
+h = sns.histplot(df, x="Step", color="grey", hue="Type", discrete=True, hue_order=["Opp","Same"], multiple="dodge", shrink=.8, ax=axes[2])
 axes[2].get_legend().remove()
-hatches = {0:"///", 1:"\\\\\\", 2:"|||"}
+#axes[2].set_alpha(0.8)
+hatches = {0:"///", 1:"", 2:"|||"}
+fill = {0:"#FFFFFF", 1:False, 2:False}
 # Distinct colors 0-8
 distinct_colors = ["#FFFFFF", "#773712", "#B3B3B3", "#EE7F31", "#FBE44D", "#B3B3B3", "#B3B3B3", "#D5C4AB", "#B3B3B3", "#B3B3B3"]
 wheel_colors = ["#FFFFFF", "#773712", "#B3B3B3", "#EE7F31", "#FBE44D", "#B3B3B3", "#B3B3B3", "#D5C4AB", "#FFFFFF", "#B3B3B3"]
@@ -453,9 +457,11 @@ for i in range(2):
         # axes[2].patches[j+i*8].set_facecolor(degree_cmap(color_index/360))
         axes[2].patches[j+i*8].set_facecolor(distinct_colors[j+1])
         axes[2].patches[j+i*8].set_hatch(hatches[i])
+        # axes[2].patches[j+i*8].set_fill(fill[i])
 sns.despine(bottom=True, left=True)
 axes[2].axhline(xmax=1, xmin=-0.5, color='black')
 axes[2].axvline(x=-0.5,ymax=1, color='black')
+axes[2].set_yticks([0,10,20,30,40,50,60,70])
 axes[2].grid(axis='y')
 axes[2].set_xlabel(r'Relative to $i$ residue')
 axes[2].yaxis.labelpad = 5
@@ -491,8 +497,8 @@ opp_above_threshold = np.maximum(values_opp - threshold, 0)
 opp_below_threshold = np.minimum(values_opp, threshold)
 same_above_threshold = np.maximum(values_same - threshold, 0)
 same_below_threshold = np.minimum(values_same, threshold)
-opp_bar = axes[4].bar(x-barWidth/2, logOddsOpp, yerr=y_r_opp, width=barWidth, color=['g', 'r', 'g', 'g', 'r', 'r', 'g', 'r'], alpha=0.8, align='center', label='Opp charge')
-same_bar = axes[4].bar(x+barWidth/2, logOddsSame, yerr=y_r_same, width=barWidth, color=['g', 'r', 'g', 'g', 'r', 'r', 'g', 'r'], alpha=0.8, align='center', label='Same charge')
+opp_bar = axes[4].bar(x-barWidth/2, logOddsOpp, yerr=y_r_opp, width=barWidth, color=['g', 'r', 'g', 'g', 'r', 'r', 'g', 'r'], alpha=1.0, align='center', label='Opp charge')
+same_bar = axes[4].bar(x+barWidth/2, logOddsSame, yerr=y_r_same, width=barWidth, color=['g', 'r', 'g', 'g', 'r', 'r', 'g', 'r'], alpha=1.0, align='center', label='Same charge')
 axes[4].set_ylabel('Log odds ratio', labelpad=5)
 # axes[4].set_yticks([-1,-0.5, 0, 0.5, 1, 1.5, 2])
 # axes[4].set_yticks([0, 0.5, 1, 1.5, 2])
@@ -534,7 +540,7 @@ for s in index:
     frac_data.append(pair_data_opp_local_num[s]/pair_data_opp_num[s])
 ##### Salt bridges ######## 
 # print(np.sum(np.array(list(gap_counts.values()))/num_local_bridges))
-axes[6].bar(x, frac_data, alpha=0.8)
+axes[6].bar(x, frac_data, alpha=1.0)
 # ax.hist(gaps, bins=[-4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 4.5], align="mid", rwidth=0.9) 
 # axes[5].set_xticks([1,2,3,4,5,6,7,8])
 axes[6].spines['top'].set_visible(False)
@@ -543,7 +549,8 @@ axes[6].axhline(xmax=8, xmin=-0.5, color='black')
 axes[6].axvline(x=-0.5,ymax=1, color='black')
 axes[6].grid(axis='y')
 axes[6].set_xlabel(r'Relative to $i$ residue')
-axes[6].set_ylabel("Frac. of opp. charged pairs", labelpad=5)
+# axes[6].set_ylabel("Frac. of opp. charged pairs", labelpad=5)
+axes[6].set_ylabel("Frac. of salt bridge pairs", labelpad=5)
 
 degree_cmap = mpl.colors.ListedColormap(mpl.cm.get_cmap('viridis_r').colors + mpl.cm.get_cmap('viridis').colors)
 # for ax in [axes[4],axes[6]]:
@@ -557,10 +564,10 @@ for i in range(8):
     # axes[4].patches[i].set_facecolor(degree_cmap(color_index/360))
     # axes[2].patches[j+i*8].set_facecolor(distinct_colors[j+1])
     axes[4].patches[i].set_facecolor(distinct_colors[i+1])
-    axes[4].patches[i].set_hatch("///")
+    axes[4].patches[i].set_hatch("")
     # axes[4].patches[i+8].set_facecolor(degree_cmap(color_index/360))
     axes[4].patches[i+8].set_facecolor(distinct_colors[i+1])
-    axes[4].patches[i+8].set_hatch("\\\\\\")
+    axes[4].patches[i+8].set_hatch("///")
 
 axes[2].legend((opp_bar, same_bar),("Opp charge", "Same charge"), loc='upper right', bbox_to_anchor=(1, 1))
 axes[4].legend((opp_bar, same_bar),("Opp charge", "Same charge"), loc='upper right', bbox_to_anchor=(1, 1.1))
