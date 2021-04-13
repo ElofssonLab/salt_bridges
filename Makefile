@@ -183,6 +183,9 @@ $(VISIMAGES) : $(A3MCHARGES) $(GLOBCHARGES)
 	./bin/visualizeAAs.py $(PROCDIR)/scop_glob_a3m.charges.pickle $(IMAGEDIR)/scop_glob_vis.svg ""
 	./bin/visualizeAAs.py $(PROCDIR)/scop_glob_a3m.charges.pickle $(IMAGEDIR)/scop_glob_vis.png ""
 	./bin/visualizeAAs.py $(PROCDIR)/scop_glob_a3m.charges.pickle $(IMAGEDIR)/scop_glob_vis.pdf ""
+	./bin/visualize_compare.py $(PROCDIR)/pdbtm_a3m.charges.pickle $(PROCDIR)/scop_glob_a3m.charges.pickle $(IMAGEDIR)/pdbtm_vs_glob_vis.svg ""
+	./bin/visualize_compare.py $(PROCDIR)/pdbtm_a3m.charges.pickle $(PROCDIR)/scop_glob_a3m.charges.pickle $(IMAGEDIR)/pdbtm_vs_glob_vis.png ""
+	./bin/visualize_compare.py $(PROCDIR)/pdbtm_a3m.charges.pickle $(PROCDIR)/scop_glob_a3m.charges.pickle $(IMAGEDIR)/pdbtm_vs_glob_vis.pdf ""
 	./bin/visualize_pairs.py $(PROCDIR)/pdbtm.clust.mems.pickle $(PROCDIR)/pdbtm.clust.pairs.csv
 	# ./bin/visualizeAAs.py $(A3MCHARGES) $(IMAGEDIR)/pdbtm_vis.svg "Charges"
 	./bin/visualizeAAs_mem.py $(PROCDIR)/pdbtm_a3m.charges.pickle $(IMAGEDIR)/mem_cluster ""
