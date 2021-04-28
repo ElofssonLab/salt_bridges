@@ -549,7 +549,7 @@ axes[4].axvline(x=-0.5,ymax=1, color='black')
 axes[4].grid(axis='y')
 axes[4].set_xlabel(r'Relative to $i$ residue')
 # axes[6].set_ylabel("Frac. of opp. charged pairs", labelpad=5)
-axes[4].set_ylabel("Frac. of salt bridge pairs", labelpad=5)
+axes[4].set_ylabel("Frac. of opp. charged pairs\nforming salt bridges", labelpad=5)
 
 degree_cmap = mpl.colors.ListedColormap(mpl.cm.get_cmap('viridis_r').colors + mpl.cm.get_cmap('viridis').colors)
 # for ax in [axes[4],axes[6]]:
